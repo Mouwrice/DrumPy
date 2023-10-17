@@ -49,8 +49,6 @@ class Marker(object):
 
         if self.is_hit():
             self.time_until_next_hit = self.memory
-            print("Hit detected: {}".format(self))
-            # print("Velocity: {} {}".format(self.velocities, mean(self.velocities[:-self.look_ahead])))
             self.find_and_play_sound(self.positions[-self.look_ahead])
 
     def get_velocity(self) -> float:
@@ -84,13 +82,16 @@ class Marker(object):
         closest_sound = None
         closest_distance = float("inf")
         for sound in self.sounds:
-            if distance := sound.is_hit(position) is not None:
+            if (distance := sound.is_hit(position)) is not None:
                 if distance < closest_distance:
                     closest_sound = sound
                     closest_distance = distance
 
         if closest_sound is not None:
             closest_sound.hit(position)
+            print("{}: {} with distance {}".format(self.label, closest_sound.name, closest_distance))
+        else:
+            print("{}: No sound found for position {}".format(self.label, position))
 
     def __str__(self):
         return "{}: \n{}  {}".format(self.label, self.positions[-1], self.velocities[-1])

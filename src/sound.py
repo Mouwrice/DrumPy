@@ -9,7 +9,8 @@ class Sound:
     closest one to hit impact.
     """
 
-    def __init__(self, path: str, position: tuple[float, float, float]):
+    def __init__(self, name: str, path: str, position: tuple[float, float, float]):
+        self.name = name
         self.sound = pygame.mixer.Sound(path)
 
         self.position = np.array(position)
