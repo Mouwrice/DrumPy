@@ -50,7 +50,7 @@ class Marker(object):
         if self.is_hit():
             self.time_until_next_hit = self.memory
             print("Hit detected: {}".format(self))
-            print("Velocity: {} {}".format(self.velocities, mean(self.velocities[:-self.look_ahead])))
+            # print("Velocity: {} {}".format(self.velocities, mean(self.velocities[:-self.look_ahead])))
             self.find_and_play_sound(self.positions[-self.look_ahead])
 
     def get_velocity(self) -> float:
