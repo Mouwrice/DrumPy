@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "drumscan"
+version = "0.1.0"
+description = ""
+authors = ["mouwrice <mauricevanwassenhove@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "<3.13,>=3.9"
+qtm-rt = "^3.0.1"
+numpy = "^1.26.1"
+pygame = "^2.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
