@@ -51,7 +51,7 @@ class Marker(object):
             self.time_until_next_hit = self.memory
             print("Hit detected: {}".format(self))
             print("Velocity: {} {}".format(self.velocities, mean(self.velocities[:-self.look_ahead])))
-            self.find_sound(self.positions[-self.look_ahead]).play()
+            self.find_and_play_sound(self.positions[-self.look_ahead])
 
     def get_velocity(self) -> float:
         if len(self.positions) < 2:
@@ -76,14 +76,21 @@ class Marker(object):
         return (avg_z_vel < self.downward_trend and avg_z_look_ahead > self.upward_trend
                 and self.time_until_next_hit == 0)
 
-    def find_sound(self, position: tuple[float, float, float]) -> Sound:
+    def find_and_play_sound(self, position: tuple[float, float, float]):
         """
-        Returns the sound that is closest to the given position
+        Plays the sound that is closest to the given position
         :param position:
-        :return:
         """
-        # TODO
-        return self.sounds[0]
+        closest_sound = None
+        closest_distance = float("inf")
+        for sound in self.sounds:
+            if distance := sound.is_hit(position) is not None:
+                if distance < closest_distance:
+                    closest_sound = sound
+                    closest_distance = distance
+
+        if closest_sound is not None:
+            closest_sound.hit(position)
 
     def __str__(self):
         return "{}: \n{}  {}".format(self.label, self.positions[-1], self.velocities[-1])
