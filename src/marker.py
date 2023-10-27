@@ -51,6 +51,9 @@ class Tracker:
         self.downward_trend = downward_trend
         self.upward_trend = upward_trend
 
+        # clustering the hit positions
+        self.hits = dict()
+
     def update(self, position: tuple[float, float, float]):
         if self.time_until_next_hit > 0:
             self.time_until_next_hit -= 1
@@ -66,8 +69,29 @@ class Tracker:
             self.velocities.pop(0)
 
         if self.is_hit():
+            self.register_hit(self.positions[-self.look_ahead])
+
             self.time_until_next_hit = self.memory
             self.find_and_play_sound(self.positions[-self.look_ahead])
+
+    def register_hit(self, position: tuple[float, float, float]):
+        closest_hit = None
+        closest_distance = float("inf")
+        for key in self.hits:
+            distance = np.linalg.norm(np.array(key) - np.array(position))
+            if distance < closest_distance and distance < 100:
+                closest_hit = key
+                closest_distance = distance
+
+        if closest_hit is not None:
+            occurrences = self.hits[closest_hit]
+            # create a new element with the new updated average position
+            new_key = (occurrences * np.array(closest_hit) + np.array(position)) / (occurrences + 1)
+            new_key = tuple(new_key)
+            self.hits[new_key] = occurrences + 1
+            del self.hits[closest_hit]
+        else:
+            self.hits[position] = 1
 
     def get_velocity(self) -> float:
         if len(self.positions) < 2:
@@ -107,7 +131,7 @@ class Tracker:
 
         if closest_sound is not None:
             closest_sound.hit(position)
-            print("{}: {} with distance {}".format(self.label, closest_sound.name, closest_distance))
+            print("{}: {} with distance {} at {}".format(self.label, closest_sound.name, closest_distance, position))
         else:
             print("{}: No sound found for position {}".format(self.label, position))
 

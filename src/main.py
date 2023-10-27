@@ -12,13 +12,13 @@ from sound import Sound
 
 class Drum:
     def __init__(self):
-        snare_drum = Sound("Snare Drum", "./DrumSamples/Snare/CKV1_Snare Loud.wav", (-100, 0, 600))
-        hi_hat = Sound("High Hat", "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav", (-220, -200, 800))
-        kick_drum = Sound("Kick Drum", "./DrumSamples/Kick/CKV1_Kick Loud.wav", (-475, 200, 30))
-        hi_hat_foot = Sound("High Hat Foot", "./DrumSamples/HiHat/CKV1_HH Foot.wav", (-420, -350, 30))
-        tom1 = Sound("Tom 1", "./DrumSamples/Perc/Tom1.wav", (-350, 0, 700))
+        snare_drum = Sound("Snare Drum", "./DrumSamples/Snare/CKV1_Snare Loud.wav", (-150, 0, 600))
+        hi_hat = Sound("High Hat", "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav", (-199, -219, 876))
+        kick_drum = Sound("Kick Drum", "./DrumSamples/Kick/CKV1_Kick Loud.wav", (-514, 208, 37))
+        hi_hat_foot = Sound("High Hat Foot", "./DrumSamples/HiHat/CKV1_HH Foot.wav", (-422, -359, 36))
+        tom1 = Sound("Tom 1", "./DrumSamples/Perc/Tom1.wav", (-350, 20, 700))
         tom2 = Sound("Tom 2", "./DrumSamples/Perc/Tom2.wav", (-350, 100, 750))
-        cymbal = Sound("Tom 3", "./DrumSamples/cymbals/Hop_Crs.wav", (-50, 500, 925))
+        cymbal = Sound("Tom 3", "./DrumSamples/cymbals/Hop_Crs.wav", (-75, 500, 925))
 
         self.left_hand = Hand(
             wrist_out=Marker("WristOut_L", 14),
@@ -42,10 +42,16 @@ class Drum:
         """ Callback function that is called everytime a data packet arrives from QTM """
         _, markers = packet.get_3d_markers()
 
-        # self.left_foot.update(markers)
-        # self.right_foot.update(markers)
-        # self.left_hand.update(markers)
+        self.left_foot.update(markers)
+        self.right_foot.update(markers)
+        self.left_hand.update(markers)
         self.right_hand.update(markers)
+
+        if packet.framenumber % 1000 == 0:
+            print(self.left_hand.tracker.hits)
+            print(self.right_hand.tracker.hits)
+            print(self.left_foot.tracker.hits)
+            print(self.right_foot.tracker.hits)
 
 
 async def main():
