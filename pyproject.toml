@@ -6,10 +6,13 @@ authors = ["mouwrice <mauricevanwassenhove@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "<3.13,>=3.9"
+python = "~3.11"
 qtm-rt = "^3.0.1"
 numpy = "^1.26.1"
 pygame = "^2.5.2"
+mediapipe = "^0.10.7"
+jupyter = "^1.0.0"
+opencv-python = "^4.8.1.78"
 
 
 [build-system]
