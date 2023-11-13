@@ -17,22 +17,33 @@ from tracker.tracker import Tracker
 class MediaPipeTracker(Tracker):
     def __init__(self, drum: Drum):
         super().__init__()
-        self.model_path = './pose_landmarker_lite.task'
+        self.model_path = './pose_landmarker_full.task'
         self.detection_result: PoseLandmarkerResult | None = None
 
         self.left_wrist_marker = Marker("Left Wrist", 15)
         self.left_wrist_tracker = MarkerTracker("Left Wrist",
-                                                [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal])
+                                                [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal],
+                                                drum,
+                                                memory=10,
+                                                downward_trend=-0.02, upward_trend=0.01)
 
         self.right_wrist_marker = Marker("Right Wrist", 16)
         self.right_wrist_tracker = MarkerTracker("Right Wrist",
-                                                 [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal])
+                                                 [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal],
+                                                 drum,
+                                                 memory=10,
+                                                 downward_trend=-0.02, upward_trend=0.01)
 
         self.left_foot_marker = Marker("Left Foot", 31)
-        self.left_foot_tracker = MarkerTracker("Left Foot", [drum.hi_hat_foot], downward_trend=-1.5, upward_trend=-0.5)
+        self.left_foot_tracker = MarkerTracker("Left Foot", [drum.hi_hat_foot], downward_trend=-0.005,
+                                               upward_trend=-0.001,
+                                               drum=drum)
 
         self.right_foot_marker = Marker("Right Foot", 32)
-        self.right_foot_tracker = MarkerTracker("Right Foot", [drum.kick_drum], downward_trend=-1.5, upward_trend=-0.5)
+        self.right_foot_tracker = MarkerTracker("Right Foot", [drum.kick_drum],
+                                                downward_trend=-0.005,
+                                                upward_trend=-0.001,
+                                                drum=drum)
 
     def result_callback(self, result: PoseLandmarkerResult, _: Image, __: int):
         """
@@ -40,15 +51,19 @@ class MediaPipeTracker(Tracker):
         """
         self.detection_result = result
 
-        left_hand = self.detection_result.pose_world_landmarks[0][self.left_wrist_marker.index]
-        right_hand = self.detection_result.pose_world_landmarks[0][self.right_wrist_marker.index]
-        left_foot = self.detection_result.pose_world_landmarks[0][self.left_foot_marker.index]
-        right_foot = self.detection_result.pose_world_landmarks[0][self.right_foot_marker.index]
+        if result is None or result.pose_world_landmarks is None or len(result.pose_world_landmarks) == 0:
+            return
 
-        self.left_wrist_tracker.update((left_hand.x, left_hand.y, left_hand.z))
-        self.right_wrist_tracker.update((right_hand.x, right_hand.y, right_hand.z))
-        self.left_foot_tracker.update((left_foot.x, left_foot.y, left_foot.z))
-        self.right_foot_tracker.update((right_foot.x, right_foot.y, right_foot.z))
+        pose_world_landmarks = result.pose_world_landmarks[0]
+        left_hand = pose_world_landmarks[self.left_wrist_marker.index]
+        right_hand = pose_world_landmarks[self.right_wrist_marker.index]
+        left_foot = pose_world_landmarks[self.left_foot_marker.index]
+        right_foot = pose_world_landmarks[self.right_foot_marker.index]
+
+        self.left_wrist_tracker.update(np.array([left_hand.x, left_hand.y, left_hand.z]))
+        self.right_wrist_tracker.update(np.array([right_hand.x, right_hand.y, right_hand.z]))
+        self.left_foot_tracker.update(np.array([left_foot.x, left_foot.y, left_foot.z]))
+        self.right_foot_tracker.update(np.array([right_foot.x, right_foot.y, right_foot.z]))
 
     def start_capture(self):
         # Variables to calculate FPS
@@ -69,9 +84,9 @@ class MediaPipeTracker(Tracker):
         # Create a pose landmarker instance
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=self.model_path, delegate=BaseOptions.Delegate.CPU),
-            running_mode=vision.RunningMode.LIVE_STREAM,
+            running_mode=vision.RunningMode.IMAGE,
             output_segmentation_masks=True,
-            result_callback=self.result_callback
+            # result_callback=self.result_callback
         )
 
         landmarker = vision.PoseLandmarker.create_from_options(options)
@@ -87,8 +102,9 @@ class MediaPipeTracker(Tracker):
             counter += 1
 
             mp_image = mp.Image(image_format=ImageFormat.SRGB, data=frame)
-            landmarker.detect_async(mp_image, int((time.time_ns() - start_time) / 1e6))
-            # self.detection_result = landmarker.detect(mp_image)
+            # landmarker.detect_async(mp_image, int((time.time_ns() - start_time) / 1e6))
+            self.detection_result = landmarker.detect(mp_image)
+            self.result_callback(self.detection_result, mp_image, int((time.time_ns() - start_time) / 1e6))
 
             # Calculate the FPS
             if counter % fps_avg_frame_count == 0:

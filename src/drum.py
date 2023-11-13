@@ -1,3 +1,5 @@
+import time
+
 from sound import Sound, SoundState
 
 
@@ -47,8 +49,42 @@ class Drum:
         :return:
         """
         print("Initializing drum kit")
-        self.snare_drum.state = SoundState.CALIBRATING
+        self.hi_hat.state = SoundState.CALIBRATING
         print(self)
+
+    def calibrate_next_sound(self):
+        time.sleep(3)
+        if self.snare_drum.state == SoundState.UNINITIALIZED:
+            self.snare_drum.state = SoundState.CALIBRATING
+            print(self)
+            return
+
+        if self.kick_drum.state == SoundState.UNINITIALIZED:
+            self.kick_drum.state = SoundState.CALIBRATING
+            print(self)
+            return
+
+        if self.hi_hat_foot.state == SoundState.UNINITIALIZED:
+            self.hi_hat_foot.state = SoundState.CALIBRATING
+            print(self)
+            return
+
+        # if self.tom1 == SoundState.UNINITIALIZED:
+        #     self.tom1.state = SoundState.CALIBRATING
+        #     print(self)
+        #     return
+        #
+        # if self.tom2 == SoundState.UNINITIALIZED:
+        #     self.tom2.state = SoundState.CALIBRATING
+        #     print(self)
+        #     return
+
+        if self.cymbal.state == SoundState.UNINITIALIZED:
+            self.cymbal.state = SoundState.CALIBRATING
+            print(self)
+            return
+
+        print("Drum kit calibration done")
 
     def __str__(self):
         return (

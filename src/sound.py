@@ -1,6 +1,7 @@
 from enum import Enum
 
 import numpy as np
+import numpy.typing as npt
 import pygame
 
 
@@ -34,7 +35,7 @@ class Sound:
 
         # the maximum and minimum distance from the sound to the hit that we allow
         self.min_margin: float = 100
-        self.margin: float = 300  # the current margin will move towards the minimum margin over time
+        self.margin: float = 0.2  # the current margin will move towards the minimum margin over time
 
     def is_hit(self, position: np.array) -> None | float:
         """
@@ -50,9 +51,17 @@ class Sound:
             self.hits.append(position)
             self.position = np.mean(self.hits, axis=0)
 
+            print("Calibrating {}".format(self.name))
+            print("Hit count: {}".format(self.hit_count))
+            print("Position: {}".format(self.position))
+            print()
             # if we have enough hits, we can stop calibrating
             if len(self.hits) > 10:
                 self.state = SoundState.READY
+                print("{} calibration done".format(self.name))
+                print("Position: {}".format(self.position))
+                print("Hit count: {}".format(self.hit_count))
+                print()
 
         distance = np.linalg.norm(self.position - position)
         if distance < self.margin:
@@ -60,7 +69,7 @@ class Sound:
 
         return None
 
-    def hit(self, position: np.array):
+    def hit(self, position: npt.NDArray[np.float64]):
         """
         Update the position of the sound slowly to the given position and play it
         :param position:

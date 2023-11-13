@@ -6,7 +6,7 @@ from drum import Drum
 from tracker.mediapipe_tracker import MediaPipeTracker
 
 
-async def main():
+def main():
     drum = Drum()
     drum.initialize()
     # await QTMTracker(drum).start_capture()
@@ -17,8 +17,9 @@ async def main():
 if __name__ == "__main__":
     pygame.init()
     pygame.mixer.set_num_channels(32)
+    main()
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.create_task(main())
-    loop.run_forever()
+    # loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(loop)
+    # loop.create_task(main())
+    # loop.run_forever()

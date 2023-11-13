@@ -1,8 +1,10 @@
 from statistics import mean
 
 import numpy as np
+import numpy.typing as npt
 
-from sound import Sound
+from drum import Drum
+from sound import Sound, SoundState
 
 
 class MarkerTracker:
@@ -10,7 +12,7 @@ class MarkerTracker:
     A tracker keeps track of the markers on the body and determines when a hit is registered.
     """
 
-    def __init__(self, label: str, sounds: list[Sound], memory: int = 15, downward_trend: float = -2,
+    def __init__(self, label: str, sounds: list[Sound], drum: Drum, memory: int = 15, downward_trend: float = -2,
                  upward_trend: float = 1):
         self.label = label
 
@@ -20,7 +22,7 @@ class MarkerTracker:
         self.velocities = []
 
         # keep track of the last 10 positions
-        self.positions = []
+        self.positions: [npt.NDArray[np.float64]] = []
 
         # time until next hit can be registered
         self.time_until_next_hit = 0
@@ -39,7 +41,9 @@ class MarkerTracker:
         # clustering the hit positions
         self.hits = dict()
 
-    def update(self, position: tuple[float, float, float]):
+        self.drum = drum
+
+    def update(self, position: npt.NDArray[np.float64]):
         if self.time_until_next_hit > 0:
             self.time_until_next_hit -= 1
 
@@ -54,7 +58,9 @@ class MarkerTracker:
             self.velocities.pop(0)
 
         if self.is_hit():
-            self.register_hit(self.positions[-self.look_ahead])
+            hit = self.positions[-self.look_ahead]
+            pos_tuple = (hit[0], hit[1], hit[2])
+            self.register_hit(pos_tuple)
 
             self.time_until_next_hit = self.memory
             self.find_and_play_sound(self.positions[-self.look_ahead])
@@ -101,18 +107,22 @@ class MarkerTracker:
         return (avg_z_vel < self.downward_trend and avg_z_look_ahead > self.upward_trend
                 and self.time_until_next_hit == 0)
 
-    def find_and_play_sound(self, position: tuple[float, float, float]):
+    def find_and_play_sound(self, position: npt.NDArray[np.float64]):
         """
         Plays the sound that is closest to the given position
         :param position:
         """
-        closest_sound = None
+        closest_sound: Sound | None = None
         closest_distance = float("inf")
         for sound in self.sounds:
+            state = sound.state
             if (distance := sound.is_hit(position)) is not None:
                 if distance < closest_distance:
                     closest_sound = sound
                     closest_distance = distance
+
+            if sound.state == SoundState.READY and state == SoundState.CALIBRATING:
+                self.drum.calibrate_next_sound()
 
         if closest_sound is not None:
             closest_sound.hit(position)
