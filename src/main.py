@@ -8,8 +8,10 @@ from tracker.mediapipe_tracker import MediaPipeTracker
 
 async def main():
     drum = Drum()
+    drum.initialize()
     # await QTMTracker(drum).start_capture()
-    MediaPipeTracker().start_capture()
+    pose_tracker = MediaPipeTracker(drum)
+    pose_tracker.start_capture()
 
 
 if __name__ == "__main__":

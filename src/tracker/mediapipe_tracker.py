@@ -1,7 +1,6 @@
 import time
 
 import cv2
-from matplotlib import pyplot as plt
 from mediapipe import solutions, Image, ImageFormat
 from mediapipe.framework.formats import landmark_pb2
 import numpy as np
@@ -9,20 +8,47 @@ import mediapipe as mp
 from mediapipe.tasks.python import vision, BaseOptions
 from mediapipe.tasks.python.vision import PoseLandmarkerOptions, PoseLandmarkerResult
 
+from drum import Drum
+from tracker.marker import Marker
+from tracker.marker_tracker import MarkerTracker
 from tracker.tracker import Tracker
 
 
 class MediaPipeTracker(Tracker):
-    def __init__(self):
+    def __init__(self, drum: Drum):
         super().__init__()
-        self.model_path = './pose_landmarker_full.task'
+        self.model_path = './pose_landmarker_lite.task'
         self.detection_result: PoseLandmarkerResult | None = None
+
+        self.left_wrist_marker = Marker("Left Wrist", 15)
+        self.left_wrist_tracker = MarkerTracker("Left Wrist",
+                                                [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal])
+
+        self.right_wrist_marker = Marker("Right Wrist", 16)
+        self.right_wrist_tracker = MarkerTracker("Right Wrist",
+                                                 [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal])
+
+        self.left_foot_marker = Marker("Left Foot", 31)
+        self.left_foot_tracker = MarkerTracker("Left Foot", [drum.hi_hat_foot], downward_trend=-1.5, upward_trend=-0.5)
+
+        self.right_foot_marker = Marker("Right Foot", 32)
+        self.right_foot_tracker = MarkerTracker("Right Foot", [drum.kick_drum], downward_trend=-1.5, upward_trend=-0.5)
 
     def result_callback(self, result: PoseLandmarkerResult, _: Image, __: int):
         """
         Callback function to receive the detection result.
         """
         self.detection_result = result
+
+        left_hand = self.detection_result.pose_world_landmarks[0][self.left_wrist_marker.index]
+        right_hand = self.detection_result.pose_world_landmarks[0][self.right_wrist_marker.index]
+        left_foot = self.detection_result.pose_world_landmarks[0][self.left_foot_marker.index]
+        right_foot = self.detection_result.pose_world_landmarks[0][self.right_foot_marker.index]
+
+        self.left_wrist_tracker.update((left_hand.x, left_hand.y, left_hand.z))
+        self.right_wrist_tracker.update((right_hand.x, right_hand.y, right_hand.z))
+        self.left_foot_tracker.update((left_foot.x, left_foot.y, left_foot.z))
+        self.right_foot_tracker.update((right_foot.x, right_foot.y, right_foot.z))
 
     def start_capture(self):
         # Variables to calculate FPS
@@ -35,7 +61,7 @@ class MediaPipeTracker(Tracker):
         # Visualization parameters
         row_size = 20  # pixels
         left_margin = 24  # pixels
-        text_color = (0, 0, 255)  # red
+        text_color = (0, 255, 0)  # green
         font_size = 1
         font_thickness = 1
         fps_avg_frame_count = 10
@@ -62,6 +88,7 @@ class MediaPipeTracker(Tracker):
 
             mp_image = mp.Image(image_format=ImageFormat.SRGB, data=frame)
             landmarker.detect_async(mp_image, int((time.time_ns() - start_time) / 1e6))
+            # self.detection_result = landmarker.detect(mp_image)
 
             # Calculate the FPS
             if counter % fps_avg_frame_count == 0:
