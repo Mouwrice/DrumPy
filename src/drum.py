@@ -1,4 +1,7 @@
-import time
+from time import sleep
+
+import numpy as np
+import numpy.typing as npt
 
 from sound import Sound, SoundState
 
@@ -26,74 +29,82 @@ class DrumPresets:
 
 class Drum:
     """
-    A drum kit with sounds
+    A drum kit consists of multiple sounds
+    The drum kit is responsible for initializing the sounds and calibrating them
+    Presets can be passed to the constructor with sound positions
     """
 
     def __init__(self, presets: dict[str, tuple[float, float, float]] | None = None):
-        self.snare_drum = Sound("Snare Drum", "./DrumSamples/Snare/CKV1_Snare Loud.wav",
-                                presets["snare"] if presets is not None else None)
-        self.hi_hat = Sound("High Hat", "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
-                            presets["hi_hat"] if presets is not None else None)
-        self.kick_drum = Sound("Kick Drum", "./DrumSamples/Kick/CKV1_Kick Loud.wav",
-                               presets["kick"] if presets is not None else None)
-        self.hi_hat_foot = Sound("High Hat Foot", "./DrumSamples/HiHat/CKV1_HH Foot.wav",
-                                 presets["hi_hat_foot"] if presets is not None else None)
-        self.tom1 = Sound("Tom 1", "./DrumSamples/Perc/Tom1.wav", presets["tom1"] if presets is not None else None)
-        self.tom2 = Sound("Tom 2", "./DrumSamples/Perc/Tom2.wav", presets["tom2"] if presets is not None else None)
-        self.cymbal = Sound("Cymbal", "./DrumSamples/cymbals/Hop_Crs.wav",
-                            presets["cymbal"] if presets is not None else None)
+        snare_drum = Sound("Snare Drum", "./DrumSamples/Snare/CKV1_Snare Loud.wav",
+                           presets["snare"] if presets is not None else None)
+        hi_hat = Sound("High Hat", "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
+                       presets["hi_hat"] if presets is not None else None)
+        kick_drum = Sound("Kick Drum", "./DrumSamples/Kick/CKV1_Kick Loud.wav",
+                          presets["kick"] if presets is not None else None)
+        hi_hat_foot = Sound("High Hat Foot", "./DrumSamples/HiHat/CKV1_HH Foot.wav",
+                            presets["hi_hat_foot"] if presets is not None else None)
+        tom1 = Sound("Tom 1", "./DrumSamples/Perc/Tom1.wav", presets["tom1"] if presets is not None else None)
+        tom2 = Sound("Tom 2", "./DrumSamples/Perc/Tom2.wav", presets["tom2"] if presets is not None else None)
+        cymbal = Sound("Cymbal", "./DrumSamples/cymbals/Hop_Crs.wav",
+                       presets["cymbal"] if presets is not None else None)
 
-    def initialize(self):
-        """
-        Initialize the drum kit
-        :return:
-        """
-        print("Initializing drum kit")
-        self.hi_hat.state = SoundState.CALIBRATING
-        print(self)
+        self.sounds = [snare_drum, hi_hat, kick_drum, hi_hat_foot, tom1, tom2, cymbal]
 
-    def calibrate_next_sound(self):
-        time.sleep(3)
-        if self.snare_drum.state == SoundState.UNINITIALIZED:
-            self.snare_drum.state = SoundState.CALIBRATING
-            print(self)
-            return
-
-        if self.kick_drum.state == SoundState.UNINITIALIZED:
-            self.kick_drum.state = SoundState.CALIBRATING
-            print(self)
-            return
-
-        if self.hi_hat_foot.state == SoundState.UNINITIALIZED:
-            self.hi_hat_foot.state = SoundState.CALIBRATING
-            print(self)
-            return
-
-        # if self.tom1 == SoundState.UNINITIALIZED:
-        #     self.tom1.state = SoundState.CALIBRATING
-        #     print(self)
-        #     return
-        #
-        # if self.tom2 == SoundState.UNINITIALIZED:
-        #     self.tom2.state = SoundState.CALIBRATING
-        #     print(self)
-        #     return
-
-        if self.cymbal.state == SoundState.UNINITIALIZED:
-            self.cymbal.state = SoundState.CALIBRATING
-            print(self)
-            return
-
-        print("Drum kit calibration done")
+        # Queue to keep track of sounds that need to be calibrated
+        self.auto_calibrations = []
 
     def __str__(self):
-        return (
-            f"Drum kit with sounds:\n"
-            f"{self.snare_drum.name}: {self.snare_drum.state}\n"
-            f"{self.hi_hat.name}: {self.hi_hat.state}\n"
-            f"{self.kick_drum.name}: {self.kick_drum.state}\n"
-            f"{self.hi_hat_foot.name}: {self.hi_hat_foot.state}\n"
-            f"{self.tom1.name}: {self.tom1.state}\n"
-            f"{self.tom2.name}: {self.tom2.state}\n"
-            f"{self.cymbal.name}: {self.cymbal.state}\n"
-        )
+        return "\n".join([str(sound) for sound in self.sounds])
+
+    def find_and_play_sound(self, position: npt.NDArray[np.float64], marker_label: str,
+                            sounds: list[int] | None = None):
+        """
+        Find the closest sound to the given position and play it
+        :param marker_label: The label of the marker that is hitting the sound
+        :param sounds: List of sounds to consider, if None, all sounds will be considered
+        :param position: A 3D position as a numpy array
+        :return:
+        """
+        closest_sound = None
+        closest_distance = float("inf")
+        for i in sounds:
+            sound = self.sounds[i]
+            if (distance := sound.is_hit(position)) is not None:
+                if distance < closest_distance:
+                    closest_sound = sound
+                    closest_distance = distance
+
+        if closest_sound is not None:
+            closest_sound.hit(position)
+            print("{}: {} with distance {} at {}".format(marker_label, closest_sound.name, closest_distance, position))
+        else:
+            print("{}: No sound found for position {}".format(marker_label, position))
+
+    def auto_calibrate(self, sounds: list[int] | None = None):
+        """
+        Automatically calibrate all sounds
+        :param sounds: List of sounds to calibrate, if None, all sounds will be calibrated in order
+        :return:
+        """
+        if sounds is None:
+            sounds = list(range(len(self.sounds)))
+
+        self.auto_calibrations = sounds
+
+    def check_calibrations(self):
+        """
+        Check if there are any sounds that need to be calibrated
+        :return:
+        """
+        if len(self.auto_calibrations) == 0:
+            return
+
+        sound = self.sounds[self.auto_calibrations[0]]
+
+        if sound.state == SoundState.UNINITIALIZED:
+            sound.calibrate()
+
+        if sound.state == SoundState.READY:
+            sleep(5)
+            self.auto_calibrations.pop(0)
+            return

@@ -25,4 +25,4 @@ class Hand:
         # increase the length of the direction vector by 50
         self.position = self.wrist_out.pos + 50 * direction / np.linalg.norm(direction)
 
-        self.tracker.update((self.position[0], self.position[1], self.position[2]))
+        self.tracker.update(self.position)

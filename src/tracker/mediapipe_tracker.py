@@ -17,31 +17,33 @@ from tracker.tracker import Tracker
 class MediaPipeTracker(Tracker):
     def __init__(self, drum: Drum):
         super().__init__()
+        self.drum = drum
+
         self.model_path = './pose_landmarker_full.task'
         self.detection_result: PoseLandmarkerResult | None = None
 
         self.left_wrist_marker = Marker("Left Wrist", 15)
         self.left_wrist_tracker = MarkerTracker("Left Wrist",
-                                                [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal],
+                                                [0, 1, 4, 5, 6],
                                                 drum,
                                                 memory=10,
                                                 downward_trend=-0.02, upward_trend=0.01)
 
         self.right_wrist_marker = Marker("Right Wrist", 16)
         self.right_wrist_tracker = MarkerTracker("Right Wrist",
-                                                 [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal],
+                                                 [0, 1, 4, 5, 6],
                                                  drum,
                                                  memory=10,
                                                  downward_trend=-0.02, upward_trend=0.01)
 
         self.left_foot_marker = Marker("Left Foot", 31)
-        self.left_foot_tracker = MarkerTracker("Left Foot", [drum.hi_hat_foot], downward_trend=-0.005,
+        self.left_foot_tracker = MarkerTracker("Left Foot", [3], downward_trend=-0.01,
                                                upward_trend=-0.001,
                                                drum=drum)
 
         self.right_foot_marker = Marker("Right Foot", 32)
-        self.right_foot_tracker = MarkerTracker("Right Foot", [drum.kick_drum],
-                                                downward_trend=-0.005,
+        self.right_foot_tracker = MarkerTracker("Right Foot", [2],
+                                                downward_trend=-0.01,
                                                 upward_trend=-0.001,
                                                 drum=drum)
 
@@ -111,6 +113,8 @@ class MediaPipeTracker(Tracker):
                 end_time = time.time()
                 fps = fps_avg_frame_count / (end_time - start_time)
                 start_time = time.time()
+
+                self.drum.check_calibrations()
 
             # Show the FPS
             fps_text = 'FPS = {:.1f}'.format(fps)

@@ -14,4 +14,4 @@ class Foot:
         self.toe_tip.pos = np.array(markers[self.toe_tip.index])
         self.pos = self.toe_tip.pos
 
-        self.tracker.update((self.pos[0], self.pos[1], self.pos[2]))
+        self.tracker.update(self.pos)

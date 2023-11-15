@@ -13,6 +13,7 @@ pygame = "^2.5.2"
 mediapipe = "^0.10.7"
 jupyter = "^1.0.0"
 opencv-python = "^4.8.1.78"
+termcolor = "^2.3.0"
 
 
 [build-system]

@@ -3,6 +3,7 @@ from enum import Enum
 import numpy as np
 import numpy.typing as npt
 import pygame
+from termcolor import cprint
 
 
 class SoundState(Enum):
@@ -37,6 +38,17 @@ class Sound:
         self.min_margin: float = 100
         self.margin: float = 0.2  # the current margin will move towards the minimum margin over time
 
+    def calibrate(self):
+        """
+        Set the sound to calibrate mode
+        :return:
+        """
+        cprint("\nCalibrating {}\n".format(self.name), color="blue", attrs=["bold"])
+        self.state = SoundState.CALIBRATING
+        self.hit_count = 0
+        self.hits = []
+        self.position = np.array([0, 0, 0])
+
     def is_hit(self, position: np.array) -> None | float:
         """
         Returns whether the given position is close enough to the sound to be considered a hit.
@@ -49,19 +61,19 @@ class Sound:
 
         if self.state == SoundState.CALIBRATING:
             self.hits.append(position)
+            prev_position = self.position
             self.position = np.mean(self.hits, axis=0)
 
             print("Calibrating {}".format(self.name))
             print("Hit count: {}".format(self.hit_count))
             print("Position: {}".format(self.position))
             print()
-            # if we have enough hits, we can stop calibrating
-            if len(self.hits) > 10:
+            # the sound is calibrated when the position is stable
+            if np.linalg.norm(self.position - prev_position) < 0.01:
                 self.state = SoundState.READY
-                print("{} calibration done".format(self.name))
+                cprint("\n{} calibration done".format(self.name), color="green", attrs=["bold"])
                 print("Position: {}".format(self.position))
-                print("Hit count: {}".format(self.hit_count))
-                print()
+                print("Hit count: {}\n".format(self.hit_count))
 
         distance = np.linalg.norm(self.position - position)
         if distance < self.margin:
