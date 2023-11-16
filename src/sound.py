@@ -5,6 +5,8 @@ import numpy.typing as npt
 import pygame
 from termcolor import cprint
 
+from util import print_float_array
+
 
 class SoundState(Enum):
     UNINITIALIZED = 0
@@ -35,15 +37,14 @@ class Sound:
         self.hits = []
 
         # the maximum and minimum distance from the sound to the hit that we allow
-        self.min_margin: float = 100
+        self.min_margin: float = 0.001
         self.margin: float = 0.2  # the current margin will move towards the minimum margin over time
 
     def calibrate(self):
         """
         Set the sound to calibrate mode
-        :return:
         """
-        cprint("\nCalibrating {}\n".format(self.name), color="blue", attrs=["bold"])
+        cprint("\n{} calibration start".format(self.name), color="blue", attrs=["bold"])
         self.state = SoundState.CALIBRATING
         self.hit_count = 0
         self.hits = []
@@ -64,19 +65,18 @@ class Sound:
             prev_position = self.position
             self.position = np.mean(self.hits, axis=0)
 
-            print("Calibrating {}".format(self.name))
-            print("Hit count: {}".format(self.hit_count))
-            print("Position: {}".format(self.position))
-            print()
-            # the sound is calibrated when the position is stable
-            if np.linalg.norm(self.position - prev_position) < 0.01:
+            # the sound is calibrated when the position is stable and the hit count is high enough
+            if np.linalg.norm(self.position - prev_position) < 0.01 and self.hit_count > 10:
                 self.state = SoundState.READY
-                cprint("\n{} calibration done".format(self.name), color="green", attrs=["bold"])
-                print("Position: {}".format(self.position))
-                print("Hit count: {}\n".format(self.hit_count))
+                cprint(f"\n{self.name} calibration done", color="green", attrs=["bold"])
+            else:
+                cprint(f"\nCalibrating {self.name}", color="blue")
+
+            print(f"\tPosition: {print_float_array(self.position)}")
+            print(f"\tHit count: {self.hit_count}")
 
         distance = np.linalg.norm(self.position - position)
-        if distance < self.margin:
+        if distance < self.margin or self.state == SoundState.CALIBRATING:
             return distance
 
         return None
@@ -85,7 +85,6 @@ class Sound:
         """
         Update the position of the sound slowly to the given position and play it
         :param position:
-        :return:
         """
         self.sound.play()
         self.hit_count += 1

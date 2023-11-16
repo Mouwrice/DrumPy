@@ -15,37 +15,70 @@ from tracker.tracker import Tracker
 
 
 class MediaPipeTracker(Tracker):
-    def __init__(self, drum: Drum):
+    def __init__(self, drum: Drum, normalize: bool = False):
+        """
+        :param drum:
+        :param normalize: Whether to use normalized coordinates or not
+        """
         super().__init__()
         self.drum = drum
+        self.normalize = normalize
 
         self.model_path = './pose_landmarker_full.task'
         self.detection_result: PoseLandmarkerResult | None = None
 
-        self.left_wrist_marker = Marker("Left Wrist", 15)
-        self.left_wrist_tracker = MarkerTracker("Left Wrist",
-                                                [0, 1, 4, 5, 6],
-                                                drum,
-                                                memory=10,
-                                                downward_trend=-0.02, upward_trend=0.01)
+        if not normalize:
+            self.left_wrist_marker = Marker("Left Wrist", 15)
+            self.left_wrist_tracker = MarkerTracker("Left Wrist",
+                                                    [0, 1, 4],  # 5, 6],
+                                                    drum,
+                                                    memory=10,
+                                                    downward_trend=-0.02, upward_trend=0.01)
 
-        self.right_wrist_marker = Marker("Right Wrist", 16)
-        self.right_wrist_tracker = MarkerTracker("Right Wrist",
-                                                 [0, 1, 4, 5, 6],
-                                                 drum,
-                                                 memory=10,
-                                                 downward_trend=-0.02, upward_trend=0.01)
+            self.right_wrist_marker = Marker("Right Wrist", 16)
+            self.right_wrist_tracker = MarkerTracker("Right Wrist",
+                                                     [0, 1, 4],  # 5, 6],
+                                                     drum,
+                                                     memory=10,
+                                                     downward_trend=-0.02, upward_trend=0.01)
 
-        self.left_foot_marker = Marker("Left Foot", 31)
-        self.left_foot_tracker = MarkerTracker("Left Foot", [3], downward_trend=-0.01,
-                                               upward_trend=-0.001,
-                                               drum=drum)
+            self.left_foot_marker = Marker("Left Foot", 31)
+            self.left_foot_tracker = MarkerTracker("Left Foot", [3], downward_trend=-0.01,
+                                                   upward_trend=-0.001,
+                                                   drum=drum)
 
-        self.right_foot_marker = Marker("Right Foot", 32)
-        self.right_foot_tracker = MarkerTracker("Right Foot", [2],
-                                                downward_trend=-0.01,
-                                                upward_trend=-0.001,
-                                                drum=drum)
+            self.right_foot_marker = Marker("Right Foot", 32)
+            self.right_foot_tracker = MarkerTracker("Right Foot", [],  # 2],
+                                                    downward_trend=-0.01,
+                                                    upward_trend=-0.001,
+                                                    drum=drum)
+
+        else:
+            self.left_wrist_marker = Marker("Left Wrist", 15)
+            self.left_wrist_tracker = MarkerTracker("Left Wrist", [0, 1, 3],  # 5, 6],
+                                                    drum,
+                                                    memory=10,
+                                                    downward_trend=-0.05,
+                                                    upward_trend=0.02)
+
+            self.right_wrist_marker = Marker("Right Wrist", 16)
+            self.right_wrist_tracker = MarkerTracker("Right Wrist", [0, 1, 3],  # 5, 6],
+                                                     drum,
+                                                     memory=10,
+                                                     downward_trend=-0.05,
+                                                     upward_trend=0.02)
+
+            self.left_foot_marker = Marker("Left Foot", 31)
+            self.left_foot_tracker = MarkerTracker("Left Foot", [],  # 3]
+                                                   downward_trend=-0.01,
+                                                   upward_trend=-0.005,
+                                                   drum=drum)
+
+            self.right_foot_marker = Marker("Right Foot", 32)
+            self.right_foot_tracker = MarkerTracker("Right Foot", [2],
+                                                    downward_trend=-0.01,
+                                                    upward_trend=-0.005,
+                                                    drum=drum)
 
     def result_callback(self, result: PoseLandmarkerResult, _: Image, __: int):
         """
@@ -56,11 +89,17 @@ class MediaPipeTracker(Tracker):
         if result is None or result.pose_world_landmarks is None or len(result.pose_world_landmarks) == 0:
             return
 
-        pose_world_landmarks = result.pose_world_landmarks[0]
-        left_hand = pose_world_landmarks[self.left_wrist_marker.index]
-        right_hand = pose_world_landmarks[self.right_wrist_marker.index]
-        left_foot = pose_world_landmarks[self.left_foot_marker.index]
-        right_foot = pose_world_landmarks[self.right_foot_marker.index]
+        if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
+            return
+
+        if self.normalize:
+            landmarks = result.pose_landmarks[0]
+        else:
+            landmarks = result.pose_world_landmarks[0]
+        left_hand = landmarks[self.left_wrist_marker.index]
+        right_hand = landmarks[self.right_wrist_marker.index]
+        left_foot = landmarks[self.left_foot_marker.index]
+        right_foot = landmarks[self.right_foot_marker.index]
 
         self.left_wrist_tracker.update(np.array([left_hand.x, left_hand.y, left_hand.z]))
         self.right_wrist_tracker.update(np.array([right_hand.x, right_hand.y, right_hand.z]))

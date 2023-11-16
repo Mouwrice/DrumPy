@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 
 from sound import Sound, SoundState
+from util import print_float_array
 
 
 class DrumPresets:
@@ -48,7 +49,7 @@ class Drum:
         cymbal = Sound("Cymbal", "./DrumSamples/cymbals/Hop_Crs.wav",
                        presets["cymbal"] if presets is not None else None)
 
-        self.sounds = [snare_drum, hi_hat, kick_drum, hi_hat_foot, tom1, tom2, cymbal]
+        self.sounds = [snare_drum, hi_hat, kick_drum, cymbal]  # , hi_hat_foot, tom1, tom2, cymbal]
 
         # Queue to keep track of sounds that need to be calibrated
         self.auto_calibrations = []
@@ -60,25 +61,36 @@ class Drum:
                             sounds: list[int] | None = None):
         """
         Find the closest sound to the given position and play it
+        If the drum is calibrating sounds, the to be calibrated sound will be played
         :param marker_label: The label of the marker that is hitting the sound
         :param sounds: List of sounds to consider, if None, all sounds will be considered
         :param position: A 3D position as a numpy array
         :return:
         """
+
         closest_sound = None
         closest_distance = float("inf")
         for i in sounds:
             sound = self.sounds[i]
             if (distance := sound.is_hit(position)) is not None:
+                # Check if the sound is calibrating
+                if sound.state == SoundState.CALIBRATING:
+                    sound.hit(position)
+                    print(
+                        f"\t{marker_label}: {sound.name} with distance {distance:.3f} at {print_float_array(position)}")
+                    return
+
                 if distance < closest_distance:
                     closest_sound = sound
                     closest_distance = distance
 
         if closest_sound is not None:
             closest_sound.hit(position)
-            print("{}: {} with distance {} at {}".format(marker_label, closest_sound.name, closest_distance, position))
+            print(
+                f"{marker_label}: {closest_sound.name} with distance {closest_distance:.3f} ] at {print_float_array(position)}")
         else:
-            print("{}: No sound found for position {}".format(marker_label, position))
+            print(
+                f"{marker_label}: No sound found for position {print_float_array(position)} with distance {closest_distance:.3f}")
 
     def auto_calibrate(self, sounds: list[int] | None = None):
         """
@@ -103,8 +115,9 @@ class Drum:
 
         if sound.state == SoundState.UNINITIALIZED:
             sound.calibrate()
+            sleep(3)
 
         if sound.state == SoundState.READY:
-            sleep(5)
+            sleep(3)
             self.auto_calibrations.pop(0)
             return

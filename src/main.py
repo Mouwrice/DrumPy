@@ -10,7 +10,7 @@ def main():
     drum = Drum()
     # await QTMTracker(drum).start_capture()
     drum.auto_calibrate()
-    pose_tracker = MediaPipeTracker(drum)
+    pose_tracker = MediaPipeTracker(drum, normalize=True)
     pose_tracker.start_capture()
 
 
