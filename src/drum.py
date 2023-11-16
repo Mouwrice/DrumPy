@@ -115,9 +115,8 @@ class Drum:
 
         if sound.state == SoundState.UNINITIALIZED:
             sound.calibrate()
-            sleep(3)
+            sleep(2)
 
         if sound.state == SoundState.READY:
-            sleep(3)
             self.auto_calibrations.pop(0)
             return

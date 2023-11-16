@@ -58,15 +58,15 @@ class MediaPipeTracker(Tracker):
             self.left_wrist_tracker = MarkerTracker("Left Wrist", [0, 1, 3],  # 5, 6],
                                                     drum,
                                                     memory=10,
-                                                    downward_trend=-0.05,
+                                                    downward_trend=-0.04,
                                                     upward_trend=0.02)
 
             self.right_wrist_marker = Marker("Right Wrist", 16)
             self.right_wrist_tracker = MarkerTracker("Right Wrist", [0, 1, 3],  # 5, 6],
                                                      drum,
                                                      memory=10,
-                                                     downward_trend=-0.05,
-                                                     upward_trend=0.02)
+                                                     downward_trend=-0.035,
+                                                     upward_trend=0.015)
 
             self.left_foot_marker = Marker("Left Foot", 31)
             self.left_foot_tracker = MarkerTracker("Left Foot", [],  # 3]
