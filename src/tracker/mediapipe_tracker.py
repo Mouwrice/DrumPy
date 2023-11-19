@@ -101,6 +101,8 @@ class MediaPipeTracker(Tracker):
         left_foot = landmarks[self.left_foot_marker.index]
         right_foot = landmarks[self.right_foot_marker.index]
 
+        print(f"Left Hand: {left_hand.x:.3f}, {left_hand.y:.3f}, {left_hand.z:.3f}")
+
         self.left_wrist_tracker.update(np.array([left_hand.x, left_hand.y, left_hand.z]))
         self.right_wrist_tracker.update(np.array([right_hand.x, right_hand.y, right_hand.z]))
         self.left_foot_tracker.update(np.array([left_foot.x, left_foot.y, left_foot.z]))
