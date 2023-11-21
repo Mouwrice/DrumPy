@@ -1,35 +1,48 @@
+import time
+
 import qtm_rt
 
+from csv_object import CSVObject
 from drum import Drum
 from tracker.foot import Foot
 from tracker.hand import Hand
 from tracker.marker import Marker
 from tracker.marker_tracker import MarkerTracker
-from tracker.tracker import Tracker
 
 
-class QTMTracker(Tracker):
-    def __init__(self, drum: Drum):
+class QTMTracker:
+    def __init__(self, drum: Drum, log_to_file: bool = False):
         super().__init__()
         self.left_hand = Hand(
             wrist_out=Marker("WristOut_L", 14),
             hand_out=Marker("HandOut_L", 17),
             hand_in=Marker("HandIn_L", 16),
-            tracker=MarkerTracker("Left Hand", [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal]))
+            tracker=MarkerTracker("Left Hand", [0, 1, 3],  # 5, 6],
+                                  drum))
 
         self.right_hand = Hand(
             wrist_out=Marker("WristOut_R", 19),
             hand_out=Marker("HandOut_R", 21),
             hand_in=Marker("HandIn_R", 22),
-            tracker=MarkerTracker("Right Hand", [drum.snare_drum, drum.hi_hat, drum.tom1, drum.tom2, drum.cymbal]))
+            tracker=MarkerTracker("Right Hand", [0, 1, 3],  # 5, 6],
+                                  drum))
 
         self.left_foot = Foot(toe_tip=Marker("ToeTip_L", 39),
-                              tracker=MarkerTracker("Left Foot", [drum.hi_hat_foot], downward_trend=-1.5,
+                              tracker=MarkerTracker("Left Foot", [],  # 3],
+                                                    drum,
+                                                    downward_trend=-1.5,
                                                     upward_trend=-0.5))
 
         self.right_foot = Foot(toe_tip=Marker("ToeTip_R", 36),
-                               tracker=MarkerTracker("Right Foot", [drum.kick_drum], downward_trend=-1.5,
+                               tracker=MarkerTracker("Right Foot", [2],
+                                                     drum,
+                                                     downward_trend=-1.5,
                                                      upward_trend=-0.5))
+
+        self.csv_writer = None
+        if log_to_file:
+            log_file = f"./qtm-{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            self.csv_writer = CSVObject(log_file)
 
     def on_packet(self, packet: qtm_rt.QRTPacket):
         """ Callback function that is called everytime a data packet arrives from QTM """
@@ -45,6 +58,11 @@ class QTMTracker(Tracker):
             print(self.right_hand.tracker.hits)
             print(self.left_foot.tracker.hits)
             print(self.right_foot.tracker.hits)
+
+        packet_time = time.time_ns()
+        if self.csv_writer is not None:
+            for i, marker in enumerate(markers):
+                self.csv_writer.write(packet.framenumber, packet_time, i, marker.x, marker.y, marker.z)
 
     async def start_capture(self):
         """ Start streaming frames from QTM """

@@ -7,7 +7,7 @@ from tracker.mediapipe_tracker import MediaPipeTracker
 
 
 def main():
-    drum = Drum()
+    drum = Drum(no_sleep=True)
     # await QTMTracker(drum).start_capture()
     drum.auto_calibrate()
     pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True)

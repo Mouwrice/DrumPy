@@ -35,7 +35,11 @@ class Drum:
     Presets can be passed to the constructor with sound positions
     """
 
-    def __init__(self, presets: dict[str, tuple[float, float, float]] | None = None):
+    def __init__(self, presets: dict[str, tuple[float, float, float]] | None = None, no_sleep: bool = False):
+        """
+        :param presets:
+        :param no_sleep: Whether to sleep between calibrations or not
+        """
         snare_drum = Sound("Snare Drum", "./DrumSamples/Snare/CKV1_Snare Loud.wav",
                            presets["snare"] if presets is not None else None)
         hi_hat = Sound("High Hat", "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
@@ -53,6 +57,8 @@ class Drum:
 
         # Queue to keep track of sounds that need to be calibrated
         self.auto_calibrations = []
+
+        self.no_sleep = no_sleep
 
     def __str__(self):
         return "\n".join([str(sound) for sound in self.sounds])
@@ -115,7 +121,8 @@ class Drum:
 
         if sound.state == SoundState.UNINITIALIZED:
             sound.calibrate()
-            sleep(2)
+            if not self.no_sleep:
+                sleep(2)
 
         if sound.state == SoundState.READY:
             self.auto_calibrations.pop(0)

@@ -2,7 +2,7 @@ import time
 from enum import Enum
 
 import cv2
-from mediapipe import solutions, Image, ImageFormat
+from mediapipe import solutions, ImageFormat
 from mediapipe.framework.formats import landmark_pb2
 import numpy as np
 import mediapipe as mp
@@ -28,6 +28,8 @@ class MediaPipeTracker:
         :param drum:
         :param normalize: Whether to use normalized coordinates or not
         :param log_to_file: Whether to log the coordinates to a CSV file
+        :param model: Which model to use for the pose landmarker
+
         """
         super().__init__()
         self.drum = drum
@@ -91,9 +93,10 @@ class MediaPipeTracker:
                                                     drum=drum)
 
         self.csv_writer = None
-        if log_to_file is not None:
-            log_file = f"./{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+        if log_to_file:
+            log_file = f"mediapipe-{self.model.name}-{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             self.csv_writer = CSVObject(log_file)
+
 
     def result_callback(self, result: PoseLandmarkerResult, frame: int):
         """
@@ -130,8 +133,9 @@ class MediaPipeTracker:
         else:
             landmarks = result.pose_world_landmarks[0]
 
+        result_time = time.time_ns()
         for i, landmark in enumerate(landmarks):
-            self.csv_writer.write(frame, time.time_ns(), i, landmark.z, landmark.x, landmark.y)
+            self.csv_writer.write(frame, result_time, i, landmark.z, landmark.x, landmark.y)
 
     def start_capture(self):
         # Variables to calculate FPS
