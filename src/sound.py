@@ -37,8 +37,8 @@ class Sound:
         self.hits = []
 
         # the maximum and minimum distance from the sound to the hit that we allow
-        self.min_margin: float = 0.001
-        self.margin: float = 0.2  # the current margin will move towards the minimum margin over time
+        self.min_margin: float = 0.01
+        self.margin: float = 0.4  # the current margin will move towards the minimum margin over time
 
     def calibrate(self):
         """
