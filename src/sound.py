@@ -21,7 +21,9 @@ class Sound:
     closest one to hit impact.
     """
 
-    def __init__(self, name: str, path: str, position: tuple[float, float, float] | None = None):
+    def __init__(self, name: str, path: str, min_margin: float, margin: float,
+                 position: tuple[float, float, float] | None = None, ):
+
         self.name = name
         self.sound = pygame.mixer.Sound(path)
 
@@ -37,8 +39,8 @@ class Sound:
         self.hits = []
 
         # the maximum and minimum distance from the sound to the hit that we allow
-        self.min_margin: float = 0.01
-        self.margin: float = 0.4  # the current margin will move towards the minimum margin over time
+        self.min_margin: float = min_margin
+        self.margin: float = margin  # the current margin will move towards the minimum margin over time
 
     def calibrate(self):
         """

@@ -2,6 +2,7 @@ import time
 from enum import Enum
 
 import cv2
+import pygame
 from mediapipe import solutions, ImageFormat
 from mediapipe.framework.formats import landmark_pb2
 import numpy as np
@@ -97,7 +98,6 @@ class MediaPipeTracker:
             log_file = f"mediapipe-{self.model.name}-{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             self.csv_writer = CSVObject(log_file)
 
-
     def result_callback(self, result: PoseLandmarkerResult, frame: int):
         """
         Callback function to receive the detection result.
@@ -128,14 +128,17 @@ class MediaPipeTracker:
             self.write_landmarks(result, frame)
 
     def write_landmarks(self, result: PoseLandmarkerResult, frame: int):
-        if self.normalize:
-            landmarks = result.pose_landmarks[0]
-        else:
-            landmarks = result.pose_world_landmarks[0]
+        pose_landmarsks = result.pose_landmarks[0]
+        pose_world_landmarks = result.pose_world_landmarks[0]
 
         result_time = time.time_ns()
-        for i, landmark in enumerate(landmarks):
-            self.csv_writer.write(frame, result_time, i, landmark.z, landmark.x, landmark.y)
+        for i, landmark in enumerate(pose_landmarsks):
+            self.csv_writer.write(frame, result_time, i, landmark.z, landmark.x, landmark.y, landmark.visibility,
+                                  landmark.presence, normalized=True)
+
+        for i, landmark in enumerate(pose_world_landmarks):
+            self.csv_writer.write(frame, result_time, i, landmark.z, landmark.x, landmark.y, landmark.visibility,
+                                  landmark.presence)
 
     def start_capture(self):
         # Variables to calculate FPS
@@ -225,3 +228,12 @@ class MediaPipeTracker:
                 solutions.pose.POSE_CONNECTIONS,
                 solutions.drawing_styles.get_default_pose_landmarks_style())
         return annotated_image
+
+
+if __name__ == '__main__':
+    pygame.init()
+    pygame.mixer.set_num_channels(64)
+    drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
+    drum.auto_calibrate()
+    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True)
+    pose_tracker.start_capture()

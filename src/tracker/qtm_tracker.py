@@ -1,9 +1,11 @@
+import asyncio
 import time
 
+import pygame
 import qtm_rt
 
 from csv_object import CSVObject
-from drum import Drum
+from drum import Drum, DrumPresets
 from tracker.foot import Foot
 from tracker.hand import Hand
 from tracker.marker import Marker
@@ -71,3 +73,18 @@ class QTMTracker:
             return
 
         await connection.stream_frames(components=["3d"], on_packet=self.on_packet)
+
+
+async def main():
+    drum = Drum(200, 40, no_sleep=True, presets=DrumPresets.first_qtm_recording())
+    await QTMTracker(drum, log_to_file=True).start_capture()
+
+
+if __name__ == "__main__":
+    pygame.init()
+    pygame.mixer.set_num_channels(64)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.create_task(main())
+    loop.run_forever()
