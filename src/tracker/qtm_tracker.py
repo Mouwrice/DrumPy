@@ -4,7 +4,7 @@ import time
 import pygame
 import qtm_rt
 
-from csv_object import CSVObject
+from writers.csv_object import CSVObject
 from drum import Drum, DrumPresets
 from tracker.foot import Foot
 from tracker.hand import Hand
@@ -12,9 +12,8 @@ from tracker.marker import Marker
 from tracker.marker_tracker import MarkerTracker
 
 
-class QTMTracker:
+class QTMFullTracker:
     def __init__(self, drum: Drum, log_to_file: bool = False):
-        super().__init__()
         self.left_hand = Hand(
             wrist_out=Marker("WristOut_L", 14),
             hand_out=Marker("HandOut_L", 17),
@@ -77,7 +76,7 @@ class QTMTracker:
 
 async def main():
     drum = Drum(200, 40, no_sleep=True, presets=DrumPresets.first_qtm_recording())
-    await QTMTracker(drum, log_to_file=True).start_capture()
+    await QTMFullTracker(drum, log_to_file=True).start_capture()
 
 
 if __name__ == "__main__":

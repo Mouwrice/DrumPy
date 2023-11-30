@@ -10,7 +10,7 @@ import mediapipe as mp
 from mediapipe.tasks.python import vision, BaseOptions
 from mediapipe.tasks.python.vision import PoseLandmarkerOptions, PoseLandmarkerResult
 
-from csv_object import CSVObject
+from writers.csv_object import CSVObject
 from drum import Drum
 from tracker.marker import Marker
 from tracker.marker_tracker import MarkerTracker
