@@ -4,7 +4,7 @@ import time
 import pygame
 import qtm_rt
 
-from writers.csv_object import CSVObject
+from csv_objects.csv_object import CSVWriter
 from drum import Drum, DrumPresets
 from tracker.foot import Foot
 from tracker.hand import Hand
@@ -43,7 +43,7 @@ class QTMFullTracker:
         self.csv_writer = None
         if log_to_file:
             log_file = f"./qtm-{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            self.csv_writer = CSVObject(log_file)
+            self.csv_writer = CSVWriter(log_file)
 
     def on_packet(self, packet: qtm_rt.QRTPacket):
         """ Callback function that is called everytime a data packet arrives from QTM """

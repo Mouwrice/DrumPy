@@ -10,7 +10,7 @@ import mediapipe as mp
 from mediapipe.tasks.python import vision, BaseOptions
 from mediapipe.tasks.python.vision import PoseLandmarkerOptions, PoseLandmarkerResult
 
-from writers.csv_object import CSVObject
+from csv_objects.csv_object import CSVWriter
 from drum import Drum
 from tracker.marker import Marker
 from tracker.marker_tracker import MarkerTracker
@@ -24,13 +24,13 @@ class LandmarkerModel(Enum):
 
 class MediaPipeTracker:
     def __init__(self, drum: Drum, normalize: bool = False, log_to_file: bool = False,
-                 model: LandmarkerModel = LandmarkerModel.FULL):
+                 model: LandmarkerModel = LandmarkerModel.FULL, source: int | str = 0):
         """
         :param drum:
         :param normalize: Whether to use normalized coordinates or not
         :param log_to_file: Whether to log the coordinates to a CSV file
         :param model: Which model to use for the pose landmarker
-
+        :param source: The source for the video capture
         """
         super().__init__()
         self.drum = drum
@@ -95,10 +95,14 @@ class MediaPipeTracker:
 
         self.csv_writer = None
         if log_to_file:
-            log_file = f"mediapipe-{self.model.name}-{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            self.csv_writer = CSVObject(log_file)
+            log_file = f"mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv_objects"
+            self.csv_writer = CSVWriter(log_file)
 
-    def result_callback(self, result: PoseLandmarkerResult, frame: int):
+        self.source = source
+        self.frame_count = 0
+        self.video_time_ms = 0
+
+    def result_callback(self, result: PoseLandmarkerResult, _, timestamp_ms: int):
         """
         Callback function to receive the detection result.
         """
@@ -125,28 +129,20 @@ class MediaPipeTracker:
         self.right_foot_tracker.update(np.array([right_foot.z, right_foot.x, right_foot.y]))
 
         if self.csv_writer is not None:
-            self.write_landmarks(result, frame)
+            self.write_landmarks(result, timestamp_ms)
 
-    def write_landmarks(self, result: PoseLandmarkerResult, frame: int):
-        pose_landmarsks = result.pose_landmarks[0]
-        pose_world_landmarks = result.pose_world_landmarks[0]
+    def write_landmarks(self, result: PoseLandmarkerResult, timestamp_ms: int):
+        pose_landmarsks = result.pose_landmarks[0] if self.normalize else result.pose_world_landmarks[0]
 
-        result_time = time.time_ns()
         for i, landmark in enumerate(pose_landmarsks):
-            self.csv_writer.write(frame, result_time, i, landmark.z, landmark.x, landmark.y, landmark.visibility,
+            self.csv_writer.write(self.frame_count, timestamp_ms, i, landmark.z, landmark.x, landmark.y,
+                                  landmark.visibility,
                                   landmark.presence, normalized=True)
-
-        for i, landmark in enumerate(pose_world_landmarks):
-            self.csv_writer.write(frame, result_time, i, landmark.z, landmark.x, landmark.y, landmark.visibility,
-                                  landmark.presence)
 
     def start_capture(self):
         # Variables to calculate FPS
-        counter, fps = 0, 0
+        fps = 0
         start_time = time.time()
-
-        # Start capturing video input from the camera
-        cap = cv2.VideoCapture(0)
 
         # Visualization parameters
         row_size = 20  # pixels
@@ -159,30 +155,33 @@ class MediaPipeTracker:
         # Create a pose landmarker instance
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=self.model.value, delegate=BaseOptions.Delegate.CPU),
-            running_mode=vision.RunningMode.IMAGE,
+            running_mode=vision.RunningMode.VIDEO,
             output_segmentation_masks=True,
             # result_callback=self.result_callback
         )
 
         landmarker = vision.PoseLandmarker.create_from_options(options)
-        video_capture = cv2.VideoCapture(0)
+        video_capture = cv2.VideoCapture(self.source)
         if not video_capture.isOpened():
             raise Exception("Could not open video device")
 
         while video_capture.isOpened():
+            processing_start_time = time.time()
+
             success, frame = video_capture.read()
             if not success:
+                video_capture.release()
                 raise Exception("Could not read frame")
 
-            counter += 1
-
+            self.frame_count += 1
+            self.video_time_ms = int(self.frame_count * 16.666666666666667)  # 60 fps
             mp_image = mp.Image(image_format=ImageFormat.SRGB, data=frame)
-            # landmarker.detect_async(mp_image, int((time.time_ns() - start_time) / 1e6))
-            self.detection_result = landmarker.detect(mp_image)
-            self.result_callback(self.detection_result, counter)
+            # landmarker.detect_async(mp_image, self.video_time_ms)
+            self.detection_result = landmarker.detect_for_video(mp_image, self.video_time_ms)
+            self.result_callback(self.detection_result, None, self.video_time_ms)
 
             # Calculate the FPS
-            if counter % fps_avg_frame_count == 0:
+            if self.frame_count % fps_avg_frame_count == 0:
                 end_time = time.time()
                 fps = fps_avg_frame_count / (end_time - start_time)
                 start_time = time.time()
@@ -195,18 +194,19 @@ class MediaPipeTracker:
             cv2.putText(frame, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
                         font_size, text_color, font_thickness)
 
-            if self.detection_result is not None:
-                vis_image = self.visualize(frame)
-                cv2.imshow('object_detector', vis_image)
-            else:
-                cv2.imshow('object_detector', frame)
+            # if self.detection_result is not None:
+            #     vis_image = self.visualize(frame)
+            #     cv2.imshow('object_detector', vis_image)
+            # else:
+            #     cv2.imshow('object_detector', frame)
 
             # Stop the program if the ESC key is pressed.
-            if cv2.waitKey(1) == 27:
+            wait_time = max(1, int(1000 / 60 - (time.time() - processing_start_time) * 1000))
+            if cv2.waitKey(wait_time) == 27:
                 break
 
         landmarker.close()
-        cap.release()
+        video_capture.release()
         cv2.destroyAllWindows()
 
     def visualize(self, rgb_image):
@@ -234,6 +234,7 @@ if __name__ == '__main__':
     pygame.init()
     pygame.mixer.set_num_channels(64)
     drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
-    drum.auto_calibrate()
-    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True)
+    # drum.auto_calibrate()
+    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=LandmarkerModel.LITE,
+                                    source="../multicam_1_left.mp4")
     pose_tracker.start_capture()
