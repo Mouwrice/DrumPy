@@ -78,73 +78,137 @@ def into_frames(csv_file: str) -> list[Frame]:
     return frames
 
 
-def plot_positions(positions: list[list[CSVRow]], markers: list[int] = None):
+def plot_axis(axis1: list[float], axis2: list[float], axis: str, marker1: int, marker2: int, smoothing: int = 1,
+              label1: str = "qtm",
+              label2: str = "mediapipe",
+              plot_file_prefix: str = ""):
     """
-    Plot the positions of the markers over time
-    :param markers: Filter for markers, if None all markers are plotted, else only the markers in the list are plotted
-    :param positions:
+    Plot the positions of the markers over time for a certain axis.
+    Normalizes the values between 0 and 1
+    :param smoothing:
+    :param axis1:
+    :param axis2:
+    :param axis:
+    :param marker1:
+    :param marker2:
+    :param label1:
+    :param label2:
     :return:
     """
+    # normalize axis1 and axis2
+    min_axis1 = min(axis1)
+    max_axis1 = max(axis1)
+    min_axis2 = min(axis2)
+    max_axis2 = max(axis2)
+    axis1 = [(axis - min_axis1) / (max_axis1 - min_axis1) for axis in axis1]
+    axis2 = [(axis - min_axis2) / (max_axis2 - min_axis2) for axis in axis2]
 
-    if markers is None:
-        markers = range(len(positions[0]))
-    for i in markers:
-        plot = figure(title=f"Position of marker {i} over time", x_axis_label='Frame', y_axis_label='Position',
-                      sizing_mode="stretch_both")
-        plot.line(list(range(len(positions))), [position[i].x for position in positions], legend_label="x",
-                  line_color="red")
-        plot.line(list(range(len(positions))), [position[i].y for position in positions], legend_label="y",
-                  line_color="green")
-        plot.line(list(range(len(positions))), [position[i].z for position in positions], legend_label="z",
-                  line_color="blue")
-        output_file(f"marker_{i}.html")
-        show(plot)
+    # smooth axis1 and axis2
+    axis1 = [sum(axis1[i:i + smoothing]) / smoothing for i in range(len(axis1) - smoothing)]
+    axis2 = [sum(axis2[i:i + smoothing]) / smoothing for i in range(len(axis2) - smoothing)]
 
+    # get the difference between axis1 and axis2
+    difference = [abs(axis1[i] - axis2[i]) for i in range(len(axis2))]
+    # get the average difference
+    average_difference = sum(difference) / len(difference)
+    print(f"Average difference between {label1} {marker1} and {label2} {marker2} on axis {axis}: {average_difference}")
+    # get the first derivative of the difference
+    difference_derivative = [difference[i + 1] - difference[i] for i in range(len(difference) - 1)]
+    # get the average difference derivative
+    average_difference_derivative = sum(difference_derivative) / len(difference_derivative)
+    print(f"Average difference derivative between {label1} {marker1} and {label2} {marker2} on axis {axis}: "
+          f"{average_difference_derivative}")
 
-def plot_distances(distances: list[list[float]], mapping: list[int] = None):
-    """
-    Plot the distances between markers over time
-    :param distances:
-    :return:
-    """
-    plot = figure(title="Distance between markers over time", x_axis_label='Frame', y_axis_label='Distance',
+    title = f"{plot_file_prefix}_{label1}_{marker1}_{label2}_{marker2}_{axis}_positions"
+
+    plot = figure(title=title, x_axis_label='Frame',
+                  y_axis_label='Position',
                   sizing_mode="stretch_both")
-    colors = ["red", "blue", "green", "orange", "purple", "brown", "pink", "gray", "black"]
-    for i in range(len(distances[0])):
-        plot.line(list(range(len(distances))), [distance[i] for distance in distances],
-                  legend_label=f"Marker {i}-{mapping[i]}",
-                  line_color=colors[i % len(colors)])
-    output_file("distances.html")
+    plot.line(list(range(len(axis1))), axis1, legend_label=label1, line_color="red")
+    plot.line(list(range(len(axis2))), axis2, legend_label=label2, line_color="blue")
+    plot.line(list(range(len(axis2))), difference_derivative, legend_label="difference derivative", line_color="black")
+    output_file(f"{title}.html")
     show(plot)
 
 
-def row_distance(row1: CSVRow, row2: CSVRow) -> float:
+def plot_positions(positions1: list[list[CSVRow]], positions2: list[list[CSVRow]], marker1: int, marker2: int,
+                   name1: str = "qtm", name2: str = "mediapipe", smoothing: int = 1, plot_file_prefix: str = ""):
     """
-    Calculate the distance between two rows
-    :param row1:
-    :param row2:
+    Plot the positions of the markers over time
+    """
+    positions1 = [position[marker1] for position in positions1]
+    positions2 = [position[marker2] for position in positions2]
+    assert len(positions1) == len(positions2), "Length of positions1 is not equal to length of positions2"
+
+    x1 = []
+    y1 = []
+    z1 = []
+    x2 = []
+    y2 = []
+    z2 = []
+    for i in range(len(positions1)):
+        x1.append(positions1[i].x)
+        y1.append(positions1[i].y)
+        z1.append(positions1[i].z)
+        if name2 == "mediapipe":  # mediapipe has x and y switched and is mirrored
+
+            x2.append(positions2[i].x)
+            y2.append(-positions2[i].z)
+            z2.append(-positions2[i].y)
+        else:
+            x2.append(positions2[i].x)
+            y2.append(positions2[i].y)
+            z2.append(positions2[i].z)
+
+    plot_axis(x1, x2, "x", marker1, marker2, smoothing, name1, name2, plot_file_prefix=plot_file_prefix)
+    plot_axis(y1, y2, "y", marker1, marker2, smoothing, name1, name2, plot_file_prefix=plot_file_prefix)
+    plot_axis(z1, z2, "z", marker1, marker2, smoothing, name1, name2, plot_file_prefix=plot_file_prefix)
+
+
+def row_distance(row1: CSVRow, row2: CSVRow) -> float:
+    return ((row1.x - row2.x) ** 2 + (row1.y - row2.z) ** 2 + (row1.z - row2.y) ** 2) ** 0.5
+
+
+def get_closest_frame_index(frames: list[Frame], frame: int) -> int:
+    """
+    Get the index of the frame with the closest frame number
+    :param frames:
+    :param frame:
     :return:
     """
-    return ((row1.x - row2.x) ** 2 + (row1.y - row2.y) ** 2 + (row1.z - row2.z) ** 2) ** 0.5
+    found = min(range(len(frames)), key=lambda i: abs(frames[i].frame - frame))
+    print(f"Found frame {frames[found].frame} at index {found}")
+    return found
 
 
-def compare_and_plot_csv_files(csv1: str, csv2: str, frame_offset1: int = 0, frame_offset2: int = 0,
-                               mapping: dict = None):
+def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int, stop1: int, stop2: int,
+                               mapping: dict = None, plot_file_prefix: str = ""):
     """
     Compare two CSV files and plot the differences
+    :param plot_file_prefix: Prefix for the plot file
     :param csv1: path to the first CSV file
     :param csv2: path to the second CSV file
-    :param frame_offset1: offset for the first CSV file
-    :param frame_offset2: offset for the second CSV file
+    :param start1: start frame of the first CSV file
+    :param start2: start frame of the second CSV file
+    :param stop1: last frame of the first CSV file
+    :param stop2: last frame of the second CSV file
     :param mapping: mapping from trackers of the first CSV file to the second CSV file
     if None, all trackers are compared based on their index
     """
     frames1 = into_frames(csv1)
     frames2 = into_frames(csv2)
 
-    frames1_index = frame_offset1
-    frames2_index = frame_offset2
-    time_offset = frames1[frames1_index].time_ms - frames2[frames2_index].time_ms
+    assert len(frames1) > 0, "No frames found in CSV file 1"
+    assert len(frames2) > 0, "No frames found in CSV file 2"
+    assert start1 < stop1, "Start frame 1 is not smaller than stop frame 1"
+    assert start2 < stop2, "Start frame 2 is not smaller than stop frame 2"
+    assert start1 >= frames1[0].frame, "Start frame 1 is smaller than the first frame in the CSV file 1"
+    assert start2 >= frames2[0].frame, "Start frame 2 is smaller than the first frame in the CSV file 2"
+
+    frames1_index = get_closest_frame_index(frames1, start1)
+    frames2_index = get_closest_frame_index(frames2, start2)
+    frames1_time_offset = frames1[frames1_index].time_ms
+    frames2_time_offset = frames2[frames2_index].time_ms
 
     distances = []
 
@@ -152,14 +216,15 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, frame_offset1: int = 0, fra
     frame2 = frames2[frames2_index]
     positions1 = []
     positions2 = []
-    while frames1_index < len(frames1) - 1 and frames2_index < len(frames2) - 1:
+    while frame1.frame < stop1 and frame2.frame < stop2:
         frame1_next = frames1[frames1_index + 1]
         frame2_next = frames2[frames2_index + 1]
-        frame2_offset_time = frame2.time_ms + time_offset
-        if frame1.time_ms < frame2_offset_time:
+        frame1_time = frame1.time_ms - frames1_time_offset
+        frame2_time = frame2.time_ms - frames2_time_offset
+        if frame1_time < frame2_time:
             frames1_index += 1
             frame1 = frame1_next
-        elif frame1.time_ms > frame2_offset_time:
+        elif frame1_time > frame2_time:
             frames2_index += 1
             frame2 = frame2_next
         else:
@@ -178,8 +243,6 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, frame_offset1: int = 0, fra
                 row2 = frame2.rows[i]
                 distance = row_distance(row1, row2)
                 frame_distances.append(distance)
-                # print(f"Frame: {frame1.frame}, Marker: {row1.index}, "
-                #       f"Distance: {distance}")
             distances.append(frame_distances)
         else:
             frame_distances = []
@@ -188,17 +251,20 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, frame_offset1: int = 0, fra
                 row2 = frame2.rows[value]
                 distance = row_distance(row1, row2)
                 frame_distances.append(distance)
-                # print(f"Frame: {frame1.frame}, Marker: {row1.index} - {row2.index}, "
-                #       f"Distance: {distance}")
             distances.append(frame_distances)
 
-        # print(f"Frame: {frame1.frame}, Time: {frame1.time_ms}, Time: {frame2.time_ms + time_offset}")
-        # print()
-    plot_positions(positions1, markers=[0, 1, 2, 3, 4, 5])
-    plot_positions(positions2, markers=[19])
-    plot_distances(distances, mapping=list(qtm_to_mediapipe.values()))
+    for key, value in mapping.items():
+        print(f"Average distance between {key} and {value}: {sum([distance[key] for distance in distances]) / len(distances)}")
+        plot_positions(positions1, positions2, key, value, "qtm", "mediapipe", plot_file_prefix=plot_file_prefix, smoothing=10)
 
 
 if __name__ == '__main__':
-    compare_and_plot_csv_files("qtm_multicam_1.csv", "mediapipe_LITE_multicam_1_left.csv", frame_offset1=5,
-                               mapping=qtm_to_mediapipe)
+    compare_and_plot_csv_files("data/qtm_multicam_1.csv", "data/mediapipe_FULL_multicam_1_left.csv", 500, 1780, 7000,
+                               8000,
+                               mapping=qtm_to_mediapipe, plot_file_prefix="./data/multicam_1_left_full")
+    compare_and_plot_csv_files("data/qtm_multicam_1.csv", "data/mediapipe_LITE_multicam_1_left.csv", 500, 1780, 7000,
+                               8000,
+                               mapping=qtm_to_mediapipe, plot_file_prefix="./data/multicam_1_left_lite")
+    compare_and_plot_csv_files("data/qtm_multicam_1.csv", "data/mediapipe_HEAVY_multicam_1_left.csv", 500, 1780, 7000,
+                               8000,
+                               mapping=qtm_to_mediapipe, plot_file_prefix="./data/multicam_1_left_heavy")

@@ -95,7 +95,7 @@ class MediaPipeTracker:
 
         self.csv_writer = None
         if log_to_file:
-            log_file = f"mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv_objects"
+            log_file = f"./data/mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             self.csv_writer = CSVWriter(log_file)
 
         self.source = source
@@ -171,10 +171,14 @@ class MediaPipeTracker:
             success, frame = video_capture.read()
             if not success:
                 video_capture.release()
-                raise Exception("Could not read frame")
+                print("Could not read frame. End of stream reached?")
+                if self.csv_writer is not None:
+                    self.csv_writer.close()
+                break
 
             self.frame_count += 1
-            self.video_time_ms = int(self.frame_count * 16.666666666666667)  # 60 fps
+            video_fps = 60.19
+            self.video_time_ms = int(self.frame_count * 1000 / video_fps)
             mp_image = mp.Image(image_format=ImageFormat.SRGB, data=frame)
             # landmarker.detect_async(mp_image, self.video_time_ms)
             self.detection_result = landmarker.detect_for_video(mp_image, self.video_time_ms)
@@ -194,11 +198,11 @@ class MediaPipeTracker:
             cv2.putText(frame, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
                         font_size, text_color, font_thickness)
 
-            # if self.detection_result is not None:
-            #     vis_image = self.visualize(frame)
-            #     cv2.imshow('object_detector', vis_image)
-            # else:
-            #     cv2.imshow('object_detector', frame)
+            if self.detection_result is not None:
+                vis_image = self.visualize(frame)
+                cv2.imshow('object_detector', vis_image)
+            else:
+                cv2.imshow('object_detector', frame)
 
             # Stop the program if the ESC key is pressed.
             wait_time = max(1, int(1000 / 60 - (time.time() - processing_start_time) * 1000))
@@ -235,6 +239,6 @@ if __name__ == '__main__':
     pygame.mixer.set_num_channels(64)
     drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
     # drum.auto_calibrate()
-    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=LandmarkerModel.LITE,
+    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=LandmarkerModel.HEAVY,
                                     source="../multicam_1_left.mp4")
     pose_tracker.start_capture()
