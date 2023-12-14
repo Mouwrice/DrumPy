@@ -1,5 +1,3 @@
-import time
-
 import qtm_rt
 
 from csv_objects.csv_object import CSVWriter
@@ -10,14 +8,15 @@ class QTMWriter:
     Class to write the captured data to a CSV file.
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, time_per_frame: float = 0.01):
         self.csv_writer = CSVWriter(path)
+        self.time_per_frame = time_per_frame
 
     def on_packet(self, packet: qtm_rt.QRTPacket):
         """ Callback function that is called everytime a data packet arrives from QTM """
         _, markers = packet.get_3d_markers()
         # packets at 100 Hz so time is frame number * 10 ms
-        packet_time = packet.framenumber * 10
+        packet_time = packet.framenumber * self.time_per_frame
         if self.csv_writer is not None:
             for i, marker in enumerate(markers):
                 self.csv_writer.write(packet.framenumber, packet_time, i, marker.x, marker.y, marker.z)
@@ -28,7 +27,7 @@ async def main():
     if connection is None:
         return
 
-    writer = QTMWriter("qtm_multicam_7.csv_objects")
+    writer = QTMWriter("qtm_multicam_ms_02.csv", time_per_frame=1 / 120)
 
     await connection.stream_frames(components=["3d"], on_packet=writer.on_packet)
 
