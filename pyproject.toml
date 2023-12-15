@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "drumscan"
+name = "src"
 version = "0.1.0"
 description = ""
 authors = ["mouwrice <mauricevanwassenhove@gmail.com>"]
