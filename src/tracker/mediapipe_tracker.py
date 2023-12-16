@@ -11,6 +11,7 @@ from mediapipe.tasks.python import vision, BaseOptions
 from mediapipe.tasks.python.vision import PoseLandmarkerOptions, PoseLandmarkerResult
 
 from csv_objects.csv_object import CSVWriter
+from cv2_utils.cv2_utils import overlay
 from drum import Drum
 from tracker.marker import Marker
 from tracker.marker_tracker import MarkerTracker
@@ -24,7 +25,8 @@ class LandmarkerModel(Enum):
 
 class MediaPipeTracker:
     def __init__(self, drum: Drum, normalize: bool = False, log_to_file: bool = False,
-                 model: LandmarkerModel = LandmarkerModel.FULL, source: int | str = 0):
+                 model: LandmarkerModel = LandmarkerModel.FULL, source: int | str = 0, scale: float = 1.0,
+                 filename: str = None):
         """
         :param drum:
         :param normalize: Whether to use normalized coordinates or not
@@ -95,12 +97,15 @@ class MediaPipeTracker:
 
         self.csv_writer = None
         if log_to_file:
-            log_file = f"./data/mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            self.csv_writer = CSVWriter(log_file)
+            self.log_file = filename if filename is not None \
+                else f"./data/mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            self.csv_writer = CSVWriter(self.log_file)
 
         self.source = source
         self.frame_count = 0
         self.video_time_ms = 0
+
+        self.scale = scale
 
     def result_callback(self, result: PoseLandmarkerResult, _, timestamp_ms: int):
         """
@@ -137,20 +142,13 @@ class MediaPipeTracker:
         for i, landmark in enumerate(pose_landmarsks):
             self.csv_writer.write(self.frame_count, timestamp_ms, i, landmark.z, landmark.x, landmark.y,
                                   landmark.visibility,
-                                  landmark.presence, normalized=True)
+                                  landmark.presence, normalized=self.normalize)
 
     def start_capture(self):
         # Variables to calculate FPS
         fps = 0
         start_time = time.time()
-
-        # Visualization parameters
-        row_size = 20  # pixels
-        left_margin = 24  # pixels
-        text_color = (0, 255, 0)  # green
-        font_size = 1
-        font_thickness = 1
-        fps_avg_frame_count = 10
+        fps_avg_frame_count = 5
 
         # Create a pose landmarker instance
         options = PoseLandmarkerOptions(
@@ -162,11 +160,20 @@ class MediaPipeTracker:
 
         landmarker = vision.PoseLandmarker.create_from_options(options)
         video_capture = cv2.VideoCapture(self.source)
+        source_fps = video_capture.get(cv2.CAP_PROP_FPS)
+        source_width = video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+        source_height = video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        print(f"FPS: {source_fps}")
         if not video_capture.isOpened():
             raise Exception("Could not open video device")
 
+        video_out = None
+        if self.csv_writer is not None:
+            video_file_name = self.log_file.replace(".csv", ".mp4")
+            video_out = cv2.VideoWriter(video_file_name, cv2.VideoWriter_fourcc(*'mp4v'), source_fps,
+                                        (int(source_width * self.scale), int(source_height * self.scale)))
+
         while video_capture.isOpened():
-            processing_start_time = time.time()
 
             success, frame = video_capture.read()
             if not success:
@@ -176,9 +183,12 @@ class MediaPipeTracker:
                     self.csv_writer.close()
                 break
 
+            width = int(source_width * self.scale)
+            height = int(source_height * self.scale)
+            frame = cv2.resize(frame, (width, height))
+
             self.frame_count += 1
-            video_fps = 60.19
-            self.video_time_ms = int(self.frame_count * 1000 / video_fps)
+            self.video_time_ms = int(video_capture.get(cv2.CAP_PROP_POS_MSEC))
             mp_image = mp.Image(image_format=ImageFormat.SRGB, data=frame)
             # landmarker.detect_async(mp_image, self.video_time_ms)
             self.detection_result = landmarker.detect_for_video(mp_image, self.video_time_ms)
@@ -189,29 +199,32 @@ class MediaPipeTracker:
                 end_time = time.time()
                 fps = fps_avg_frame_count / (end_time - start_time)
                 start_time = time.time()
-
                 self.drum.check_calibrations()
 
-            # Show the FPS
-            fps_text = 'FPS = {:.1f}'.format(fps)
-            text_location = (left_margin, row_size)
-            cv2.putText(frame, fps_text, text_location, cv2.FONT_HERSHEY_PLAIN,
-                        font_size, text_color, font_thickness)
-
+            # Overlay the FPS and other information
+            overlay(frame, source_fps, fps, self.frame_count, self.video_time_ms, self.model, width, height)
             if self.detection_result is not None:
                 vis_image = self.visualize(frame)
+                if video_out is not None:
+                    video_out.write(vis_image)
                 cv2.imshow('object_detector', vis_image)
             else:
+                if video_out is not None:
+                    video_out.write(frame)
                 cv2.imshow('object_detector', frame)
 
             # Stop the program if the ESC key is pressed.
-            wait_time = max(1, int(1000 / 60 - (time.time() - processing_start_time) * 1000))
-            if cv2.waitKey(wait_time) == 27:
+            if cv2.waitKey(1) == 27:
                 break
 
         landmarker.close()
-        video_capture.release()
         cv2.destroyAllWindows()
+        video_capture.release()
+        if video_out is not None:
+            video_out.release()
+
+        if self.csv_writer is not None:
+            self.csv_writer.close()
 
     def visualize(self, rgb_image):
         pose_landmarks_list = self.detection_result.pose_landmarks
@@ -239,6 +252,35 @@ if __name__ == '__main__':
     pygame.mixer.set_num_channels(64)
     drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
     # drum.auto_calibrate()
-    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=LandmarkerModel.HEAVY,
-                                    source="../multicam_1_left.mp4")
-    pose_tracker.start_capture()
+    recordings = [
+        "../recordings/multicam_asil_01_front_trim.mkv",
+        "../recordings/multicam_asil_01_left_trim.mkv",
+        "../recordings/multicam_asil_02_front_trim.mkv",
+        "../recordings/multicam_asil_02_left_trim.mkv",
+        "../recordings/multicam_asil_03_front_trim.mkv",
+        "../recordings/multicam_asil_03_left_trim.mkv",
+        "../recordings/multicam_ms_01_front_trim.mkv",
+        "../recordings/multicam_ms_01_right_trim.mkv",
+        "../recordings/multicam_ms_02_front_trim.mkv",
+        "../recordings/multicam_ms_02_right_trim.mkv",
+    ]
+
+    scales = [1.0, 0.75, 0.5, 0.25]
+
+    models = [LandmarkerModel.LITE, LandmarkerModel.FULL, LandmarkerModel.HEAVY]
+
+    for recording in recordings:
+        for scale in scales:
+            for model in models:
+                file_name = recording.split("/")[-1].replace(".mkv", "")
+                print(f"Recording: {recording}, Scale: {scale}, Model: {model}, Normalized: False")
+                width = int(1920 * scale)
+                height = int(1080 * scale)
+                pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=model,
+                                                source=recording, scale=scale,
+                                                filename=f"./data/mediapipe_{file_name}_{width}_{height}_{model.name}.csv")
+                pose_tracker.start_capture()
+                print(f"Recording: {recording}, Scale: {scale}, Model: {model}, Normalized: True")
+                pose_tracker = MediaPipeTracker(drum, normalize=True, log_to_file=True, model=model,
+                                                source=recording, scale=scale,
+                                                filename=f"./data/mediapipe_{file_name}_{width}_{height}_{model.name}_normalized_.csv")
