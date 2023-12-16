@@ -177,10 +177,7 @@ class MediaPipeTracker:
 
             success, frame = video_capture.read()
             if not success:
-                video_capture.release()
                 print("Could not read frame. End of stream reached?")
-                if self.csv_writer is not None:
-                    self.csv_writer.close()
                 break
 
             width = int(source_width * self.scale)
@@ -222,7 +219,6 @@ class MediaPipeTracker:
         video_capture.release()
         if video_out is not None:
             video_out.release()
-
         if self.csv_writer is not None:
             self.csv_writer.close()
 
@@ -253,7 +249,7 @@ if __name__ == '__main__':
     drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
     # drum.auto_calibrate()
     recordings = [
-        "../recordings/multicam_asil_01_front_trim.mkv",
+        # "../recordings/multicam_asil_01_front_trim.mkv",
         "../recordings/multicam_asil_01_left_trim.mkv",
         "../recordings/multicam_asil_02_front_trim.mkv",
         "../recordings/multicam_asil_02_left_trim.mkv",
@@ -273,14 +269,17 @@ if __name__ == '__main__':
         for scale in scales:
             for model in models:
                 file_name = recording.split("/")[-1].replace(".mkv", "")
+                # omit everything after th second underscore
+                directory = "_".join(file_name.split("_")[:3])
                 print(f"Recording: {recording}, Scale: {scale}, Model: {model}, Normalized: False")
                 width = int(1920 * scale)
                 height = int(1080 * scale)
                 pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=model,
                                                 source=recording, scale=scale,
-                                                filename=f"./data/mediapipe_{file_name}_{width}_{height}_{model.name}.csv")
+                                                filename=f"./data/{directory}/mediapipe_{file_name}_{width}_{height}_{model.name}_video.csv")
                 pose_tracker.start_capture()
                 print(f"Recording: {recording}, Scale: {scale}, Model: {model}, Normalized: True")
                 pose_tracker = MediaPipeTracker(drum, normalize=True, log_to_file=True, model=model,
                                                 source=recording, scale=scale,
-                                                filename=f"./data/mediapipe_{file_name}_{width}_{height}_{model.name}_normalized_.csv")
+                                                filename=f"./data/{directory}/mediapipe_{file_name}_{width}_{height}_{model.name}_video__normalized.csv")
+                pose_tracker.start_capture()
