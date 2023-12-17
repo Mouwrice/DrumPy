@@ -181,7 +181,7 @@ def get_closest_frame_index(frames: list[Frame], frame: int) -> int:
     return found
 
 
-def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int, stop1: int, stop2: int,
+def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int,
                                mapping: dict = None, plot_file_prefix: str = ""):
     """
     Compare two CSV files and plot the differences
@@ -190,8 +190,6 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int, s
     :param csv2: path to the second CSV file
     :param start1: start frame of the first CSV file
     :param start2: start frame of the second CSV file
-    :param stop1: last frame of the first CSV file
-    :param stop2: last frame of the second CSV file
     :param mapping: mapping from trackers of the first CSV file to the second CSV file
     if None, all trackers are compared based on their index
     """
@@ -200,8 +198,6 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int, s
 
     assert len(frames1) > 0, "No frames found in CSV file 1"
     assert len(frames2) > 0, "No frames found in CSV file 2"
-    assert start1 < stop1, "Start frame 1 is not smaller than stop frame 1"
-    assert start2 < stop2, "Start frame 2 is not smaller than stop frame 2"
     assert start1 >= frames1[0].frame, "Start frame 1 is smaller than the first frame in the CSV file 1"
     assert start2 >= frames2[0].frame, "Start frame 2 is smaller than the first frame in the CSV file 2"
 
@@ -216,7 +212,7 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int, s
     frame2 = frames2[frames2_index]
     positions1 = []
     positions2 = []
-    while frame1.frame < stop1 and frame2.frame < stop2:
+    while frames1_index < len(frames1) - 1 and frames2_index < len(frames2) - 1:
         frame1_next = frames1[frames1_index + 1]
         frame2_next = frames2[frames2_index + 1]
         frame1_time = frame1.time_ms - frames1_time_offset
@@ -254,17 +250,14 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int, s
             distances.append(frame_distances)
 
     for key, value in mapping.items():
-        print(f"Average distance between {key} and {value}: {sum([distance[key] for distance in distances]) / len(distances)}")
-        plot_positions(positions1, positions2, key, value, "qtm", "mediapipe", plot_file_prefix=plot_file_prefix, smoothing=10)
+        print(
+            f"Average distance between {key} and {value}: {sum([distance[key] for distance in distances]) / len(distances)}")
+        plot_positions(positions1, positions2, key, value, "qtm", "mediapipe", plot_file_prefix=plot_file_prefix,
+                       smoothing=10)
 
 
 if __name__ == '__main__':
-    compare_and_plot_csv_files("data/qtm_multicam_1.csv", "data/mediapipe_FULL_multicam_1_left.csv", 500, 1780, 7000,
-                               8000,
-                               mapping=qtm_to_mediapipe, plot_file_prefix="./data/multicam_1_left_full")
-    compare_and_plot_csv_files("data/qtm_multicam_1.csv", "data/mediapipe_LITE_multicam_1_left.csv", 500, 1780, 7000,
-                               8000,
-                               mapping=qtm_to_mediapipe, plot_file_prefix="./data/multicam_1_left_lite")
-    compare_and_plot_csv_files("data/qtm_multicam_1.csv", "data/mediapipe_HEAVY_multicam_1_left.csv", 500, 1780, 7000,
-                               8000,
-                               mapping=qtm_to_mediapipe, plot_file_prefix="./data/multicam_1_left_heavy")
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_trim_1920_1080_LITE_video.csv",
+                               5, 5, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="multicam_asil_01_front_trim_1920_1080_LITE_video")

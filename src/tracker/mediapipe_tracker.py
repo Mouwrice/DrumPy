@@ -152,7 +152,7 @@ class MediaPipeTracker:
 
         # Create a pose landmarker instance
         options = PoseLandmarkerOptions(
-            base_options=BaseOptions(model_asset_path=self.model.value, delegate=BaseOptions.Delegate.CPU),
+            base_options=BaseOptions(model_asset_path=self.model.value, delegate=BaseOptions.Delegate.GPU),
             running_mode=vision.RunningMode.VIDEO,
             output_segmentation_masks=True,
             # result_callback=self.result_callback
@@ -249,7 +249,7 @@ if __name__ == '__main__':
     drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
     # drum.auto_calibrate()
     recordings = [
-        # "../recordings/multicam_asil_01_front_trim.mkv",
+        "../recordings/multicam_asil_01_front_trim.mkv",
         "../recordings/multicam_asil_01_left_trim.mkv",
         "../recordings/multicam_asil_02_front_trim.mkv",
         "../recordings/multicam_asil_02_left_trim.mkv",
@@ -261,9 +261,9 @@ if __name__ == '__main__':
         "../recordings/multicam_ms_02_right_trim.mkv",
     ]
 
-    scales = [1.0, 0.75, 0.5, 0.25]
+    scales = [0.25, 0.5, 0.75, 1.0]
 
-    models = [LandmarkerModel.LITE, LandmarkerModel.FULL, LandmarkerModel.HEAVY]
+    models = [LandmarkerModel.LITE, LandmarkerModel.FULL]
 
     for recording in recordings:
         for scale in scales:
@@ -271,15 +271,10 @@ if __name__ == '__main__':
                 file_name = recording.split("/")[-1].replace(".mkv", "")
                 # omit everything after th second underscore
                 directory = "_".join(file_name.split("_")[:3])
-                print(f"Recording: {recording}, Scale: {scale}, Model: {model}, Normalized: False")
+                print(f"Recording: {recording}, Scale: {scale}, Model: {model}")
                 width = int(1920 * scale)
                 height = int(1080 * scale)
-                pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=model,
+                pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=model,
                                                 source=recording, scale=scale,
                                                 filename=f"./data/{directory}/mediapipe_{file_name}_{width}_{height}_{model.name}_video.csv")
-                pose_tracker.start_capture()
-                print(f"Recording: {recording}, Scale: {scale}, Model: {model}, Normalized: True")
-                pose_tracker = MediaPipeTracker(drum, normalize=True, log_to_file=True, model=model,
-                                                source=recording, scale=scale,
-                                                filename=f"./data/{directory}/mediapipe_{file_name}_{width}_{height}_{model.name}_video__normalized.csv")
                 pose_tracker.start_capture()
