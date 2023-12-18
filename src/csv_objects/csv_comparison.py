@@ -3,15 +3,6 @@ import csv
 from bokeh.io import show, output_file
 from bokeh.plotting import figure
 
-qtm_to_mediapipe = {
-    0: 19,  # left index
-    1: 15,  # left wrist
-    2: 20,  # right index
-    3: 16,  # right wrist
-    4: 31,  # left foot index
-    5: 32,  # right foot index
-}
-
 
 class CSVRow:
     def __init__(self, frame: int, time: int, index: int, x: float, y: float, z: float, visibility: float | None,
@@ -96,12 +87,14 @@ def plot_axis(axis1: list[float], axis2: list[float], axis: str, marker1: int, m
     :return:
     """
     # normalize axis1 and axis2
-    min_axis1 = min(axis1)
-    max_axis1 = max(axis1)
-    min_axis2 = min(axis2)
-    max_axis2 = max(axis2)
-    axis1 = [(axis - min_axis1) / (max_axis1 - min_axis1) for axis in axis1]
-    axis2 = [(axis - min_axis2) / (max_axis2 - min_axis2) for axis in axis2]
+    # min_axis1 = min(axis1)
+    # max_axis1 = max(axis1)
+    # min_axis2 = min(axis2)
+    # max_axis2 = max(axis2)
+    # axis1 = [(axis - min_axis1) / (max_axis1 - min_axis1) for axis in axis1]
+    # axis2 = [(axis - min_axis2) / (max_axis2 - min_axis2) for axis in axis2]
+
+    axis1 = [axis / 1000 for axis in axis1]
 
     # smooth axis1 and axis2
     axis1 = [sum(axis1[i:i + smoothing]) / smoothing for i in range(len(axis1) - smoothing)]
@@ -153,8 +146,8 @@ def plot_positions(positions1: list[list[CSVRow]], positions2: list[list[CSVRow]
         if name2 == "mediapipe":  # mediapipe has x and y switched and is mirrored
 
             x2.append(positions2[i].x)
-            y2.append(-positions2[i].z)
-            z2.append(-positions2[i].y)
+            y2.append(positions2[i].y)
+            z2.append(positions2[i].z)
         else:
             x2.append(positions2[i].x)
             y2.append(positions2[i].y)
@@ -232,32 +225,22 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int,
         positions1.append(frame1.rows)
         positions2.append(frame2.rows)
 
-        if mapping is None:
-            frame_distances = []
-            for i in range(min(len(frame1.rows), len(frame2.rows))):
-                row1 = frame1.rows[i]
-                row2 = frame2.rows[i]
-                distance = row_distance(row1, row2)
-                frame_distances.append(distance)
-            distances.append(frame_distances)
-        else:
-            frame_distances = []
-            for key, value in mapping.items():
-                row1 = frame1.rows[key]
-                row2 = frame2.rows[value]
-                distance = row_distance(row1, row2)
-                frame_distances.append(distance)
-            distances.append(frame_distances)
-
     for key, value in mapping.items():
-        print(
-            f"Average distance between {key} and {value}: {sum([distance[key] for distance in distances]) / len(distances)}")
         plot_positions(positions1, positions2, key, value, "qtm", "mediapipe", plot_file_prefix=plot_file_prefix,
                        smoothing=10)
 
 
+qtm_to_mediapipe = {
+    # 4: 19,  # left index
+    5: 15,  # left wrist
+    # 2: 20,  # right index
+    # 3: 16,  # right wrist
+    # 1: 31,  # left foot index
+    # 0: 32,  # right foot index
+}
+
 if __name__ == '__main__':
     compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
-                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_trim_1920_1080_LITE_video.csv",
-                               5, 5, mapping=qtm_to_mediapipe,
-                               plot_file_prefix="multicam_asil_01_front_trim_1920_1080_LITE_video")
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_LITE_video.csv",
+                               5, 65, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_LITE_video")

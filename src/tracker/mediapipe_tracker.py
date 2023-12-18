@@ -243,27 +243,23 @@ class MediaPipeTracker:
         return annotated_image
 
 
-if __name__ == '__main__':
-    pygame.init()
-    pygame.mixer.set_num_channels(64)
-    drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
-    # drum.auto_calibrate()
+def track_recordings():
     recordings = [
-        "../recordings/multicam_asil_01_front_trim.mkv",
-        "../recordings/multicam_asil_01_left_trim.mkv",
-        "../recordings/multicam_asil_02_front_trim.mkv",
-        "../recordings/multicam_asil_02_left_trim.mkv",
-        "../recordings/multicam_asil_03_front_trim.mkv",
-        "../recordings/multicam_asil_03_left_trim.mkv",
-        "../recordings/multicam_ms_01_front_trim.mkv",
-        "../recordings/multicam_ms_01_right_trim.mkv",
-        "../recordings/multicam_ms_02_front_trim.mkv",
-        "../recordings/multicam_ms_02_right_trim.mkv",
+        # "../recordings/multicam_asil_01_front.mkv",
+        "../recordings/multicam_asil_01_left.mkv",
+        "../recordings/multicam_asil_02_front.mkv",
+        "../recordings/multicam_asil_02_left.mkv",
+        "../recordings/multicam_asil_03_front.mkv",
+        "../recordings/multicam_asil_03_left.mkv",
+        "../recordings/multicam_ms_01_front.mkv",
+        "../recordings/multicam_ms_01_right.mkv",
+        "../recordings/multicam_ms_02_front.mkv",
+        "../recordings/multicam_ms_02_right.mkv",
     ]
 
-    scales = [0.25, 0.5, 0.75, 1.0]
+    scales = [0.25]
 
-    models = [LandmarkerModel.LITE, LandmarkerModel.FULL]
+    models = [LandmarkerModel.LITE]
 
     for recording in recordings:
         for scale in scales:
@@ -278,3 +274,15 @@ if __name__ == '__main__':
                                                 source=recording, scale=scale,
                                                 filename=f"./data/{directory}/mediapipe_{file_name}_{width}_{height}_{model.name}_video.csv")
                 pose_tracker.start_capture()
+
+
+if __name__ == '__main__':
+    pygame.init()
+    pygame.mixer.set_num_channels(64)
+    drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
+    # drum.auto_calibrate()
+    #
+    # pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
+    #                                 source=0)
+    # pose_tracker.start_capture()
+    track_recordings()
