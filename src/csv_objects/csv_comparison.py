@@ -76,25 +76,11 @@ def plot_axis(axis1: list[float], axis2: list[float], axis: str, marker1: int, m
     """
     Plot the positions of the markers over time for a certain axis.
     Normalizes the values between 0 and 1
-    :param smoothing:
-    :param axis1:
-    :param axis2:
-    :param axis:
-    :param marker1:
-    :param marker2:
-    :param label1:
-    :param label2:
     :return:
     """
-    # normalize axis1 and axis2
-    # min_axis1 = min(axis1)
-    # max_axis1 = max(axis1)
-    # min_axis2 = min(axis2)
-    # max_axis2 = max(axis2)
-    # axis1 = [(axis - min_axis1) / (max_axis1 - min_axis1) for axis in axis1]
-    # axis2 = [(axis - min_axis2) / (max_axis2 - min_axis2) for axis in axis2]
 
-    axis1 = [axis / 1000 for axis in axis1]
+    if label1 == "qtm":
+        axis1 = [axis / 1000 for axis in axis1]
 
     # smooth axis1 and axis2
     axis1 = [sum(axis1[i:i + smoothing]) / smoothing for i in range(len(axis1) - smoothing)]
@@ -107,6 +93,7 @@ def plot_axis(axis1: list[float], axis2: list[float], axis: str, marker1: int, m
     print(f"Average difference between {label1} {marker1} and {label2} {marker2} on axis {axis}: {average_difference}")
     # get the first derivative of the difference
     difference_derivative = [difference[i + 1] - difference[i] for i in range(len(difference) - 1)]
+    difference_derivative.append(0)
     # get the average difference derivative
     average_difference_derivative = sum(difference_derivative) / len(difference_derivative)
     print(f"Average difference derivative between {label1} {marker1} and {label2} {marker2} on axis {axis}: "
@@ -119,13 +106,13 @@ def plot_axis(axis1: list[float], axis2: list[float], axis: str, marker1: int, m
                   sizing_mode="stretch_both")
     plot.line(list(range(len(axis1))), axis1, legend_label=label1, line_color="red")
     plot.line(list(range(len(axis2))), axis2, legend_label=label2, line_color="blue")
-    plot.line(list(range(len(axis2))), difference_derivative, legend_label="difference derivative", line_color="black")
+    # plot.line(list(range(len(axis2))), difference_derivative, legend_label="difference derivative", line_color="black")
     output_file(f"{title}.html")
     show(plot)
 
 
 def plot_positions(positions1: list[list[CSVRow]], positions2: list[list[CSVRow]], marker1: int, marker2: int,
-                   name1: str = "qtm", name2: str = "mediapipe", smoothing: int = 1, plot_file_prefix: str = ""):
+                   label1: str = "qtm", label2: str = "mediapipe", smoothing: int = 1, plot_file_prefix: str = ""):
     """
     Plot the positions of the markers over time
     """
@@ -143,19 +130,19 @@ def plot_positions(positions1: list[list[CSVRow]], positions2: list[list[CSVRow]
         x1.append(positions1[i].x)
         y1.append(positions1[i].y)
         z1.append(positions1[i].z)
-        if name2 == "mediapipe":  # mediapipe has x and y switched and is mirrored
+        if label2 == "mediapipe":  # mediapipe has z mirrored
 
-            x2.append(positions2[i].x)
+            x2.append(-positions2[i].x - 0.7)
             y2.append(positions2[i].y)
-            z2.append(positions2[i].z)
+            z2.append(-positions2[i].z + 0.6)
         else:
             x2.append(positions2[i].x)
             y2.append(positions2[i].y)
             z2.append(positions2[i].z)
 
-    plot_axis(x1, x2, "x", marker1, marker2, smoothing, name1, name2, plot_file_prefix=plot_file_prefix)
-    plot_axis(y1, y2, "y", marker1, marker2, smoothing, name1, name2, plot_file_prefix=plot_file_prefix)
-    plot_axis(z1, z2, "z", marker1, marker2, smoothing, name1, name2, plot_file_prefix=plot_file_prefix)
+    plot_axis(x1, x2, "x", marker1, marker2, smoothing, label1, label2, plot_file_prefix=plot_file_prefix)
+    plot_axis(y1, y2, "y", marker1, marker2, smoothing, label1, label2, plot_file_prefix=plot_file_prefix)
+    plot_axis(z1, z2, "z", marker1, marker2, smoothing, label1, label2, plot_file_prefix=plot_file_prefix)
 
 
 def row_distance(row1: CSVRow, row2: CSVRow) -> float:
@@ -175,7 +162,8 @@ def get_closest_frame_index(frames: list[Frame], frame: int) -> int:
 
 
 def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int,
-                               mapping: dict = None, plot_file_prefix: str = ""):
+                               mapping: dict = None, plot_file_prefix: str = "", label1: str = "qtm",
+                               label2: str = "mediapipe"):
     """
     Compare two CSV files and plot the differences
     :param plot_file_prefix: Prefix for the plot file
@@ -198,8 +186,6 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int,
     frames2_index = get_closest_frame_index(frames2, start2)
     frames1_time_offset = frames1[frames1_index].time_ms
     frames2_time_offset = frames2[frames2_index].time_ms
-
-    distances = []
 
     frame1 = frames1[frames1_index]
     frame2 = frames2[frames2_index]
@@ -226,21 +212,70 @@ def compare_and_plot_csv_files(csv1: str, csv2: str, start1: int, start2: int,
         positions2.append(frame2.rows)
 
     for key, value in mapping.items():
-        plot_positions(positions1, positions2, key, value, "qtm", "mediapipe", plot_file_prefix=plot_file_prefix,
-                       smoothing=10)
+        plot_positions(positions1, positions2, key, value, label1, label2, plot_file_prefix=plot_file_prefix,
+                       smoothing=1)
 
 
 qtm_to_mediapipe = {
-    # 4: 19,  # left index
-    5: 15,  # left wrist
-    # 2: 20,  # right index
-    # 3: 16,  # right wrist
-    # 1: 31,  # left foot index
-    # 0: 32,  # right foot index
+    0: 15,  # left wrist
+    1: 16,  # right wrist
+    2: 19,  # left index
+    3: 20,  # right index
+    4: 31,  # left foot index
+    5: 32,  # right foot index
 }
 
-if __name__ == '__main__':
+
+def compare_resolutions_and_models_axil_01_front_right_wrist(mapping: dict):
+    start1 = 5
+    start2 = 72
     compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
                                "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_LITE_video.csv",
-                               5, 65, mapping=qtm_to_mediapipe,
+                               start1, start2, mapping=qtm_to_mediapipe,
                                plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_LITE_video")
+
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_FULL_video.csv",
+                               start1, start2, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_FULL_video")
+
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_960_540_LITE_video.csv",
+                               start1, start2, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_960_540_LITE_video")
+
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_960_540_FULL_video.csv",
+                               start1, start2, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_960_540_FULL_video")
+
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_1440_810_LITE_video.csv",
+                               start1, start2, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_1440_810_LITE_video")
+
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_1440_810_FULL_video.csv",
+                               start1, start2, mapping=qtm_to_mediapipe,
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_1440_810_FULL_video")
+
+
+def compare_resolutions():
+    """
+    Compare the resolutions of the mediapipe models
+    """
+    mapping = {16: 16}
+    compare_and_plot_csv_files("./data/multicam_asil_01/mediapipe_multicam_asil_01_front_1440_810_LITE_video.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_LITE_video.csv",
+                               72, 72, mapping=mapping, label1="1440x810", label2="480x270",
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_LITE_video")
+
+    compare_and_plot_csv_files("./data/multicam_asil_01/mediapipe_multicam_asil_01_front_1440_810_FULL_video.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_front_480_270_FULL_video.csv",
+                               72, 72, mapping=mapping, label1="1440x810", label2="480x270",
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_front_FULL_video")
+
+
+if __name__ == '__main__':
+    compare_resolutions_and_models_axil_01_front_right_wrist(mapping=qtm_to_mediapipe)
+    # compare_resolutions()
