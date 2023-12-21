@@ -1,6 +1,6 @@
 import qtm_rt
 
-from csv_objects.csv_object import CSVWriter
+from src.csv_objects.csv_object import CSVWriter
 
 
 class QTMWriter:

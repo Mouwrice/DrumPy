@@ -4,12 +4,12 @@ import time
 import pygame
 import qtm_rt
 
-from csv_objects.csv_object import CSVWriter
-from drum import Drum, DrumPresets
-from tracker.foot import Foot
-from tracker.hand import Hand
-from tracker.marker import Marker
-from tracker.marker_tracker import MarkerTracker
+from src.csv_objects.csv_object import CSVWriter
+from src.drum import Drum, DrumPresets
+from src.tracker.foot import Foot
+from src.tracker.hand import Hand
+from src.tracker.marker import Marker
+from src.tracker.marker_tracker import MarkerTracker
 
 
 class QTMFullTracker:

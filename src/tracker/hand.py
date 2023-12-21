@@ -1,7 +1,7 @@
 import numpy as np
 
-from marker import Marker
-from tracker.marker_tracker import MarkerTracker
+from src.tracker.marker import Marker
+from src.tracker.marker_tracker import MarkerTracker
 
 
 class Hand:

@@ -5,7 +5,7 @@ import numpy.typing as npt
 import pygame
 from termcolor import cprint
 
-from util import print_float_array
+from src.util import print_float_array
 
 
 class SoundState(Enum):

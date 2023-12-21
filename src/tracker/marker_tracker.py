@@ -3,7 +3,7 @@ from statistics import mean
 import numpy as np
 import numpy.typing as npt
 
-from drum import Drum
+from src.drum import Drum
 
 
 class MarkerTracker:

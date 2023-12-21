@@ -10,11 +10,11 @@ import mediapipe as mp
 from mediapipe.tasks.python import vision, BaseOptions
 from mediapipe.tasks.python.vision import PoseLandmarkerOptions, PoseLandmarkerResult
 
-from csv_objects.csv_object import CSVWriter
-from cv2_utils.cv2_utils import overlay
-from drum import Drum
-from tracker.marker import Marker
-from tracker.marker_tracker import MarkerTracker
+from src.csv_objects.csv_object import CSVWriter
+from src.cv2_utils.cv2_utils import overlay
+from src.drum import Drum
+from src.tracker.marker import Marker
+from src.tracker.marker_tracker import MarkerTracker
 
 
 class LandmarkerModel(Enum):
@@ -144,7 +144,7 @@ class MediaPipeTracker:
                                   landmark.visibility,
                                   landmark.presence, normalized=self.normalize)
 
-    def start_capture(self):
+    def start_capture(self, live: bool = False):
         # Variables to calculate FPS
         fps = 0
         start_time = time.time()
@@ -153,9 +153,9 @@ class MediaPipeTracker:
         # Create a pose landmarker instance
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=self.model.value, delegate=BaseOptions.Delegate.GPU),
-            running_mode=vision.RunningMode.VIDEO,
-            output_segmentation_masks=True,
-            # result_callback=self.result_callback
+            running_mode=vision.RunningMode.LIVE_STREAM if live else vision.RunningMode.VIDEO,
+            output_segmentation_masks=False,
+            result_callback=self.result_callback if live else None,
         )
 
         landmarker = vision.PoseLandmarker.create_from_options(options)
@@ -187,9 +187,12 @@ class MediaPipeTracker:
             self.frame_count += 1
             self.video_time_ms = int(video_capture.get(cv2.CAP_PROP_POS_MSEC))
             mp_image = mp.Image(image_format=ImageFormat.SRGB, data=frame)
-            # landmarker.detect_async(mp_image, self.video_time_ms)
-            self.detection_result = landmarker.detect_for_video(mp_image, self.video_time_ms)
-            self.result_callback(self.detection_result, None, self.video_time_ms)
+
+            if live:
+                landmarker.detect_async(mp_image, self.video_time_ms)
+            else:
+                detection_result = landmarker.detect_for_video(mp_image, self.video_time_ms)
+                self.result_callback(detection_result, None, self.video_time_ms)
 
             # Calculate the FPS
             if self.frame_count % fps_avg_frame_count == 0:
@@ -247,17 +250,17 @@ def track_recordings():
     recordings = [
         # "../recordings/multicam_asil_01_front.mkv",
         "../recordings/multicam_asil_01_left.mkv",
-        "../recordings/multicam_asil_02_front.mkv",
-        "../recordings/multicam_asil_02_left.mkv",
-        "../recordings/multicam_asil_03_front.mkv",
-        "../recordings/multicam_asil_03_left.mkv",
-        "../recordings/multicam_ms_01_front.mkv",
-        "../recordings/multicam_ms_01_right.mkv",
-        "../recordings/multicam_ms_02_front.mkv",
-        "../recordings/multicam_ms_02_right.mkv",
+        # "../recordings/multicam_asil_02_front.mkv",
+        # "../recordings/multicam_asil_02_left.mkv",
+        # "../recordings/multicam_asil_03_front.mkv",
+        # "../recordings/multicam_asil_03_left.mkv",
+        # "../recordings/multicam_ms_01_front.mkv",
+        # "../recordings/multicam_ms_01_right.mkv",
+        # "../recordings/multicam_ms_02_front.mkv",
+        # "../recordings/multicam_ms_02_right.mkv",
     ]
 
-    scales = [0.25]
+    scales = [0.75]
 
     models = [LandmarkerModel.LITE]
 
@@ -270,19 +273,26 @@ def track_recordings():
                 print(f"Recording: {recording}, Scale: {scale}, Model: {model}")
                 width = int(1920 * scale)
                 height = int(1080 * scale)
-                pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=model,
+                pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=model,
                                                 source=recording, scale=scale,
-                                                filename=f"./data/{directory}/mediapipe_{file_name}_{width}_{height}_{model.name}_video.csv")
+                                                filename=f"./data/{directory}/mediapipe_{file_name}_{width}x{height}_{model.name}_video.csv")
                 pose_tracker.start_capture()
+
+
+def live_capture():
+    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
+                                    source=0)
+    pose_tracker.start_capture(live=True)
 
 
 if __name__ == '__main__':
     pygame.init()
     pygame.mixer.set_num_channels(64)
     drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
-    # drum.auto_calibrate()
+    drum.auto_calibrate()
     #
     # pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
     #                                 source=0)
     # pose_tracker.start_capture()
-    track_recordings()
+    # track_recordings()
+    live_capture()

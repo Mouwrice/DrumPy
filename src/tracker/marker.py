@@ -1,8 +1,4 @@
-from statistics import mean
-
 import numpy as np
-
-from sound import Sound
 
 
 class Marker:
@@ -18,4 +14,3 @@ class Marker:
 
         # the position of the marker in 3D space, X, Y, Z
         self.pos = np.array((0, 0, 0))
-

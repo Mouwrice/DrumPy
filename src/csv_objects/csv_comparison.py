@@ -277,5 +277,9 @@ def compare_resolutions():
 
 
 if __name__ == '__main__':
-    compare_resolutions_and_models_axil_01_front_right_wrist(mapping=qtm_to_mediapipe)
+    # compare_resolutions_and_models_axil_01_front_right_wrist(mapping=qtm_to_mediapipe)
     # compare_resolutions()
+    compare_and_plot_csv_files("./data/multicam_asil_01/qtm_multicam_asil_01.csv",
+                               "./data/multicam_asil_01/mediapipe_multicam_asil_01_left_1440x810_LITE_video.csv",
+                               5, 120, mapping={0: 15},
+                               plot_file_prefix="./data/multicam_asil_01/mediapipe_multicam_asil_01_left_1440x810_LITE_video")

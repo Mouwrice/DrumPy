@@ -3,8 +3,8 @@ from time import sleep
 import numpy as np
 import numpy.typing as npt
 
-from sound import Sound, SoundState
-from util import print_float_array
+from src.sound import Sound, SoundState
+from src.util import print_float_array
 
 
 class DrumPresets:
