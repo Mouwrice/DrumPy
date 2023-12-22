@@ -281,14 +281,14 @@ def track_recordings():
 
 def live_capture():
     pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
-                                    source=0)
+                                    source=2)
     pose_tracker.start_capture(live=True)
 
 
 if __name__ == '__main__':
     pygame.init()
     pygame.mixer.set_num_channels(64)
-    drum = Drum(no_sleep=True, margin=0.1, min_margin=0.001)
+    drum = Drum(no_sleep=False, margin=0.1, min_margin=0.001)
     drum.auto_calibrate()
     #
     # pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
