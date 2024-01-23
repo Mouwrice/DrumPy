@@ -7,13 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "~3.11"
-qtm-rt = "^3.0.1"
-numpy = "^1.26.1"
-pygame = "^2.5.2"
-mediapipe = "^0.10.9"
-opencv-python = "^4.8.1.78"
-termcolor = "^2.3.0"
-bokeh = "^3.3.2"
+qtm-rt = "3.0.1"
+numpy = "1.26.1"
+pygame = "2.5.2"
+mediapipe = "0.10.9"
+opencv-python = "4.8.1.78"
+termcolor = "2.3.0"
+bokeh = "3.3.2"
 
 
 [build-system]
