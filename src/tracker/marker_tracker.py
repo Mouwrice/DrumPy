@@ -11,8 +11,15 @@ class MarkerTracker:
     A tracker keeps track of the markers on the body and determines when a hit is registered.
     """
 
-    def __init__(self, label: str, sounds: list[int], drum: Drum, memory: int = 15, downward_trend: float = -2,
-                 upward_trend: float = 1):
+    def __init__(
+        self,
+        label: str,
+        sounds: list[int],
+        drum: Drum,
+        memory: int = 15,
+        downward_trend: float = -2,
+        upward_trend: float = 1,
+    ):
         self.label = label
 
         # the sounds that can be played by this marker
@@ -64,7 +71,9 @@ class MarkerTracker:
             self.register_hit(pos_tuple)
 
             self.time_until_next_hit = self.memory
-            self.drum.find_and_play_sound(self.positions[-self.look_ahead], self.label, self.sounds)
+            self.drum.find_and_play_sound(
+                self.positions[-self.look_ahead], self.label, self.sounds
+            )
 
     def register_hit(self, position: tuple[float, float, float]):
         closest_hit = None
@@ -78,7 +87,9 @@ class MarkerTracker:
         if closest_hit is not None:
             occurrences = self.hits[closest_hit]
             # create a new element with the new updated average position
-            new_key = (occurrences * np.array(closest_hit) + np.array(position)) / (occurrences + 1)
+            new_key = (occurrences * np.array(closest_hit) + np.array(position)) / (
+                occurrences + 1
+            )
             new_key = tuple(new_key)
             self.hits[new_key] = occurrences + 1
             del self.hits[closest_hit]
@@ -102,11 +113,16 @@ class MarkerTracker:
         if len(self.velocities) < self.look_ahead:
             return False
 
-        avg_z_vel = mean(self.velocities[:-self.look_ahead])
-        avg_z_look_ahead = mean(self.velocities[-self.look_ahead:])
+        avg_z_vel = mean(self.velocities[: -self.look_ahead])
+        avg_z_look_ahead = mean(self.velocities[-self.look_ahead :])
 
-        return (avg_z_vel < self.downward_trend and avg_z_look_ahead > self.upward_trend
-                and self.time_until_next_hit == 0)
+        return (
+            avg_z_vel < self.downward_trend
+            and avg_z_look_ahead > self.upward_trend
+            and self.time_until_next_hit == 0
+        )
 
     def __str__(self):
-        return "{}: \n{}  {}".format(self.label, self.positions[-1], self.velocities[-1])
+        return "{}: \n{}  {}".format(
+            self.label, self.positions[-1], self.velocities[-1]
+        )

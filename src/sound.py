@@ -21,9 +21,14 @@ class Sound:
     closest one to hit impact.
     """
 
-    def __init__(self, name: str, path: str, min_margin: float, margin: float,
-                 position: tuple[float, float, float] | None = None, ):
-
+    def __init__(
+        self,
+        name: str,
+        path: str,
+        min_margin: float,
+        margin: float,
+        position: tuple[float, float, float] | None = None,
+    ):
         self.name = name
         self.sound = pygame.mixer.Sound(path)
 
@@ -40,7 +45,9 @@ class Sound:
 
         # the maximum and minimum distance from the sound to the hit that we allow
         self.min_margin: float = min_margin
-        self.margin: float = margin  # the current margin will move towards the minimum margin over time
+        self.margin: float = (
+            margin  # the current margin will move towards the minimum margin over time
+        )
 
     def calibrate(self):
         """
@@ -68,7 +75,10 @@ class Sound:
             self.position = np.mean(self.hits, axis=0)
 
             # the sound is calibrated when the position is stable and the hit count is high enough
-            if np.linalg.norm(self.position - prev_position) < 0.01 and self.hit_count > 10:
+            if (
+                np.linalg.norm(self.position - prev_position) < 0.01
+                and self.hit_count > 10
+            ):
                 self.state = SoundState.READY
                 cprint(f"\n{self.name} calibration done", color="green", attrs=["bold"])
             else:

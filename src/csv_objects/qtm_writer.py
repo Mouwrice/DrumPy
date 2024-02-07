@@ -17,13 +17,15 @@ class QTMWriter:
         self.time_per_frame = time_per_frame
 
     def on_packet(self, packet: qtm_rt.QRTPacket):
-        """ Callback function that is called everytime a data packet arrives from QTM """
+        """Callback function that is called everytime a data packet arrives from QTM"""
         _, markers = packet.get_3d_markers()
         # packets at 100 Hz so time is frame number * 10 ms
         packet_time = int(packet.framenumber * self.time_per_frame)
         if self.csv_writer is not None:
             for i, marker in enumerate(markers):
-                self.csv_writer.write(packet.framenumber, packet_time, i, marker.x, marker.y, marker.z)
+                self.csv_writer.write(
+                    packet.framenumber, packet_time, i, marker.x, marker.y, marker.z
+                )
 
 
 async def main():
@@ -31,7 +33,9 @@ async def main():
     if connection is None:
         return
 
-    writer = QTMWriter("./data/multicam_asil_01/qtm_multicam_asil_01.csv", time_per_frame=1000 / 100)
+    writer = QTMWriter(
+        "./data/multicam_asil_01/qtm_multicam_asil_01.csv", time_per_frame=1000 / 100
+    )
 
     await connection.stream_frames(components=["3d"], on_packet=writer.on_packet)
 

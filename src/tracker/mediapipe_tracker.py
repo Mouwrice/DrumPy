@@ -24,9 +24,16 @@ class LandmarkerModel(Enum):
 
 
 class MediaPipeTracker:
-    def __init__(self, drum: Drum, normalize: bool = False, log_to_file: bool = False,
-                 model: LandmarkerModel = LandmarkerModel.FULL, source: int | str = 0, scale: float = 1.0,
-                 filename: str = None):
+    def __init__(
+        self,
+        drum: Drum,
+        normalize: bool = False,
+        log_to_file: bool = False,
+        model: LandmarkerModel = LandmarkerModel.FULL,
+        source: int | str = 0,
+        scale: float = 1.0,
+        filename: str = None,
+    ):
         """
         :param drum:
         :param normalize: Whether to use normalized coordinates or not
@@ -43,62 +50,81 @@ class MediaPipeTracker:
 
         if not normalize:
             self.left_wrist_marker = Marker("Left Wrist", 15)
-            self.left_wrist_tracker = MarkerTracker("Left Wrist",
-                                                    [0, 1, 3],  # 5, 6],
-                                                    drum,
-                                                    memory=10,
-                                                    downward_trend=-0.02, upward_trend=0.01)
+            self.left_wrist_tracker = MarkerTracker(
+                "Left Wrist",
+                [0, 1, 3],  # 5, 6],
+                drum,
+                memory=10,
+                downward_trend=-0.02,
+                upward_trend=0.01,
+            )
 
             self.right_wrist_marker = Marker("Right Wrist", 16)
-            self.right_wrist_tracker = MarkerTracker("Right Wrist",
-                                                     [0, 1, 3],  # 5, 6],
-                                                     drum,
-                                                     memory=10,
-                                                     downward_trend=-0.02, upward_trend=0.01)
+            self.right_wrist_tracker = MarkerTracker(
+                "Right Wrist",
+                [0, 1, 3],  # 5, 6],
+                drum,
+                memory=10,
+                downward_trend=-0.02,
+                upward_trend=0.01,
+            )
 
             self.left_foot_marker = Marker("Left Foot", 31)
-            self.left_foot_tracker = MarkerTracker("Left Foot", [],  # 3]
-                                                   downward_trend=-0.005,
-                                                   upward_trend=-0.001,
-                                                   drum=drum)
+            self.left_foot_tracker = MarkerTracker(
+                "Left Foot",
+                [],  # 3]
+                downward_trend=-0.005,
+                upward_trend=-0.001,
+                drum=drum,
+            )
 
             self.right_foot_marker = Marker("Right Foot", 32)
-            self.right_foot_tracker = MarkerTracker("Right Foot", [2],
-                                                    downward_trend=-0.005,
-                                                    upward_trend=-0.001,
-                                                    drum=drum)
+            self.right_foot_tracker = MarkerTracker(
+                "Right Foot", [2], downward_trend=-0.005, upward_trend=-0.001, drum=drum
+            )
 
         else:
             self.left_wrist_marker = Marker("Left Wrist", 15)
-            self.left_wrist_tracker = MarkerTracker("Left Wrist", [0, 1, 3],  # 5, 6],
-                                                    drum,
-                                                    memory=10,
-                                                    downward_trend=-0.04,
-                                                    upward_trend=0.02)
+            self.left_wrist_tracker = MarkerTracker(
+                "Left Wrist",
+                [0, 1, 3],  # 5, 6],
+                drum,
+                memory=10,
+                downward_trend=-0.04,
+                upward_trend=0.02,
+            )
 
             self.right_wrist_marker = Marker("Right Wrist", 16)
-            self.right_wrist_tracker = MarkerTracker("Right Wrist", [0, 1, 3],  # 5, 6],
-                                                     drum,
-                                                     memory=10,
-                                                     downward_trend=-0.035,
-                                                     upward_trend=0.015)
+            self.right_wrist_tracker = MarkerTracker(
+                "Right Wrist",
+                [0, 1, 3],  # 5, 6],
+                drum,
+                memory=10,
+                downward_trend=-0.035,
+                upward_trend=0.015,
+            )
 
             self.left_foot_marker = Marker("Left Foot", 31)
-            self.left_foot_tracker = MarkerTracker("Left Foot", [],  # 3]
-                                                   downward_trend=-0.005,
-                                                   upward_trend=-0.002,
-                                                   drum=drum)
+            self.left_foot_tracker = MarkerTracker(
+                "Left Foot",
+                [],  # 3]
+                downward_trend=-0.005,
+                upward_trend=-0.002,
+                drum=drum,
+            )
 
             self.right_foot_marker = Marker("Right Foot", 32)
-            self.right_foot_tracker = MarkerTracker("Right Foot", [2],
-                                                    downward_trend=-0.005,
-                                                    upward_trend=-0.002,
-                                                    drum=drum)
+            self.right_foot_tracker = MarkerTracker(
+                "Right Foot", [2], downward_trend=-0.005, upward_trend=-0.002, drum=drum
+            )
 
         self.csv_writer = None
         if log_to_file:
-            self.log_file = filename if filename is not None \
+            self.log_file = (
+                filename
+                if filename is not None
                 else f"./data/mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            )
             self.csv_writer = CSVWriter(self.log_file)
 
         self.source = source
@@ -113,7 +139,11 @@ class MediaPipeTracker:
         """
         self.detection_result = result
 
-        if result is None or result.pose_world_landmarks is None or len(result.pose_world_landmarks) == 0:
+        if (
+            result is None
+            or result.pose_world_landmarks is None
+            or len(result.pose_world_landmarks) == 0
+        ):
             return
 
         if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
@@ -128,21 +158,39 @@ class MediaPipeTracker:
         left_foot = landmarks[self.left_foot_marker.index]
         right_foot = landmarks[self.right_foot_marker.index]
 
-        self.left_wrist_tracker.update(np.array([left_hand.z, left_hand.x, left_hand.y]))
-        self.right_wrist_tracker.update(np.array([right_hand.z, right_hand.x, right_hand.y]))
+        self.left_wrist_tracker.update(
+            np.array([left_hand.z, left_hand.x, left_hand.y])
+        )
+        self.right_wrist_tracker.update(
+            np.array([right_hand.z, right_hand.x, right_hand.y])
+        )
         self.left_foot_tracker.update(np.array([left_foot.z, left_foot.x, left_foot.y]))
-        self.right_foot_tracker.update(np.array([right_foot.z, right_foot.x, right_foot.y]))
+        self.right_foot_tracker.update(
+            np.array([right_foot.z, right_foot.x, right_foot.y])
+        )
 
         if self.csv_writer is not None:
             self.write_landmarks(result, timestamp_ms)
 
     def write_landmarks(self, result: PoseLandmarkerResult, timestamp_ms: int):
-        pose_landmarsks = result.pose_landmarks[0] if self.normalize else result.pose_world_landmarks[0]
+        pose_landmarsks = (
+            result.pose_landmarks[0]
+            if self.normalize
+            else result.pose_world_landmarks[0]
+        )
 
         for i, landmark in enumerate(pose_landmarsks):
-            self.csv_writer.write(self.frame_count, timestamp_ms, i, landmark.z, landmark.x, landmark.y,
-                                  landmark.visibility,
-                                  landmark.presence, normalized=self.normalize)
+            self.csv_writer.write(
+                self.frame_count,
+                timestamp_ms,
+                i,
+                landmark.z,
+                landmark.x,
+                landmark.y,
+                landmark.visibility,
+                landmark.presence,
+                normalized=self.normalize,
+            )
 
     def start_capture(self, live: bool = False):
         # Variables to calculate FPS
@@ -152,8 +200,12 @@ class MediaPipeTracker:
 
         # Create a pose landmarker instance
         options = PoseLandmarkerOptions(
-            base_options=BaseOptions(model_asset_path=self.model.value, delegate=BaseOptions.Delegate.GPU),
-            running_mode=vision.RunningMode.LIVE_STREAM if live else vision.RunningMode.VIDEO,
+            base_options=BaseOptions(
+                model_asset_path=self.model.value, delegate=BaseOptions.Delegate.GPU
+            ),
+            running_mode=vision.RunningMode.LIVE_STREAM
+            if live
+            else vision.RunningMode.VIDEO,
             output_segmentation_masks=False,
             result_callback=self.result_callback if live else None,
         )
@@ -170,11 +222,14 @@ class MediaPipeTracker:
         video_out = None
         if self.csv_writer is not None:
             video_file_name = self.log_file.replace(".csv", ".mp4")
-            video_out = cv2.VideoWriter(video_file_name, cv2.VideoWriter_fourcc(*'mp4v'), source_fps,
-                                        (int(source_width * self.scale), int(source_height * self.scale)))
+            video_out = cv2.VideoWriter(
+                video_file_name,
+                cv2.VideoWriter_fourcc(*"mp4v"),
+                source_fps,
+                (int(source_width * self.scale), int(source_height * self.scale)),
+            )
 
         while video_capture.isOpened():
-
             success, frame = video_capture.read()
             if not success:
                 print("Could not read frame. End of stream reached?")
@@ -191,7 +246,9 @@ class MediaPipeTracker:
             if live:
                 landmarker.detect_async(mp_image, self.video_time_ms)
             else:
-                detection_result = landmarker.detect_for_video(mp_image, self.video_time_ms)
+                detection_result = landmarker.detect_for_video(
+                    mp_image, self.video_time_ms
+                )
                 self.result_callback(detection_result, None, self.video_time_ms)
 
             # Calculate the FPS
@@ -202,16 +259,25 @@ class MediaPipeTracker:
                 self.drum.check_calibrations()
 
             # Overlay the FPS and other information
-            overlay(frame, source_fps, fps, self.frame_count, self.video_time_ms, self.model, width, height)
+            overlay(
+                frame,
+                source_fps,
+                fps,
+                self.frame_count,
+                self.video_time_ms,
+                self.model,
+                width,
+                height,
+            )
             if self.detection_result is not None:
                 vis_image = self.visualize(frame)
                 if video_out is not None:
                     video_out.write(vis_image)
-                cv2.imshow('object_detector', vis_image)
+                cv2.imshow("object_detector", vis_image)
             else:
                 if video_out is not None:
                     video_out.write(frame)
-                cv2.imshow('object_detector', frame)
+                cv2.imshow("object_detector", frame)
 
             # Stop the program if the ESC key is pressed.
             if cv2.waitKey(1) == 27:
@@ -235,14 +301,20 @@ class MediaPipeTracker:
 
             # Draw the pose landmarks.
             pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-            pose_landmarks_proto.landmark.extend([
-                landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in pose_landmarks
-            ])
+            pose_landmarks_proto.landmark.extend(
+                [
+                    landmark_pb2.NormalizedLandmark(
+                        x=landmark.x, y=landmark.y, z=landmark.z
+                    )
+                    for landmark in pose_landmarks
+                ]
+            )
             solutions.drawing_utils.draw_landmarks(
                 annotated_image,
                 pose_landmarks_proto,
                 solutions.pose.POSE_CONNECTIONS,
-                solutions.drawing_styles.get_default_pose_landmarks_style())
+                solutions.drawing_styles.get_default_pose_landmarks_style(),
+            )
         return annotated_image
 
 
@@ -273,19 +345,26 @@ def track_recordings():
                 print(f"Recording: {recording}, Scale: {scale}, Model: {model}")
                 width = int(1920 * scale)
                 height = int(1080 * scale)
-                pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=True, model=model,
-                                                source=recording, scale=scale,
-                                                filename=f"./data/{directory}/mediapipe_{file_name}_{width}x{height}_{model.name}_video.csv")
+                pose_tracker = MediaPipeTracker(
+                    drum,
+                    normalize=False,
+                    log_to_file=True,
+                    model=model,
+                    source=recording,
+                    scale=scale,
+                    filename=f"./data/{directory}/mediapipe_{file_name}_{width}x{height}_{model.name}_video.csv",
+                )
                 pose_tracker.start_capture()
 
 
 def live_capture():
-    pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
-                                    source=2)
+    pose_tracker = MediaPipeTracker(
+        drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL, source=0
+    )
     pose_tracker.start_capture(live=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pygame.init()
     pygame.mixer.set_num_channels(64)
     drum = Drum(no_sleep=False, margin=0.1, min_margin=0.001)

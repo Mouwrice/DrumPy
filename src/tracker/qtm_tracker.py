@@ -18,27 +18,41 @@ class QTMFullTracker:
             wrist_out=Marker("WristOut_L", 14),
             hand_out=Marker("HandOut_L", 17),
             hand_in=Marker("HandIn_L", 16),
-            tracker=MarkerTracker("Left Hand", [0, 1, 3],  # 5, 6],
-                                  drum))
+            tracker=MarkerTracker(
+                "Left Hand",
+                [0, 1, 3],  # 5, 6],
+                drum,
+            ),
+        )
 
         self.right_hand = Hand(
             wrist_out=Marker("WristOut_R", 19),
             hand_out=Marker("HandOut_R", 21),
             hand_in=Marker("HandIn_R", 22),
-            tracker=MarkerTracker("Right Hand", [0, 1, 3],  # 5, 6],
-                                  drum))
+            tracker=MarkerTracker(
+                "Right Hand",
+                [0, 1, 3],  # 5, 6],
+                drum,
+            ),
+        )
 
-        self.left_foot = Foot(toe_tip=Marker("ToeTip_L", 39),
-                              tracker=MarkerTracker("Left Foot", [],  # 3],
-                                                    drum,
-                                                    downward_trend=-1.5,
-                                                    upward_trend=-0.5))
+        self.left_foot = Foot(
+            toe_tip=Marker("ToeTip_L", 39),
+            tracker=MarkerTracker(
+                "Left Foot",
+                [],  # 3],
+                drum,
+                downward_trend=-1.5,
+                upward_trend=-0.5,
+            ),
+        )
 
-        self.right_foot = Foot(toe_tip=Marker("ToeTip_R", 36),
-                               tracker=MarkerTracker("Right Foot", [2],
-                                                     drum,
-                                                     downward_trend=-1.5,
-                                                     upward_trend=-0.5))
+        self.right_foot = Foot(
+            toe_tip=Marker("ToeTip_R", 36),
+            tracker=MarkerTracker(
+                "Right Foot", [2], drum, downward_trend=-1.5, upward_trend=-0.5
+            ),
+        )
 
         self.csv_writer = None
         if log_to_file:
@@ -46,7 +60,7 @@ class QTMFullTracker:
             self.csv_writer = CSVWriter(log_file)
 
     def on_packet(self, packet: qtm_rt.QRTPacket):
-        """ Callback function that is called everytime a data packet arrives from QTM """
+        """Callback function that is called everytime a data packet arrives from QTM"""
         _, markers = packet.get_3d_markers()
 
         self.left_foot.update(markers)
@@ -63,10 +77,12 @@ class QTMFullTracker:
         packet_time = time.time_ns()
         if self.csv_writer is not None:
             for i, marker in enumerate(markers):
-                self.csv_writer.write(packet.framenumber, packet_time, i, marker.x, marker.y, marker.z)
+                self.csv_writer.write(
+                    packet.framenumber, packet_time, i, marker.x, marker.y, marker.z
+                )
 
     async def start_capture(self):
-        """ Start streaming frames from QTM """
+        """Start streaming frames from QTM"""
         connection = await qtm_rt.connect("127.0.0.1")
         if connection is None:
             return

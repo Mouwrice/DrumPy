@@ -35,31 +35,73 @@ class Drum:
     Presets can be passed to the constructor with sound positions
     """
 
-    def __init__(self, margin: float, min_margin: float, presets: dict[str, tuple[float, float, float]] | None = None,
-                 no_sleep: bool = False,
-                 ):
+    def __init__(
+        self,
+        margin: float,
+        min_margin: float,
+        presets: dict[str, tuple[float, float, float]] | None = None,
+        no_sleep: bool = False,
+    ):
         """
         :param presets:
         :param no_sleep: Whether to sleep between calibrations or not
         """
-        snare_drum = Sound("Snare Drum", "./DrumSamples/Snare/CKV1_Snare Loud.wav", margin=margin,
-                           min_margin=min_margin,
-                           position=presets["snare"] if presets is not None else None)
-        hi_hat = Sound("High Hat", "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav", margin=margin, min_margin=min_margin,
-                       position=presets["hi_hat"] if presets is not None else None)
-        kick_drum = Sound("Kick Drum", "./DrumSamples/Kick/CKV1_Kick Loud.wav", margin=margin, min_margin=min_margin,
-                          position=presets["kick"] if presets is not None else None)
-        hi_hat_foot = Sound("High Hat Foot", "./DrumSamples/HiHat/CKV1_HH Foot.wav", margin=margin,
-                            min_margin=min_margin,
-                            position=presets["hi_hat_foot"] if presets is not None else None)
-        tom1 = Sound("Tom 1", "./DrumSamples/Perc/Tom1.wav", margin=margin, min_margin=min_margin,
-                     position=presets["tom1"] if presets is not None else None)
-        tom2 = Sound("Tom 2", "./DrumSamples/Perc/Tom2.wav", margin=margin, min_margin=min_margin,
-                     position=presets["tom2"] if presets is not None else None)
-        cymbal = Sound("Cymbal", "./DrumSamples/cymbals/Hop_Crs.wav", margin=margin, min_margin=min_margin,
-                       position=presets["cymbal"] if presets is not None else None)
+        snare_drum = Sound(
+            "Snare Drum",
+            "./DrumSamples/Snare/CKV1_Snare Loud.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["snare"] if presets is not None else None,
+        )
+        hi_hat = Sound(
+            "High Hat",
+            "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["hi_hat"] if presets is not None else None,
+        )
+        kick_drum = Sound(
+            "Kick Drum",
+            "./DrumSamples/Kick/CKV1_Kick Loud.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["kick"] if presets is not None else None,
+        )
+        hi_hat_foot = Sound(
+            "High Hat Foot",
+            "./DrumSamples/HiHat/CKV1_HH Foot.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["hi_hat_foot"] if presets is not None else None,
+        )
+        tom1 = Sound(
+            "Tom 1",
+            "./DrumSamples/Perc/Tom1.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["tom1"] if presets is not None else None,
+        )
+        tom2 = Sound(
+            "Tom 2",
+            "./DrumSamples/Perc/Tom2.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["tom2"] if presets is not None else None,
+        )
+        cymbal = Sound(
+            "Cymbal",
+            "./DrumSamples/cymbals/Hop_Crs.wav",
+            margin=margin,
+            min_margin=min_margin,
+            position=presets["cymbal"] if presets is not None else None,
+        )
 
-        self.sounds = [snare_drum, hi_hat, kick_drum, cymbal]  # , hi_hat_foot, tom1, tom2, cymbal]
+        self.sounds = [
+            snare_drum,
+            hi_hat,
+            kick_drum,
+            cymbal,
+        ]  # , hi_hat_foot, tom1, tom2, cymbal]
 
         # Queue to keep track of sounds that need to be calibrated
         self.auto_calibrations = []
@@ -69,8 +111,12 @@ class Drum:
     def __str__(self):
         return "\n".join([str(sound) for sound in self.sounds])
 
-    def find_and_play_sound(self, position: npt.NDArray[np.float64], marker_label: str,
-                            sounds: list[int] | None = None):
+    def find_and_play_sound(
+        self,
+        position: npt.NDArray[np.float64],
+        marker_label: str,
+        sounds: list[int] | None = None,
+    ):
         """
         Find the closest sound to the given position and play it
         If the drum is calibrating sounds, the to be calibrated sound will be played
@@ -89,7 +135,8 @@ class Drum:
                 if sound.state == SoundState.CALIBRATING:
                     sound.hit(position)
                     print(
-                        f"\t{marker_label}: {sound.name} with distance {distance:.3f} at {print_float_array(position)}")
+                        f"\t{marker_label}: {sound.name} with distance {distance:.3f} at {print_float_array(position)}"
+                    )
                     return
 
                 if distance < closest_distance:
@@ -99,10 +146,12 @@ class Drum:
         if closest_sound is not None:
             closest_sound.hit(position)
             print(
-                f"{marker_label}: {closest_sound.name} with distance {closest_distance:.3f} ] at {print_float_array(position)}")
+                f"{marker_label}: {closest_sound.name} with distance {closest_distance:.3f} ] at {print_float_array(position)}"
+            )
         else:
             print(
-                f"{marker_label}: No sound found for position {print_float_array(position)} with distance {closest_distance:.3f}")
+                f"{marker_label}: No sound found for position {print_float_array(position)} with distance {closest_distance:.3f}"
+            )
 
     def auto_calibrate(self, sounds: list[int] | None = None):
         """
