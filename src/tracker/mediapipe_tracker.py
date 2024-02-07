@@ -281,11 +281,7 @@ def track_recordings():
 
 def live_capture():
     pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
-<<<<<<< HEAD
-                                    source=0)
-=======
                                     source=2)
->>>>>>> 3a4a01c1b17a27a53aec77b81ff7ac607ba6ee08
     pose_tracker.start_capture(live=True)
 
 
