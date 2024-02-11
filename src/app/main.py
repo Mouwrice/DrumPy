@@ -8,10 +8,12 @@ Uses Pygame Camera module to display a webcam in a window
 
 
 class CameraDisplay(pygame_gui.elements.UIImage):
-    def __init__(self,
-                 image_surface: pygame.Surface,
-                 camera_id: str | int,
-                 ui_manager: pygame_gui.UIManager):
+    def __init__(
+        self,
+        image_surface: pygame.Surface,
+        camera_id: str | int,
+        ui_manager: pygame_gui.UIManager,
+    ):
         # Construct the relative rectangle
         relative_rect = pygame.Rect((0, 0), (0, 0))
 
@@ -37,9 +39,13 @@ class CameraDisplay(pygame_gui.elements.UIImage):
         image_width, image_height = self.camera.get_size()
 
         if window_width / window_height > image_width / image_height:
-            self.set_dimensions((window_height * image_width / image_height, window_height))
+            self.set_dimensions(
+                (window_height * image_width / image_height, window_height)
+            )
         else:
-            self.set_dimensions((window_width, window_width * image_height / image_width))
+            self.set_dimensions(
+                (window_width, window_width * image_height / image_width)
+            )
 
         self.rect.center = (window_width // 2, window_height // 2)
 
@@ -58,7 +64,7 @@ def main():
     print(pygame.camera.get_backends())
     print(pygame.camera.list_cameras())
 
-    pygame.display.set_caption('DrumPy')
+    pygame.display.set_caption("DrumPy")
     initial_window_size = (800, 600)
     window_surface = pygame.display.set_mode(initial_window_size, pygame.RESIZABLE)
     ui_manager = pygame_gui.UIManager(initial_window_size)
@@ -67,9 +73,7 @@ def main():
     cam_names = pygame.camera.list_cameras()
     for cam_name in cam_names[:num_connected_cameras]:
         CameraDisplay(
-            camera_id=cam_name,
-            image_surface=window_surface,
-            ui_manager=ui_manager
+            camera_id=cam_name, image_surface=window_surface, ui_manager=ui_manager
         )
 
     clock = pygame.time.Clock()
@@ -83,7 +87,7 @@ def main():
                     is_running = False
                 case pygame.VIDEORESIZE:
                     ui_manager.set_window_resolution(window_surface.get_size())
-                    window_surface.fill(pygame.Color('#000000'))
+                    window_surface.fill(pygame.Color("#000000"))
 
             ui_manager.process_events(event)
 
@@ -92,5 +96,5 @@ def main():
         pygame.display.update()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
