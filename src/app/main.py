@@ -2,86 +2,93 @@ import pygame
 import pygame.camera
 import pygame_gui
 
-
 """
 Uses Pygame Camera module to display a webcam in a window 
 """
 
 
-class CameraWindow(pygame_gui.elements.UIWindow):
+class CameraDisplay(pygame_gui.elements.UIImage):
     def __init__(self,
-                 rect: pygame.Rect,
-                 camera_name,
-                 ui_manager: pygame_gui.core.interfaces.IUIManagerInterface):
-        super().__init__(rect, ui_manager, window_display_title=camera_name, resizable=True)
+                 image_surface: pygame.Surface,
+                 camera_id: str | int,
+                 ui_manager: pygame_gui.UIManager):
+        # Construct the relative rectangle
+        relative_rect = pygame.Rect((0, 0), (0, 0))
 
-        self.camera = None
+        super().__init__(relative_rect, image_surface, ui_manager)
 
-        self.camera = pygame.camera.Camera(camera_name, (640, 480))
+        self.ui_manager = ui_manager
+        self.camera = pygame.camera.Camera(camera_id)
         self.camera.start()
 
         print(self.camera.get_controls())
 
-        cam_rect = pygame.Rect((0, 0), self.get_container().get_size())
-        self.cam_image = pygame_gui.elements.UIImage(relative_rect=cam_rect,
-                                                     image_surface=self.camera.get_image(),
-                                                     manager=self.ui_manager,
-                                                     container=self,
-                                                     anchors={'left': 'left',
-                                                              'right': 'right',
-                                                              'top': 'top',
-                                                              'bottom': 'bottom'})
+        self._size = self.camera.get_size()
+        self.__fit_and_center_rect()
+        self.set_image(self.camera.get_image())
+
+    def __fit_and_center_rect(self):
+        """
+        Fits the camera image to the window size without stretching.
+        Centers the camera image in the window.
+        :return:
+        """
+        window_width, window_height = self.ui_manager.window_resolution
+        image_width, image_height = self.camera.get_size()
+
+        if window_width / window_height > image_width / image_height:
+            self.set_dimensions((window_height * image_width / image_height, window_height))
+        else:
+            self.set_dimensions((window_width, window_width * image_height / image_width))
+
+        self.rect.center = (window_width // 2, window_height // 2)
 
     def update(self, time_delta: float):
         super().update(time_delta)
+        self.__fit_and_center_rect()
 
         if self.camera is not None:
-
-            self.cam_image.set_image(pygame.transform.smoothscale(self.camera.get_image(),
-                                                                  self.get_container().get_size()))
+            self.set_image(self.camera.get_image())
 
 
 def main():
-
     pygame.init()
     pygame.camera.init()
 
     print(pygame.camera.get_backends())
     print(pygame.camera.list_cameras())
 
-    pygame.display.set_caption('Quick Start')
-    window_surface = pygame.display.set_mode((800, 600))
-    manager = pygame_gui.UIManager((800, 600))
+    pygame.display.set_caption('DrumPy')
+    initial_window_size = (800, 600)
+    window_surface = pygame.display.set_mode(initial_window_size, pygame.RESIZABLE)
+    ui_manager = pygame_gui.UIManager(initial_window_size)
 
-    background = pygame.Surface((800, 600))
-    background.fill(manager.ui_theme.get_colour('dark_bg'))
-
-    cam_window_pos = [10, 10]
     num_connected_cameras = 1
     cam_names = pygame.camera.list_cameras()
     for cam_name in cam_names[:num_connected_cameras]:
-        cam_window_rect = pygame.Rect(0, 0, 400, 300)
-        cam_window_rect.topleft = cam_window_pos
-        CameraWindow(cam_window_rect, cam_name, manager)
-        cam_window_pos = (cam_window_pos[0] + 420,
-                          cam_window_pos[1])
+        CameraDisplay(
+            camera_id=cam_name,
+            image_surface=window_surface,
+            ui_manager=ui_manager
+        )
 
     clock = pygame.time.Clock()
     is_running = True
 
     while is_running:
-        time_delta = clock.tick(60)/1000.0
+        time_delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
+            match event.type:
+                case pygame.QUIT:
+                    is_running = False
+                case pygame.VIDEORESIZE:
+                    ui_manager.set_window_resolution(window_surface.get_size())
+                    window_surface.fill(pygame.Color('#000000'))
 
-            manager.process_events(event)
+            ui_manager.process_events(event)
 
-        manager.update(time_delta)
-
-        window_surface.blit(background, (0, 0))
-        manager.draw_ui(window_surface)
-
+        ui_manager.update(time_delta)
+        ui_manager.draw_ui(window_surface)
         pygame.display.update()
 
 
