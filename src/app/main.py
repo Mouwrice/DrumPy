@@ -2,6 +2,8 @@ import pygame
 import pygame.camera
 import pygame_gui
 
+from tracker.mediapipe_pose import MediaPipePose, visualize_landmarks
+
 """
 Uses Pygame Camera module to display a webcam in a window 
 """
@@ -13,6 +15,7 @@ class CameraDisplay(pygame_gui.elements.UIImage):
         image_surface: pygame.Surface,
         camera_id: str | int,
         ui_manager: pygame_gui.UIManager,
+        media_pipe_pose: MediaPipePose,
     ):
         # Construct the relative rectangle
         relative_rect = pygame.Rect((0, 0), (0, 0))
@@ -21,6 +24,7 @@ class CameraDisplay(pygame_gui.elements.UIImage):
 
         self.ui_manager = ui_manager
         self.camera = pygame.camera.Camera(camera_id)
+        self.media_pipe_pose = media_pipe_pose
         self.camera.start()
 
         print(self.camera.get_controls())
@@ -54,7 +58,17 @@ class CameraDisplay(pygame_gui.elements.UIImage):
         self.__fit_and_center_rect()
 
         if self.camera is not None:
-            self.set_image(self.camera.get_image())
+            image = self.camera.get_image()
+
+            # Convert the image to a numpy array
+            image_array = pygame.surfarray.array3d(image)
+            self.media_pipe_pose.process_image(image_array)
+
+            # Draw the landmarks on the image
+            image = visualize_landmarks(
+                image_array, self.media_pipe_pose.process_image(image_array)
+            )
+            self.set_image(pygame.surfarray.make_surface(image))
 
 
 def main():
@@ -69,11 +83,16 @@ def main():
     window_surface = pygame.display.set_mode(initial_window_size, pygame.RESIZABLE)
     ui_manager = pygame_gui.UIManager(initial_window_size)
 
+    media_pipe_pose = MediaPipePose()
+
     num_connected_cameras = 1
     cam_names = pygame.camera.list_cameras()
     for cam_name in cam_names[:num_connected_cameras]:
         CameraDisplay(
-            camera_id=cam_name, image_surface=window_surface, ui_manager=ui_manager
+            camera_id=cam_name,
+            image_surface=window_surface,
+            ui_manager=ui_manager,
+            media_pipe_pose=media_pipe_pose,
         )
 
     clock = pygame.time.Clock()
