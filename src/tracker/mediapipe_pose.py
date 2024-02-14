@@ -23,8 +23,6 @@ def visualize_landmarks(
 ) -> ndarray:
     """
     Visualize the landmarks on the image given the landmarks and the image
-    :param rgb_image:
-    :return:
     """
     pose_landmarks_list = detection_result.pose_landmarks
 
