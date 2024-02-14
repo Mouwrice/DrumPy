@@ -2,6 +2,7 @@ import pygame
 import pygame.camera
 from pygame_gui import UIManager
 
+from app.camera_container import FPSDisplay
 from app.camera_display import CameraDisplay
 from tracker.mediapipe_pose import MediaPipePose
 
@@ -20,15 +21,17 @@ def main():
 
     media_pipe_pose = MediaPipePose()
 
-    num_connected_cameras = 1
-    cam_names = pygame.camera.list_cameras()
-    for cam_name in cam_names[:num_connected_cameras]:
-        CameraDisplay(
-            camera_id=cam_name,
-            image_surface=window_surface,
-            ui_manager=ui_manager,
-            media_pipe_pose=media_pipe_pose,
-        )
+    FPSDisplay(
+        ui_manager=ui_manager,
+        media_pipe_pose=media_pipe_pose,
+    )
+
+    CameraDisplay(
+        image_surface=pygame.Surface((640, 480)),
+        camera_id="/dev/video0",
+        ui_manager=ui_manager,
+        media_pipe_pose=media_pipe_pose,
+    )
 
     clock = pygame.time.Clock()
     is_running = True
@@ -41,12 +44,13 @@ def main():
                     is_running = False
                 case pygame.VIDEORESIZE:
                     ui_manager.set_window_resolution(window_surface.get_size())
-                    window_surface.fill(pygame.Color("#000000"))
 
             ui_manager.process_events(event)
 
         ui_manager.update(time_delta)
+        window_surface.fill(pygame.Color("#000000"))
         ui_manager.draw_ui(window_surface)
+
         pygame.display.update()
 
 

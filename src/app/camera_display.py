@@ -19,7 +19,7 @@ class CameraDisplay(UIImage):
         media_pipe_pose: MediaPipePose,
     ):
         # Construct the relative rectangle
-        relative_rect = Rect((0, 0), (0, 0))
+        relative_rect = Rect((0, 50), (0, 0))
 
         super().__init__(relative_rect, image_surface, ui_manager)
 
@@ -41,6 +41,7 @@ class CameraDisplay(UIImage):
         :return:
         """
         window_width, window_height = self.ui_manager.window_resolution
+        window_height -= 50  # Subtract the height of the FPSDisplay
         image_width, image_height = self.camera.get_size()
 
         if window_width / window_height > image_width / image_height:
@@ -52,7 +53,7 @@ class CameraDisplay(UIImage):
                 (window_width, window_width * image_height / image_width)
             )
 
-        self.rect.center = (window_width // 2, window_height // 2)
+        self.rect.center = (window_width // 2, window_height // 2 + 50)
 
     def update(self, time_delta: float):
         super().update(time_delta)
