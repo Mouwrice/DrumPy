@@ -1,5 +1,6 @@
 from enum import Enum
 
+import numpy as np
 from mediapipe import Image, ImageFormat
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe.python import solutions
@@ -8,6 +9,7 @@ from mediapipe.tasks.python.vision import (
     PoseLandmarkerOptions,
     PoseLandmarker,
     PoseLandmarkerResult,
+    RunningMode,
 )
 from numpy import ndarray
 
@@ -24,6 +26,7 @@ def visualize_landmarks(
     """
     Visualize the landmarks on the image given the landmarks and the image
     """
+    rgb_image = np.copy(rgb_image)  # Make a copy of the image
     pose_landmarks_list = detection_result.pose_landmarks
 
     # Loop through the detected poses to visualize.
@@ -57,18 +60,45 @@ class MediaPipePose:
     def __init__(self):
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(
-                model_asset_path=LandmarkerModel.LITE.value,
+                model_asset_path=LandmarkerModel.FULL.value,
                 delegate=BaseOptions.Delegate.GPU,
-            )
+            ),
+            running_mode=RunningMode.LIVE_STREAM,
+            result_callback=self.result_callback,
         )
 
-        self.landmarker_model = PoseLandmarker.create_from_options(options)
+        self.landmarker = PoseLandmarker.create_from_options(options)
+        self.result = None
+        self.image_landmarks: ndarray | None = (
+            None  # The image with the landmarks represented as an array
+        )
+        self.latest_timestamp: int = (
+            0  # The timestamp of the latest frame that was processed
+        )
+        self.latency: int = 1  # The latency of the pose estimation, in milliseconds
 
-    def process_image(self, image_array: ndarray) -> PoseLandmarkerResult:
+    def result_callback(
+        self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
+    ):
         """
-        Process the image and return the landmarks
+        Callback method to receive the result of the pose estimation
+        :param result:
+        :param image: Original image the landmarks were detected on
+        :param timestamp_ms: The timestamp of the frame
+        :return:
+        """
+        self.result = result
+        image_landmarks = visualize_landmarks(image.numpy_view(), result)
+        self.image_landmarks = image_landmarks
+        self.latency = timestamp_ms - self.latest_timestamp
+        self.latest_timestamp = timestamp_ms
+
+    def process_image(self, image_array: ndarray, timestamp_ms: int):
+        """
+        Process the image
+        :param timestamp_ms: The timestamp of the frame
         :param image_array: The image to process
         :return: The landmarks
         """
-        image_array = Image(image_format=ImageFormat.SRGB, data=image_array)
-        return self.landmarker_model.detect(image_array)
+        image = Image(image_format=ImageFormat.SRGB, data=image_array)
+        self.landmarker.detect_async(image, timestamp_ms)

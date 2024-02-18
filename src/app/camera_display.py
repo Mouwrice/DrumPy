@@ -1,8 +1,9 @@
-from pygame import Surface, Rect, surfarray, camera
+import pygame.time
+from pygame import Surface, surfarray, camera, Rect
 from pygame_gui import UIManager
 from pygame_gui.elements import UIImage
 
-from tracker.mediapipe_pose import MediaPipePose, visualize_landmarks
+from tracker.mediapipe_pose import MediaPipePose
 
 
 class CameraDisplay(UIImage):
@@ -15,23 +16,13 @@ class CameraDisplay(UIImage):
         self,
         image_surface: Surface,
         camera_id: str | int,
-        # container: IContainerLikeInterface,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ):
-        # Construct the relative rectangle
-        relative_rect = Rect((0, 50), (0, 0))
-
         super().__init__(
-            relative_rect,
-            image_surface,
+            relative_rect=Rect(200, 50, 600, 550),
+            image_surface=image_surface,
             manager=ui_manager,
-            anchors={
-                "top": "top",
-                "left": "left",
-                "right": "right",
-                "bottom": "bottom",
-            },
         )
 
         self.ui_manager = ui_manager
@@ -42,8 +33,6 @@ class CameraDisplay(UIImage):
         print(self.camera.get_controls())
 
         self._size = self.camera.get_size()
-        # self.__fit_and_center_rect()
-        self.set_image(self.camera.get_image())
 
     def __fit_and_center_rect(self):
         """
@@ -52,21 +41,16 @@ class CameraDisplay(UIImage):
         :return:
         """
         # Get the dimensions of the container
-        width, height = self.ui_manager.window_resolution
-        container_width = width - 400  # Subtract the width of the left and right panel
-        container_height = height - 50  # Subtract the height of the FPSDisplay
-        image_width, image_height = self.camera.get_size()
+        image_width, image_height = self._size
 
-        if container_width / container_height > image_width / image_height:
+        if self.rect.width / self.rect.height > image_width / image_height:
             self.set_dimensions(
-                (container_height * image_width / image_height, container_height)
+                (self.rect.height * image_width / image_height, self.rect.height)
             )
         else:
             self.set_dimensions(
-                (container_width, container_width * image_height / image_width)
+                (self.rect.width, self.rect.width * image_height / image_width)
             )
-
-        self.rect.center = (container_width // 2 + 200, container_height // 2 + 50)
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -77,10 +61,9 @@ class CameraDisplay(UIImage):
 
             # Convert the image to a numpy array
             image_array = surfarray.array3d(image)
-            self.media_pipe_pose.process_image(image_array)
+            timestamp_ms = pygame.time.get_ticks()
+            self.media_pipe_pose.process_image(image_array, timestamp_ms)
 
-            # Draw the landmarks on the image
-            image = visualize_landmarks(
-                image_array, self.media_pipe_pose.process_image(image_array)
-            )
-            self.set_image(surfarray.make_surface(image))
+            image = self.media_pipe_pose.image_landmarks
+            if image is not None:
+                self.set_image(surfarray.make_surface(image))

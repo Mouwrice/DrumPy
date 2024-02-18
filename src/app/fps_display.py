@@ -1,6 +1,5 @@
 from pygame import Rect
 from pygame_gui import UIManager
-from pygame_gui.core import IContainerLikeInterface
 from pygame_gui.elements import UILabel
 
 from tracker.mediapipe_pose import MediaPipePose
@@ -13,14 +12,12 @@ class FPSDisplay(UILabel):
 
     def __init__(
         self,
-        container: IContainerLikeInterface,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ):
         super().__init__(
-            Rect((0, 0), (300, 30)),
+            Rect((200, 0), (300, 30)),
             "UI FPS: -:--  Camera FPS: -:--",
-            container=container,
             manager=ui_manager,
         )
 
@@ -37,9 +34,13 @@ class FPSDisplay(UILabel):
         if len(self.ui_time_deltas) > 30:
             self.ui_time_deltas.pop(0)
 
-        fps = 1 / (sum(self.ui_time_deltas) / len(self.ui_time_deltas))
+        self.mediapipe_time_deltas.append(self.media_pipe_pose.latency)
+        if len(self.mediapipe_time_deltas) > 30:
+            self.mediapipe_time_deltas.pop(0)
 
-        ui_fps = fps
-        camera_fps = fps
+        ui_fps = 1 / (sum(self.ui_time_deltas) / len(self.ui_time_deltas))
+        camera_fps = 1000 / (
+            sum(self.mediapipe_time_deltas) / len(self.mediapipe_time_deltas)
+        )
 
         self.set_text(f"UI FPS: {ui_fps:.2f}  Camera FPS: {camera_fps:.2f}")
