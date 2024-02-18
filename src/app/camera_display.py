@@ -15,13 +15,24 @@ class CameraDisplay(UIImage):
         self,
         image_surface: Surface,
         camera_id: str | int,
+        # container: IContainerLikeInterface,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ):
         # Construct the relative rectangle
         relative_rect = Rect((0, 50), (0, 0))
 
-        super().__init__(relative_rect, image_surface, ui_manager)
+        super().__init__(
+            relative_rect,
+            image_surface,
+            manager=ui_manager,
+            anchors={
+                "top": "top",
+                "left": "left",
+                "right": "right",
+                "bottom": "bottom",
+            },
+        )
 
         self.ui_manager = ui_manager
         self.camera = camera.Camera(camera_id)
@@ -31,7 +42,7 @@ class CameraDisplay(UIImage):
         print(self.camera.get_controls())
 
         self._size = self.camera.get_size()
-        self.__fit_and_center_rect()
+        # self.__fit_and_center_rect()
         self.set_image(self.camera.get_image())
 
     def __fit_and_center_rect(self):
@@ -40,26 +51,28 @@ class CameraDisplay(UIImage):
         Centers the camera image in the window.
         :return:
         """
-        window_width, window_height = self.ui_manager.window_resolution
-        window_height -= 50  # Subtract the height of the FPSDisplay
+        # Get the dimensions of the container
+        width, height = self.ui_manager.window_resolution
+        container_width = width - 400  # Subtract the width of the left and right panel
+        container_height = height - 50  # Subtract the height of the FPSDisplay
         image_width, image_height = self.camera.get_size()
 
-        if window_width / window_height > image_width / image_height:
+        if container_width / container_height > image_width / image_height:
             self.set_dimensions(
-                (window_height * image_width / image_height, window_height)
+                (container_height * image_width / image_height, container_height)
             )
         else:
             self.set_dimensions(
-                (window_width, window_width * image_height / image_width)
+                (container_width, container_width * image_height / image_width)
             )
 
-        self.rect.center = (window_width // 2, window_height // 2 + 50)
+        self.rect.center = (container_width // 2 + 200, container_height // 2 + 50)
 
     def update(self, time_delta: float):
         super().update(time_delta)
         self.__fit_and_center_rect()
 
-        if self.camera is not None:
+        if self.camera is not None and self.camera.query_image():
             image = self.camera.get_image()
 
             # Convert the image to a numpy array

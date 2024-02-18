@@ -334,7 +334,7 @@ def track_recordings():
 
     scales = [0.75]
 
-    models = [LandmarkerModel.LITE]
+    models = [LandmarkerModel.FULL]
 
     for recording in recordings:
         for scale in scales:
@@ -369,9 +369,6 @@ if __name__ == "__main__":
     pygame.mixer.set_num_channels(64)
     drum = Drum(no_sleep=False, margin=0.1, min_margin=0.001)
     drum.auto_calibrate()
-    #
-    # pose_tracker = MediaPipeTracker(drum, normalize=False, log_to_file=False, model=LandmarkerModel.FULL,
-    #                                 source=0)
-    # pose_tracker.start_capture()
-    # track_recordings()
+
     live_capture()
+    # track_recordings()

@@ -240,3 +240,4 @@ fabric.properties
 *.mp4
 *.mkv
 
+.idea/
