@@ -8,7 +8,9 @@ from pygame_gui import UIManager
 
 from app.fps_display import FPSDisplay
 from app.camera_display import CameraDisplay
-from app.latency_graph import LatencyGraph
+from app.graphs.latency_graph import LatencyGraph
+
+from app.graphs.marker_location_graphs import MarkerLocationGraphs
 from tracker.mediapipe_pose import MediaPipePose
 
 
@@ -20,7 +22,7 @@ def main():
     print(pygame.camera.list_cameras())
 
     pygame.display.set_caption("DrumPy")
-    initial_window_size = (1200, 800)
+    initial_window_size = (1400, 800)
     window_surface = pygame.display.set_mode(initial_window_size)
     manager = UIManager(initial_window_size)
 
@@ -42,11 +44,13 @@ def main():
     # Can be used to execute long-running tasks in parallel without blocking the main thread
     with Pool(processes=4) as pool:
         LatencyGraph(
-            relative_rect=Rect(800, 50, 400, 300),
+            relative_rect=Rect(1000, 50, 400, 300),
             image_surface=pygame.Surface((400, 300)),
             pool=pool,
             media_pipe_pose=media_pipe_pose,
         )
+
+        MarkerLocationGraphs(pool, media_pipe_pose)
 
         frame = 0
         clock = pygame.time.Clock()

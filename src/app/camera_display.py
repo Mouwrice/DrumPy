@@ -20,7 +20,7 @@ class CameraDisplay(UIImage):
         media_pipe_pose: MediaPipePose,
     ):
         super().__init__(
-            relative_rect=Rect(200, 50, 600, 550),
+            relative_rect=Rect(400, 50, 600, 550),
             image_surface=image_surface,
             manager=ui_manager,
         )

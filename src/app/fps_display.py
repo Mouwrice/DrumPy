@@ -16,7 +16,7 @@ class FPSDisplay(UILabel):
         media_pipe_pose: MediaPipePose,
     ):
         super().__init__(
-            Rect((200, 0), (300, 30)),
+            Rect((400, 0), (300, 30)),
             "UI FPS: -:--  Camera FPS: -:--",
             manager=ui_manager,
         )
