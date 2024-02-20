@@ -1,3 +1,5 @@
+from multiprocessing import Pool
+
 import pygame
 import pygame.camera
 
@@ -36,28 +38,32 @@ def main():
         media_pipe_pose=media_pipe_pose,
     )
 
-    LatencyGraph(
-        relative_rect=Rect(800, 50, 400, 300),
-        image_surface=pygame.Surface((400, 300)),
-    )
+    # Apply multiprocessing using Pool
+    # Can be used to execute long-running tasks in parallel without blocking the main thread
+    with Pool(processes=4) as pool:
+        LatencyGraph(
+            relative_rect=Rect(800, 50, 400, 300),
+            image_surface=pygame.Surface((400, 300)),
+            pool=pool,
+            media_pipe_pose=media_pipe_pose,
+        )
 
-    frame = 0
-    clock = pygame.time.Clock()
+        frame = 0
+        clock = pygame.time.Clock()
+        while True:
+            frame += 1
+            time_delta_ms = clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return
 
-    while True:
-        frame += 1
-        time_delta = clock.tick(60) / 1000.0
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
+                manager.process_events(event)
 
-            manager.process_events(event)
+            window_surface.fill(pygame.Color("#000000"))
+            manager.update(time_delta_ms / 1000.0)
+            manager.draw_ui(window_surface)
 
-        window_surface.fill(pygame.Color("#000000"))
-        manager.update(time_delta)
-        manager.draw_ui(window_surface)
-
-        pygame.display.update()
+            pygame.display.update()
 
 
 if __name__ == "__main__":
