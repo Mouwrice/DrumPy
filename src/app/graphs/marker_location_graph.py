@@ -6,6 +6,7 @@ import numpy as np
 import pygame
 from pygame_gui.elements import UIImage
 
+from app.graphs.ui_constants import GRAPH_FRAME_RANGE
 from tracker.mediapipe_pose import MediaPipePose
 
 
@@ -79,7 +80,7 @@ class MarkerLocationGraph(UIImage):
                 if self.marker_idx < len(landmarks):
                     landmark = landmarks[self.marker_idx]
                     self.marker_locations.append((landmark.x, landmark.y, landmark.z))
-                    if len(self.marker_locations) > 120:
+                    if len(self.marker_locations) > GRAPH_FRAME_RANGE:
                         self.marker_locations.pop(0)
 
         if self.plot_async_result is None:

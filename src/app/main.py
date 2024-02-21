@@ -3,7 +3,6 @@ from multiprocessing import Pool
 import pygame
 import pygame.camera
 
-from pygame import Rect
 from pygame_gui import UIManager
 
 from app.fps_display import FPSDisplay
@@ -22,11 +21,11 @@ def main():
     print(pygame.camera.list_cameras())
 
     pygame.display.set_caption("DrumPy")
-    initial_window_size = (1400, 800)
+    initial_window_size = (1500, 1000)
     window_surface = pygame.display.set_mode(initial_window_size)
     manager = UIManager(initial_window_size)
 
-    media_pipe_pose = MediaPipePose()
+    media_pipe_pose = MediaPipePose(live_stream=False)
 
     FPSDisplay(
         ui_manager=manager,
@@ -34,7 +33,6 @@ def main():
     )
 
     CameraDisplay(
-        image_surface=pygame.Surface((600, 550)),
         camera_id="/dev/video0",
         ui_manager=manager,
         media_pipe_pose=media_pipe_pose,
@@ -44,8 +42,6 @@ def main():
     # Can be used to execute long-running tasks in parallel without blocking the main thread
     with Pool(processes=4) as pool:
         LatencyGraph(
-            relative_rect=Rect(1000, 50, 400, 300),
-            image_surface=pygame.Surface((400, 300)),
             pool=pool,
             media_pipe_pose=media_pipe_pose,
         )

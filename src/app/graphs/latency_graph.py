@@ -4,6 +4,7 @@ from multiprocessing import Pool
 import pygame
 from pygame_gui.elements import UIImage
 
+from app.graphs.ui_constants import GRAPH_FRAME_RANGE
 from tracker.mediapipe_pose import MediaPipePose
 
 
@@ -48,12 +49,13 @@ class LatencyGraph(UIImage):
 
     def __init__(
         self,
-        relative_rect: pygame.Rect,
-        image_surface: pygame.surface.Surface,
         pool: Pool,
         media_pipe_pose: MediaPipePose,
     ):
-        super().__init__(relative_rect, image_surface)
+        super().__init__(
+            relative_rect=pygame.Rect(1100, 50, 400, 300),
+            image_surface=pygame.Surface((400, 300)),
+        )
 
         self.ui_latencies = []
         self.mediapipe_latencies = []
@@ -67,12 +69,12 @@ class LatencyGraph(UIImage):
 
         self.frame += 1
 
-        self.ui_latencies.append(time_delta)
-        if len(self.ui_latencies) > 120:
+        self.ui_latencies.append(time_delta * 1000)
+        if len(self.ui_latencies) > GRAPH_FRAME_RANGE:
             self.ui_latencies.pop(0)
 
         self.mediapipe_latencies.append(self.media_pipe_pose.latency)
-        if len(self.mediapipe_latencies) > 120:
+        if len(self.mediapipe_latencies) > GRAPH_FRAME_RANGE:
             self.mediapipe_latencies.pop(0)
 
         # If the plot is not being generated, start the process

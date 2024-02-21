@@ -14,14 +14,13 @@ class CameraDisplay(UIImage):
 
     def __init__(
         self,
-        image_surface: Surface,
         camera_id: str | int,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ):
         super().__init__(
-            relative_rect=Rect(400, 50, 600, 550),
-            image_surface=image_surface,
+            relative_rect=Rect(400, 50, 700, 700),
+            image_surface=Surface((700, 700)),
             manager=ui_manager,
         )
 

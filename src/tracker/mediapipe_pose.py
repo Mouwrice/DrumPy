@@ -57,14 +57,14 @@ class MediaPipePose:
     Class to handle the pose estimation using MediaPipe
     """
 
-    def __init__(self):
+    def __init__(self, live_stream: bool = True):
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(
                 model_asset_path=LandmarkerModel.FULL.value,
                 delegate=BaseOptions.Delegate.GPU,
             ),
-            running_mode=RunningMode.LIVE_STREAM,
-            result_callback=self.result_callback,
+            running_mode=RunningMode.LIVE_STREAM if live_stream else RunningMode.VIDEO,
+            result_callback=self.result_callback if live_stream else None,
         )
 
         self.landmarker = PoseLandmarker.create_from_options(options)
@@ -76,6 +76,9 @@ class MediaPipePose:
             0  # The timestamp of the latest frame that was processed
         )
         self.latency: int = 1  # The latency of the pose estimation, in milliseconds
+        self.live_stream = (
+            live_stream  # Whether the pose estimation is in live stream mode
+        )
 
     def result_callback(
         self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
@@ -101,4 +104,8 @@ class MediaPipePose:
         :return: The landmarks
         """
         image = Image(image_format=ImageFormat.SRGB, data=image_array)
-        self.landmarker.detect_async(image, timestamp_ms)
+        if self.live_stream:
+            self.landmarker.detect_async(image, timestamp_ms)
+        else:
+            result = self.landmarker.detect_for_video(image, timestamp_ms)
+            self.result_callback(result, image, timestamp_ms)
