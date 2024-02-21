@@ -67,21 +67,21 @@ class Drum:
             min_margin=min_margin,
             position=presets["kick"] if presets is not None else None,
         )
-        hi_hat_foot = Sound(
+        _hi_hat_foot = Sound(
             "High Hat Foot",
             "./DrumSamples/HiHat/CKV1_HH Foot.wav",
             margin=margin,
             min_margin=min_margin,
             position=presets["hi_hat_foot"] if presets is not None else None,
         )
-        tom1 = Sound(
+        _tom1 = Sound(
             "Tom 1",
             "./DrumSamples/Perc/Tom1.wav",
             margin=margin,
             min_margin=min_margin,
             position=presets["tom1"] if presets is not None else None,
         )
-        tom2 = Sound(
+        _tom2 = Sound(
             "Tom 2",
             "./DrumSamples/Perc/Tom2.wav",
             margin=margin,
