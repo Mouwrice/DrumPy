@@ -11,7 +11,7 @@ from tracker.mediapipe_pose import MediaPipePose
 
 
 def plot_marker_location_graph(
-    marker_locations: [(float, float, float)], frame: int
+    marker_locations: [(float, float, float)], frame: int, title: str
 ) -> ndarray | ndarray[Any, dtype[Any]]:
     """
     Plots the marker location graph using matplotlib writing the plot to a BytesIO object
@@ -35,7 +35,7 @@ def plot_marker_location_graph(
 
     ax.set_xlabel("Frame")
     ax.set_ylabel("Location (m)")
-    ax.set_title("Marker Location Graph")
+    ax.set_title(title)
 
     buf = io.BytesIO()
     fig.savefig(buf, format="png")
@@ -56,7 +56,8 @@ class MarkerLocationGraph(UIImage):
         image_surface: pygame.surface.Surface,
         pool: Pool,
         media_pipe_pose: MediaPipePose,
-    ):
+        title: str,
+    ) -> object:
         super().__init__(relative_rect, image_surface)
         self.marker_idx = marker_idx
         self.marker_locations: [(float, float, float)] = []
@@ -64,6 +65,7 @@ class MarkerLocationGraph(UIImage):
         self.frame = 0
         self.plot_async_result = None
         self.pool = pool
+        self.title = title
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -84,11 +86,13 @@ class MarkerLocationGraph(UIImage):
 
         if self.plot_async_result is None:
             self.plot_async_result = self.pool.apply_async(
-                plot_marker_location_graph, (self.marker_locations, self.frame)
+                plot_marker_location_graph,
+                (self.marker_locations, self.frame, self.title),
             )
         elif self.plot_async_result.ready():
             image = self.plot_async_result.get()
             self.set_image(pygame.image.load(image))
             self.plot_async_result = self.pool.apply_async(
-                plot_marker_location_graph, (self.marker_locations, self.frame)
+                plot_marker_location_graph,
+                (self.marker_locations, self.frame, self.title),
             )
