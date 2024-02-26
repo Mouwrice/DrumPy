@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 import numpy as np
 from mediapipe import Image, ImageFormat
@@ -11,7 +12,7 @@ from mediapipe.tasks.python.vision import (
     PoseLandmarkerResult,
     RunningMode,
 )
-from numpy import ndarray
+from numpy import ndarray, dtype
 
 
 class LandmarkerModel(Enum):
@@ -22,7 +23,7 @@ class LandmarkerModel(Enum):
 
 def visualize_landmarks(
     rgb_image: ndarray, detection_result: PoseLandmarkerResult
-) -> ndarray:
+) -> ndarray[Any, dtype[Any]]:
     """
     Visualize the landmarks on the image given the landmarks and the image
     """
@@ -49,6 +50,7 @@ def visualize_landmarks(
             solutions.pose.POSE_CONNECTIONS,
             solutions.drawing_styles.get_default_pose_landmarks_style(),
         )
+
     return rgb_image
 
 
@@ -60,7 +62,7 @@ class MediaPipePose:
     def __init__(self, live_stream: bool = True):
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(
-                model_asset_path=LandmarkerModel.FULL.value,
+                model_asset_path=LandmarkerModel.HEAVY.value,
                 delegate=BaseOptions.Delegate.GPU,
             ),
             running_mode=RunningMode.LIVE_STREAM if live_stream else RunningMode.VIDEO,
@@ -68,10 +70,7 @@ class MediaPipePose:
         )
 
         self.landmarker = PoseLandmarker.create_from_options(options)
-        self.result = None
-        self.image_landmarks: ndarray | None = (
-            None  # The image with the landmarks represented as an array
-        )
+        self.detection_result = None
         self.latest_timestamp: int = (
             0  # The timestamp of the latest frame that was processed
         )
@@ -79,6 +78,7 @@ class MediaPipePose:
         self.live_stream = (
             live_stream  # Whether the pose estimation is in live stream mode
         )
+        self.visualisation = None
 
     def result_callback(
         self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
@@ -90,11 +90,12 @@ class MediaPipePose:
         :param timestamp_ms: The timestamp of the frame
         :return:
         """
-        self.result = result
-        image_landmarks = visualize_landmarks(image.numpy_view(), result)
-        self.image_landmarks = image_landmarks
+        self.detection_result = result
         self.latency = timestamp_ms - self.latest_timestamp
         self.latest_timestamp = timestamp_ms
+        self.visualisation = visualize_landmarks(
+            image.numpy_view(), self.detection_result
+        )
 
     def process_image(self, image_array: ndarray, timestamp_ms: int):
         """

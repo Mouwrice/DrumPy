@@ -15,10 +15,12 @@ opencv-python = "4.9.0.80"
 termcolor = "2.4.0"
 bokeh = "3.3.3"
 pygame-gui = "^0.6.9"
+scikit-image = "^0.22.0"
 
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.1"
+line-profiler-pycharm = "^1.1.0"
 
 [build-system]
 requires = ["poetry-core"]

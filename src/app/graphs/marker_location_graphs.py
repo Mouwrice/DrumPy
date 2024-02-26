@@ -28,14 +28,14 @@ class MarkerLocationGraphs:
         )
         MarkerLocationGraph(
             31,
-            pygame.Rect(1100, 350, 400, 300),
+            pygame.Rect(1400, 350, 400, 300),
             pygame.Surface((400, 300)),
             pool,
             media_pipe_pose,
         )
         MarkerLocationGraph(
             32,
-            pygame.Rect(1100, 650, 400, 300),
+            pygame.Rect(1400, 650, 400, 300),
             pygame.Surface((400, 300)),
             pool,
             media_pipe_pose,

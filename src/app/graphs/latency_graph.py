@@ -35,7 +35,7 @@ def plot_latency_graph(
     ax.set_title("Latency Graph")
 
     buf = io.BytesIO()
-    fig.savefig(buf)
+    fig.savefig(buf, format="png")
     buf.seek(0)
     plt.close(fig)
 
@@ -53,7 +53,7 @@ class LatencyGraph(UIImage):
         media_pipe_pose: MediaPipePose,
     ):
         super().__init__(
-            relative_rect=pygame.Rect(1100, 50, 400, 300),
+            relative_rect=pygame.Rect(1400, 50, 400, 300),
             image_surface=pygame.Surface((400, 300)),
         )
 

@@ -1,68 +1,73 @@
 import pygame.time
-from pygame import Surface, surfarray, camera, Rect
-from pygame_gui import UIManager
-from pygame_gui.elements import UIImage
+from pygame import Surface
 
+from app.video_source import VideoSource, Source
 from tracker.mediapipe_pose import MediaPipePose
 
 
-class CameraDisplay(UIImage):
+class VideoDisplay:
     """
-    Pygame GUI element to display the camera feed and the pose landmarks
+    Pygame GUI element to display a video source and the pose landmarks
     Automatically resizes the camera feed to fit the window size
     """
 
     def __init__(
         self,
-        camera_id: str | int,
-        ui_manager: UIManager,
+        video_source: VideoSource,
         media_pipe_pose: MediaPipePose,
+        window: Surface,
+        source: Source,
+        dimensions: tuple[int, int],  # (width, height)
     ):
-        super().__init__(
-            relative_rect=Rect(400, 50, 700, 700),
-            image_surface=Surface((700, 700)),
-            manager=ui_manager,
-        )
-
-        self.ui_manager = ui_manager
-        self.camera = camera.Camera(camera_id)
+        self.source = source
+        self.dimensions = dimensions
+        self.window = window
         self.media_pipe_pose = media_pipe_pose
-        self.camera.start()
+        self.video_source = video_source
+        self._size = self.video_source.get_size()
+        self.prev_surface = None
 
-        print(self.camera.get_controls())
+    def update(self):
+        frame = self.video_source.get_frame()
 
-        self._size = self.camera.get_size()
+        # There is no new frame to display
+        if frame is None and self.prev_surface is not None:
+            self.window.blit(self.prev_surface, (400, 50))
+            return
 
-    def __fit_and_center_rect(self):
-        """
-        Fits the camera image to the window size without stretching.
-        Centers the camera image in the window.
-        :return:
-        """
-        # Get the dimensions of the container
-        image_width, image_height = self._size
+        # There is no new frame to display and no previous frame to display
+        if frame is None and self.prev_surface is None:
+            return
 
-        if self.rect.width / self.rect.height > image_width / image_height:
-            self.set_dimensions(
-                (self.rect.height * image_width / image_height, self.rect.height)
-            )
+        timestamp_ms = pygame.time.get_ticks()
+
+        self.media_pipe_pose.process_image(frame, timestamp_ms)
+
+        # Draw the landmarks on the image
+        if self.media_pipe_pose.visualisation is not None:
+            frame = self.media_pipe_pose.visualisation
+
+        if self.source == Source.CAMERA:
+            size = frame.shape[0], frame.shape[1]
+            frame = frame.swapaxes(0, 1)
         else:
-            self.set_dimensions(
-                (self.rect.width, self.rect.width * image_height / image_width)
-            )
+            size = frame.shape[1], frame.shape[0]
 
-    def update(self, time_delta: float):
-        super().update(time_delta)
-        self.__fit_and_center_rect()
+        image_surface = pygame.image.frombuffer(frame.flatten(), size, "RGB")
 
-        if self.camera is not None and self.camera.query_image():
-            image = self.camera.get_image()
+        # # Rotate the image 90 degrees
+        # if self.source == Source.CAMERA:
+        #     image_surface = pygame.transform.rotate(image_surface, -90)
 
-            # Convert the image to a numpy array
-            image_array = surfarray.array3d(image)
-            timestamp_ms = pygame.time.get_ticks()
-            self.media_pipe_pose.process_image(image_array, timestamp_ms)
+        # Resize the image to fit the window but maintain the aspect ratio
+        if size[0] > size[1]:
+            new_width = self.dimensions[0]
+            new_height = int(size[1] * (new_width / size[0]))
+        else:
+            new_height = self.dimensions[1]
+            new_width = int(size[0] * (new_height / size[1]))
 
-            image = self.media_pipe_pose.image_landmarks
-            if image is not None:
-                self.set_image(surfarray.make_surface(image))
+        image_surface = pygame.transform.scale(image_surface, (new_width, new_height))
+
+        self.prev_surface = image_surface
+        self.window.blit(image_surface, (400, 50))

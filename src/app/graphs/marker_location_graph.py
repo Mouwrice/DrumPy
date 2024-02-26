@@ -1,9 +1,9 @@
 from multiprocessing import Pool
-
-import io
+from typing import Any
 
 import numpy as np
 import pygame
+from numpy import ndarray, dtype
 from pygame_gui.elements import UIImage
 
 from app.graphs.ui_constants import GRAPH_FRAME_RANGE
@@ -12,7 +12,7 @@ from tracker.mediapipe_pose import MediaPipePose
 
 def plot_marker_location_graph(
     marker_locations: [(float, float, float)], frame: int
-) -> io.BytesIO:
+) -> ndarray | ndarray[Any, dtype[Any]]:
     """
     Plots the marker location graph using matplotlib writing the plot to a BytesIO object
     Cannot be a method of the MarkerLocationGraph class because it is used in a multiprocessing Pool
@@ -38,10 +38,9 @@ def plot_marker_location_graph(
     ax.set_title("Marker Location Graph")
 
     buf = io.BytesIO()
-    fig.savefig(buf)
+    fig.savefig(buf, format="png")
     buf.seek(0)
     plt.close(fig)
-
     return buf
 
 
@@ -71,10 +70,10 @@ class MarkerLocationGraph(UIImage):
         self.frame += 1
 
         if (
-            self.media_pipe_pose.result is not None
-            and self.media_pipe_pose.result.pose_world_landmarks is not None
+            self.media_pipe_pose.detection_result is not None
+            and self.media_pipe_pose.detection_result.pose_world_landmarks is not None
         ):
-            landmarks = self.media_pipe_pose.result.pose_world_landmarks
+            landmarks = self.media_pipe_pose.detection_result.pose_world_landmarks
             if len(landmarks) > 0:
                 landmarks = landmarks[0]
                 if self.marker_idx < len(landmarks):
