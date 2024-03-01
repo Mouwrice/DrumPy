@@ -57,7 +57,7 @@ class MarkerLocationGraph(UIImage):
         pool: Pool,
         media_pipe_pose: MediaPipePose,
         title: str,
-    ) -> object:
+    ):
         super().__init__(relative_rect, image_surface)
         self.marker_idx = marker_idx
         self.marker_locations: [(float, float, float)] = []

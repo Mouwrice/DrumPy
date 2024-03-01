@@ -18,9 +18,11 @@ class VideoDisplay:
         window: Surface,
         source: Source,
         dimensions: tuple[int, int],  # (width, height)
+        offset: tuple[int, int] = (0, 0),  # (x, y)
     ):
         self.source = source
         self.dimensions = dimensions
+        self.offset = offset
         self.window = window
         self.media_pipe_pose = media_pipe_pose
         self.video_source = video_source
@@ -32,14 +34,14 @@ class VideoDisplay:
 
         # There is no new frame to display
         if frame is None and self.prev_surface is not None:
-            self.window.blit(self.prev_surface, (400, 50))
+            self.window.blit(self.prev_surface, self.offset)
             return
 
         # There is no new frame to display and no previous frame to display
         if frame is None and self.prev_surface is None:
             return
 
-        timestamp_ms = pygame.time.get_ticks()
+        timestamp_ms = self.video_source.get_timestamp_ms()
 
         self.media_pipe_pose.process_image(frame, timestamp_ms)
 
@@ -70,4 +72,4 @@ class VideoDisplay:
         image_surface = pygame.transform.scale(image_surface, (new_width, new_height))
 
         self.prev_surface = image_surface
-        self.window.blit(image_surface, (400, 50))
+        self.window.blit(image_surface, self.offset)

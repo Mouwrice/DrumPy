@@ -241,3 +241,5 @@ fabric.properties
 *.mkv
 
 .idea/
+
+data/

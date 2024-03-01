@@ -3,6 +3,7 @@ from enum import Enum
 from multiprocessing import Pool
 
 import cv2
+import pygame.transform
 from numpy import ndarray
 from pygame import camera, surfarray
 
@@ -23,6 +24,7 @@ class VideoSource(ABC):
 
     def __init__(self, pool: Pool):
         self.pool = pool
+        self.stopped = False
 
     def get_fps(self) -> float:
         """
@@ -49,6 +51,13 @@ class VideoSource(ABC):
         """
         Get the size of the video source
         :return: The width and height of the video source
+        """
+        pass
+
+    def get_timestamp_ms(self) -> int:
+        """
+        Get the timestamp of the current frame
+        :return: The timestamp of the current frame
         """
         pass
 
@@ -81,6 +90,7 @@ class VideoFileSource(VideoSource):
         """
         ret, frame = self.cap.read()
         if not ret or frame is None:
+            self.stopped = True
             return None
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -99,6 +109,13 @@ class VideoFileSource(VideoSource):
         :return: The width and height of the video source
         """
         return self.source_width, self.source_height
+
+    def get_timestamp_ms(self) -> int:
+        """
+        Get the timestamp of the current frame
+        :return: The timestamp of the current frame
+        """
+        return int(self.cap.get(cv2.CAP_PROP_POS_MSEC))
 
 
 class CameraSource(VideoSource):
@@ -125,7 +142,10 @@ class CameraSource(VideoSource):
         :return: The frame and the timestamp
         """
         if self.camera.query_image():
-            frame = surfarray.array3d(self.camera.get_image())
+            image = self.camera.get_image()
+            image = pygame.transform.flip(image, True, False)
+            frame = surfarray.array3d(image)
+
             return frame
 
         return None
@@ -139,3 +159,13 @@ class CameraSource(VideoSource):
 
     def get_size(self) -> tuple[int, int]:
         return self.size
+
+    def get_timestamp_ms(self) -> int:
+        """
+        Get the timestamp of the current frame
+        :return: The timestamp of the current frame
+        """
+        return pygame.time.get_ticks()
+
+    def is_opened(self):
+        return True

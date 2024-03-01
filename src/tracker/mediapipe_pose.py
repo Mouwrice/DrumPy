@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 from typing import Any
 
@@ -13,6 +14,8 @@ from mediapipe.tasks.python.vision import (
     RunningMode,
 )
 from numpy import ndarray, dtype
+
+from measure.csv_utils.csv_object import CSVWriter
 
 
 class LandmarkerModel(Enum):
@@ -59,10 +62,18 @@ class MediaPipePose:
     Class to handle the pose estimation using MediaPipe
     """
 
-    def __init__(self, live_stream: bool = True):
+    def __init__(
+        self,
+        live_stream: bool = True,
+        model: LandmarkerModel = LandmarkerModel.FULL,
+        log_file: str | None = None,
+    ):
+        self.frame_count = 0
+        self.model = model
+
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(
-                model_asset_path=LandmarkerModel.HEAVY.value,
+                model_asset_path=self.model.value,
                 delegate=BaseOptions.Delegate.GPU,
             ),
             running_mode=RunningMode.LIVE_STREAM if live_stream else RunningMode.VIDEO,
@@ -80,6 +91,15 @@ class MediaPipePose:
         )
         self.visualisation = None
 
+        self.csv_writer = None
+        if log_file is not None:
+            self.log_file = (
+                log_file
+                if log_file is not None
+                else f"./data/mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            )
+            self.csv_writer = CSVWriter(self.log_file)
+
     def result_callback(
         self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
     ):
@@ -96,6 +116,31 @@ class MediaPipePose:
         self.visualisation = visualize_landmarks(
             image.numpy_view(), self.detection_result
         )
+        self.frame_count += 1
+        if self.csv_writer is not None:
+            self.write_landmarks(result, timestamp_ms)
+
+    def write_landmarks(self, result: PoseLandmarkerResult, timestamp_ms: int):
+        """
+        Write the landmarks to a file
+        :param result: The result of the pose estimation
+        :param timestamp_ms: The timestamp of the frame
+        :return:
+        """
+        pose_landmarsks = result.pose_landmarks[0]
+
+        for i, landmark in enumerate(pose_landmarsks):
+            self.csv_writer.write(
+                self.frame_count,
+                timestamp_ms,
+                i,
+                landmark.x,
+                landmark.y,
+                landmark.z,
+                landmark.visibility,
+                landmark.presence,
+                normalized=False,
+            )
 
     def process_image(self, image_array: ndarray, timestamp_ms: int):
         """
