@@ -27,13 +27,13 @@ class CSVRow:
         self.normalized: bool = normalized
 
     @staticmethod
-    def parse_row(row):
+    def parse_row(row, scale: float = 1.0):
         frame = int(row["frame"])
         time = int(row["time"])
         index = int(row["index"])
-        x = float(row["x"])
-        y = float(row["y"])
-        z = float(row["z"])
+        x = float(row["x"]) * scale
+        y = float(row["y"]) * scale
+        z = float(row["z"]) * scale
         visibility = row["visibility"]
         presence = row["presence"]
         normalized = row["normalized"]

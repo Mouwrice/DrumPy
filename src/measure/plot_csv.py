@@ -1,7 +1,34 @@
 import os
 
-from measure.csv_utils.csv_comparison import get_closest_frame_index, plot_positions
+from measure.csv_utils.csv_comparison import (
+    get_closest_frame_index,
+    row_deviations_boxplot,
+)
 from measure.frame import Frame
+
+
+def plot_files(
+    mediapipe_file: str,
+    qtm_file: str,
+    plot_file_prefix: str,
+    mediapipe_offset=0,
+    qtm_offset=0,
+    mapping=None,
+):
+    """
+    Plots the mediapipe and qtm csv files against each other
+    """
+    mediapipe_data: list[Frame] = Frame.frames_from_csv(mediapipe_file, scale=1000)
+    qtm_data: list[Frame] = Frame.frames_from_csv(qtm_file)
+
+    compare_qtm_mediapipe(
+        mediapipe_data,
+        qtm_data,
+        plot_file_prefix=plot_file_prefix,
+        mediapipe_offset=mediapipe_offset,
+        qtm_offset=qtm_offset,
+        mapping=mapping,
+    )
 
 
 def plot_all():
@@ -31,7 +58,8 @@ def plot_all():
             if file.startswith("mediapipe"):
                 # Parse the mediapipe csv file
                 mediapipe_data: list[Frame] = Frame.frames_from_csv(
-                    f"data/{directory}/{file}"
+                    f"data/{directory}/{file}",
+                    scale=1000,
                 )
 
                 mediapipe_offset = offsets.get(file, 0)
@@ -49,7 +77,9 @@ def plot_all():
 
 
 offsets = {
-    "mediapipe_multicam_asil_01_front_LITE_async_video.csv": 0,
+    "mediapipe_multicam_asil_01_front_LITE_async_video.csv": 70,
+    "mediapipe_multicam_asil_01_front_FULL_async_video.csv": 70,
+    "mediapipe_multicam_asil_01_front_HEAVY_async_video.csv": 70,
     "qtm_multicam_asil_01.csv": 0,
 }
 
@@ -78,8 +108,8 @@ def compare_qtm_mediapipe(
     assert len(mediapipe_data) > 0, "No frames found in QTM file"
     assert len(qtm_data) > 0, "No frames found in Mediapipe file"
 
-    mediapipe_offset = min(mediapipe_offset, mediapipe_data[0].frame)
-    qtm_offset = min(qtm_offset, qtm_data[0].frame)
+    mediapipe_offset = max(mediapipe_offset, mediapipe_data[0].frame)
+    qtm_offset = max(qtm_offset, qtm_data[0].frame)
 
     mp_idx = get_closest_frame_index(mediapipe_data, mediapipe_offset)
     qtm_idx = get_closest_frame_index(qtm_data, qtm_offset)
@@ -113,9 +143,22 @@ def compare_qtm_mediapipe(
     mp_to_qtm_basis(mp_pos)
 
     for key, value in mapping.items():
-        plot_positions(
-            qtm_pos,
-            mp_pos,
+        qtm_rows = [frame[key] for frame in qtm_pos]
+        mp_rows = [frame[value] for frame in mp_pos]
+        # plot_marker_trajectories(
+        #     qtm_rows,
+        #     mp_rows,
+        #     key,
+        #     value,
+        #     "qtm",
+        #     "mediapipe",
+        #     plot_file_prefix=plot_file_prefix,
+        #     show_plot=True,
+        # )
+
+        row_deviations_boxplot(
+            qtm_rows,
+            mp_rows,
             key,
             value,
             "qtm",
@@ -136,3 +179,8 @@ def mp_to_qtm_basis(mp_pos):
 
 if __name__ == "__main__":
     plot_all()
+    # plot_files("data/multicam_asil_01/mediapipe_multicam_asil_01_front_LITE_async_video.csv",
+    #            "data/multicam_asil_01/qtm_multicam_asil_01.csv",
+    #            "data/multicam_asil_01/mediapipe_multicam_asil_01_front_LITE_async_video",
+    #            mediapipe_offset=70,
+    #            mapping={0: 15})

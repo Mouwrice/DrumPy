@@ -14,7 +14,7 @@ class Frame:
         self.frame: int = 0
 
     @staticmethod
-    def frames_from_csv(csv_file: str):
+    def frames_from_csv(csv_file: str, scale: float = 1.0):
         """
         Read a CSV file and return a list of frames
         """
@@ -27,7 +27,7 @@ class Frame:
             frame.time_ms = row.time
             frame.rows.append(row)
             for row in reader:
-                row = CSVRow.parse_row(row)
+                row = CSVRow.parse_row(row, scale=scale)
                 if row.frame == frame.frame:
                     frame.rows.append(row)
                 else:
@@ -37,3 +37,10 @@ class Frame:
                     frame.time_ms = row.time
                     frame.rows.append(row)
         return frames
+
+
+def extract_rows(frames: list[Frame], marker: int):
+    """
+    Extract the rows for a certain marker
+    """
+    return [frame.rows[marker] for frame in frames]

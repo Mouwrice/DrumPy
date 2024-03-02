@@ -1,5 +1,6 @@
 from bokeh.io import output_file, save, show
 from bokeh.plotting import figure
+from matplotlib import pyplot as plt
 
 from measure.csv_utils.csv_row import CSVRow
 from measure.frame import Frame
@@ -21,9 +22,17 @@ def plot_axis(
     Normalizes the values between 0 and 1
     :return:
     """
+    # if label1 == "qtm":
+    #     axis1 = [x / 1000 for x in axis1]
 
-    if label1 == "qtm":
-        axis1 = [axis / 1000 for axis in axis1]
+    # Remove the average offset from the data
+    avg_offset = 0
+    for i in range(len(axis1)):
+        avg_offset += axis2[i] - axis1[i]
+    avg_offset /= len(axis1)
+
+    for i in range(len(axis1)):
+        axis2[i] -= avg_offset
 
     title = f"{plot_file_prefix}_{label1}_{marker1}_{label2}_{marker2}_{axis}_positions"
 
@@ -43,9 +52,67 @@ def plot_axis(
         save(plot)
 
 
-def plot_positions(
-    positions1: list[list[CSVRow]],
-    positions2: list[list[CSVRow]],
+def row_deviations_boxplot(
+    baseline: list[CSVRow],
+    comparison: list[CSVRow],
+    baseline_marker: int,
+    comparison_marker: int,
+    baseline_label: str = "qtm",
+    comparison_label: str = "mediapipe",
+    plot_file_prefix: str = "",
+    show_plot: bool = False,
+):
+    """
+    Plot the absolute sum of deviations of each CSVRow for a certain marker
+    as a matploblib boxplot
+    """
+    if baseline_label == "qtm":
+        for i in range(len(baseline)):
+            baseline[i].x /= 1000
+            baseline[i].y /= 1000
+            baseline[i].z /= 1000
+
+    # First calculate the average offset of the comparison to the baseline
+    avg_offset_x = 0
+    avg_offset_y = 0
+    avg_offset_z = 0
+    for i in range(len(baseline)):
+        avg_offset_x += comparison[i].x - baseline[i].x
+        avg_offset_y += comparison[i].y - baseline[i].y
+        avg_offset_z += comparison[i].z - baseline[i].z
+    avg_offset_x /= len(baseline)
+    avg_offset_y /= len(baseline)
+    avg_offset_z /= len(baseline)
+
+    deviations = [[], [], []]
+    for i in range(len(baseline)):
+        deviations[0].append(abs(comparison[i].x - baseline[i].x - avg_offset_x))
+        deviations[1].append(abs(comparison[i].y - baseline[i].y - avg_offset_y))
+        deviations[2].append(abs(comparison[i].z - baseline[i].z - avg_offset_z))
+
+    title = f"{plot_file_prefix}_{baseline_label}_{baseline_marker}_{comparison_label}_{comparison_marker}_deviations"
+
+    fig, ax = plt.subplots()
+    bplot = ax.boxplot(deviations, patch_artist=True, vert=True)
+    ax.set_title(title)
+    ax.set_ylabel("Deviation (mm)")
+    ax.set_xticklabels(["x", "y", "z"])
+
+    # increase the dpi for better quality
+    fig.set_dpi(300)
+
+    # make the plot bigger
+    fig.set_size_inches(10, 5)
+
+    # Save the plot
+    plt.savefig(f"{title}.png")
+    if show_plot:
+        plt.show()
+
+
+def plot_marker_trajectories(
+    positions1: list[CSVRow],
+    positions2: list[CSVRow],
     marker1: int,
     marker2: int,
     label1: str = "qtm",
@@ -56,8 +123,6 @@ def plot_positions(
     """
     Plot the positions of the markers over time
     """
-    positions1 = [position[marker1] for position in positions1]
-    positions2 = [position[marker2] for position in positions2]
     assert len(positions1) == len(
         positions2
     ), "Length of positions1 is not equal to length of positions2"
