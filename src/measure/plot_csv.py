@@ -110,6 +110,8 @@ def compare_qtm_mediapipe(
         mp_pos.append(mp_frame.rows)
         qtm_pos.append(qtm_frame.rows)
 
+    mp_to_qtm_basis(mp_pos)
+
     for key, value in mapping.items():
         plot_positions(
             qtm_pos,
@@ -119,6 +121,7 @@ def compare_qtm_mediapipe(
             "qtm",
             "mediapipe",
             plot_file_prefix=plot_file_prefix,
+            show_plot=True,
         )
 
 
@@ -128,7 +131,7 @@ def mp_to_qtm_basis(mp_pos):
     """
     for frame in mp_pos:
         for row in frame:
-            row.x, row.y, row.z = row.z, row.x, row.y
+            row.x, row.y, row.z = row.z, -row.x, row.y
 
 
 if __name__ == "__main__":

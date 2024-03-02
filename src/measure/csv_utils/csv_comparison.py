@@ -1,4 +1,4 @@
-from bokeh.io import output_file
+from bokeh.io import output_file, save, show
 from bokeh.plotting import figure
 
 from measure.csv_utils.csv_row import CSVRow
@@ -14,6 +14,7 @@ def plot_axis(
     label1: str = "qtm",
     label2: str = "mediapipe",
     plot_file_prefix: str = "",
+    show_plot: bool = False,
 ):
     """
     Plot the positions of the markers over time for a certain axis.
@@ -36,6 +37,10 @@ def plot_axis(
     plot.line(list(range(len(axis2))), axis2, legend_label=label2, line_color="blue")
 
     output_file(f"{title}.html")
+    if show_plot:
+        show(plot)
+    else:
+        save(plot)
 
 
 def plot_positions(
@@ -46,6 +51,7 @@ def plot_positions(
     label1: str = "qtm",
     label2: str = "mediapipe",
     plot_file_prefix: str = "",
+    show_plot: bool = False,
 ):
     """
     Plot the positions of the markers over time
@@ -79,6 +85,7 @@ def plot_positions(
         label1,
         label2,
         plot_file_prefix=plot_file_prefix,
+        show_plot=show_plot,
     )
     plot_axis(
         y1,
@@ -89,6 +96,7 @@ def plot_positions(
         label1,
         label2,
         plot_file_prefix=plot_file_prefix,
+        show_plot=show_plot,
     )
     plot_axis(
         z1,
@@ -99,13 +107,8 @@ def plot_positions(
         label1,
         label2,
         plot_file_prefix=plot_file_prefix,
+        show_plot=show_plot,
     )
-
-
-def row_distance(row1: CSVRow, row2: CSVRow) -> float:
-    return (
-        (row1.x - row2.x) ** 2 + (row1.y - row2.z) ** 2 + (row1.z - row2.y) ** 2
-    ) ** 0.5
 
 
 def get_closest_frame_index(frames: list[Frame], frame: int) -> int:

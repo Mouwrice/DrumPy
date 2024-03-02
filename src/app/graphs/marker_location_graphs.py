@@ -3,7 +3,7 @@ from multiprocessing import Pool
 import pygame
 
 from app.graphs.marker_location_graph import MarkerLocationGraph
-from mediapipe_markers import Marker
+from drum_tracking.mediapipe_markers import Marker
 from tracker.mediapipe_pose import MediaPipePose
 
 

@@ -26,15 +26,16 @@ def plot_marker_location_graph(
     # Generate frame numbers
     frame_range = np.arange(frame - len(marker_locations), frame)
     # Extract x, y, z from the marker locations
-    x = [location[0] for location in marker_locations]
-    y = [location[1] for location in marker_locations]
-    z = [location[2] for location in marker_locations]
+    x = [location[2] for location in marker_locations]
+    y = [-location[0] for location in marker_locations]
+    z = [location[1] for location in marker_locations]
     ax.plot(frame_range, x, label="X", color="red")
     ax.plot(frame_range, y, label="Y", color="green")
     ax.plot(frame_range, z, label="Z", color="blue")
 
     ax.set_xlabel("Frame")
     ax.set_ylabel("Location (m)")
+    ax.legend()
     ax.set_title(title)
 
     buf = io.BytesIO()

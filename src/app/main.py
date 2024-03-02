@@ -109,9 +109,10 @@ def main():
     with Pool(processes=6) as pool:
         app = App(
             pool,
-            source=Source.FILE,
-            file_path="../recordings/multicam_asil_01_left.mkv",
+            source=Source.CAMERA,
+            file_path="../recordings/multicam_asil_01_front.mkv",
             live_stream=True,
+            plot=True,
         )
         app.start()
 

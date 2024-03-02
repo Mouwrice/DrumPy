@@ -33,6 +33,7 @@ def plot_latency_graph(
     ax.set_xlabel("Frame")
     ax.set_ylabel("Latency (ms)")
     ax.set_title("Latency Graph")
+    ax.legend()
 
     buf = io.BytesIO()
     fig.savefig(buf, format="png")
