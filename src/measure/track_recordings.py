@@ -12,8 +12,8 @@ and output the results to a csv file
 
 def track_redcordings():
     recordings = [
-        "../recordings/multicam_asil_01_front.mkv",
-        # "../recordings/multicam_asil_01_left.mkv",
+        # "../recordings/multicam_asil_01_front.mkv",
+        "../recordings/multicam_asil_01_left.mkv",
         # "../recordings/multicam_asil_01_right.mkv",
         # "../recordings/multicam_asil_02_front.mkv",
         # "../recordings/multicam_asil_02_left.mkv",

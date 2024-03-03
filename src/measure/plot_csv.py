@@ -3,6 +3,7 @@ import os
 from measure.csv_utils.csv_comparison import (
     get_closest_frame_index,
     row_deviations_boxplot,
+    plot_marker_trajectories,
 )
 from measure.frame import Frame
 
@@ -20,6 +21,8 @@ def plot_files(
     """
     mediapipe_data: list[Frame] = Frame.frames_from_csv(mediapipe_file, scale=1000)
     qtm_data: list[Frame] = Frame.frames_from_csv(qtm_file)
+
+    mp_to_qtm_basis(mediapipe_data)
 
     compare_qtm_mediapipe(
         mediapipe_data,
@@ -54,6 +57,11 @@ def plot_all():
             # If the file is not a csv file
             if not file.endswith(".csv"):
                 continue
+
+            # If the file is not in the offsets dictionary
+            if file not in offsets:
+                continue
+
             # If the file is a mediapipe csv file
             if file.startswith("mediapipe"):
                 # Parse the mediapipe csv file
@@ -61,6 +69,8 @@ def plot_all():
                     f"data/{directory}/{file}",
                     scale=1000,
                 )
+
+                mp_to_qtm_basis(mediapipe_data)
 
                 mediapipe_offset = offsets.get(file, 0)
                 qtm_offset = offsets.get(qtm, 0)
@@ -140,23 +150,10 @@ def compare_qtm_mediapipe(
         mp_pos.append(mp_frame.rows)
         qtm_pos.append(qtm_frame.rows)
 
-    mp_to_qtm_basis(mp_pos)
-
     for key, value in mapping.items():
         qtm_rows = [frame[key] for frame in qtm_pos]
         mp_rows = [frame[value] for frame in mp_pos]
-        # plot_marker_trajectories(
-        #     qtm_rows,
-        #     mp_rows,
-        #     key,
-        #     value,
-        #     "qtm",
-        #     "mediapipe",
-        #     plot_file_prefix=plot_file_prefix,
-        #     show_plot=True,
-        # )
-
-        row_deviations_boxplot(
+        plot_marker_trajectories(
             qtm_rows,
             mp_rows,
             key,
@@ -167,20 +164,31 @@ def compare_qtm_mediapipe(
             show_plot=True,
         )
 
+        row_deviations_boxplot(
+            qtm_rows,
+            mp_rows,
+            key,
+            value,
+            "qtm",
+            "mediapipe",
+            plot_file_prefix=plot_file_prefix,
+            show_plot=False,
+        )
 
-def mp_to_qtm_basis(mp_pos):
+
+def mp_to_qtm_basis(frames: list[Frame]):
     """
     MP uses a different basis, convert to QTM basis
     """
-    for frame in mp_pos:
-        for row in frame:
-            row.x, row.y, row.z = row.z, -row.x, row.y
+    for frame in frames:
+        for row in frame.rows:
+            row.x, row.y, row.z = -row.z, row.x, -row.y
 
 
 if __name__ == "__main__":
     plot_all()
-    # plot_files("data/multicam_asil_01/mediapipe_multicam_asil_01_front_LITE_async_video.csv",
+    # plot_files("data/multicam_asil_01/mediapipe_multicam_asil_01_left_HEAVY_async_video.csv",
     #            "data/multicam_asil_01/qtm_multicam_asil_01.csv",
-    #            "data/multicam_asil_01/mediapipe_multicam_asil_01_front_LITE_async_video",
-    #            mediapipe_offset=70,
+    #            "data/multicam_asil_01/mediapipe_multicam_asil_01_left_HEAVY_async_video",
+    #            mediapipe_offset=100,
     #            mapping={0: 15})

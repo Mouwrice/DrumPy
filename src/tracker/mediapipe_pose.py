@@ -127,6 +127,9 @@ class MediaPipePose:
         :param timestamp_ms: The timestamp of the frame
         :return:
         """
+        if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
+            return
+
         pose_landmarsks = result.pose_landmarks[0]
 
         for i, landmark in enumerate(pose_landmarsks):
