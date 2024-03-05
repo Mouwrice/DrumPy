@@ -1,9 +1,13 @@
 [tool.poetry]
-name = "src"
+name = "drumpy"
 version = "0.1.0"
 description = ""
-authors = ["mouwrice <mauricevanwassenhove@gmail.com>"]
-readme = "README.md"
+authors = ["mouwrice <mauricevanwassenhove@fastmail.com>"]
+packages = [ { include = "drumpy", from = "src" } ]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "~3.11"
@@ -22,6 +26,4 @@ scikit-image = "^0.22.0"
 pre-commit = "^3.6.1"
 line-profiler-pycharm = "^1.1.0"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+
