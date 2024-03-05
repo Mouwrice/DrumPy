@@ -11,18 +11,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "~3.11"
-numpy = "1.26.3"
-pygame = "2.5.2"
-mediapipe = "0.10.9"
-opencv-python = "4.9.0.80"
-termcolor = "2.4.0"
+numpy = "^1.26.3"
+pygame = "^2.5.2"
+mediapipe = "^0.10.9"
+opencv-python = "^4.9.0.80"
+termcolor = "^2.4.0"
 pygame-gui = "^0.6.9"
 matplotlib = "^3.8.3"
 
-
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.6.1"
-line-profiler-pycharm = "^1.1.0"
 deptry = "^0.12.0"
-
-
