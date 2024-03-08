@@ -3,7 +3,7 @@ name = "drumpy"
 version = "0.1.0"
 description = ""
 authors = ["mouwrice <mauricevanwassenhove@fastmail.com>"]
-packages = [ { include = "drumpy", from = "src" } ]
+packages = [{ include = "drumpy" }]
 
 [build-system]
 requires = ["poetry-core"]

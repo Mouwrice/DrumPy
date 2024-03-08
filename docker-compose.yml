@@ -4,3 +4,7 @@ services:
     build:
       context: .
       network: host
+
+    privileged: true
+    devices:
+      - /dev/video0:/dev/video0

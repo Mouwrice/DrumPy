@@ -2,6 +2,7 @@ from multiprocessing import Pool
 
 import pygame
 import pygame.camera
+from mediapipe.tasks.python import BaseOptions
 from pygame_gui import UIManager
 
 from drumpy.app.camera_display import VideoDisplay
@@ -25,9 +26,18 @@ class App:
         file_path: str = None,
         live_stream: bool = True,
         model: LandmarkerModel = LandmarkerModel.FULL,
+        delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         plot: bool = False,
         log_file: None | str = None,
     ):
+        """
+        Initialize the application
+        :param live_stream: Whether the pose estimation is in live stream mode, causing the result to be
+        returned asynchronously and frames can be dropped
+        :param model: The model to use for the pose estimation
+        :param log_file: The file to log the landmarks to, if None no logging will be done
+        :delegate: The delegate to use for the pose estimation, Either CPU or GPU
+        """
         self.pool = pool  # Pool of processes for multiprocessing, required to not block the main thread
 
         self.model = model
@@ -44,8 +54,9 @@ class App:
         initial_window_size = (1800, 1000)
         self.window_surface = pygame.display.set_mode(initial_window_size)
         self.manager = UIManager(initial_window_size)
+
         self.media_pipe_pose = MediaPipePose(
-            live_stream=live_stream, model=model, log_file=log_file
+            live_stream=live_stream, model=model, log_file=log_file, delegate=delegate
         )
 
         FPSDisplay(
@@ -113,6 +124,7 @@ def main():
             file_path="../recordings/multicam_asil_01_front.mkv",
             live_stream=True,
             plot=True,
+            delegate=BaseOptions.Delegate.CPU,
         )
         app.start()
 

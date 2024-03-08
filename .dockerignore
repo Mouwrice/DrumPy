@@ -1,0 +1,6 @@
+.gitignore
+.mise.toml
+.pre-commit-config.yaml
+docker-compose.yml
+Dockerfile
+renovate.json

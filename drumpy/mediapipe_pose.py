@@ -66,15 +66,24 @@ class MediaPipePose:
         self,
         live_stream: bool = True,
         model: LandmarkerModel = LandmarkerModel.FULL,
+        delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         log_file: str | None = None,
     ):
+        """
+        Initialize the MediaPipePose class
+        :param live_stream: Whether the pose estimation is in live stream mode, causing the result to be
+        returned asynchronously and frames can be dropped
+        :param model: The model to use for the pose estimation
+        :param log_file: The file to log the landmarks to, if None no logging will be done
+        :delegate: The delegate to use for the pose estimation, Either CPU or GPU
+        """
         self.frame_count = 0
         self.model = model
 
         options = PoseLandmarkerOptions(
             base_options=BaseOptions(
                 model_asset_path=self.model.value,
-                delegate=BaseOptions.Delegate.GPU,
+                delegate=delegate,
             ),
             running_mode=RunningMode.LIVE_STREAM if live_stream else RunningMode.VIDEO,
             result_callback=self.result_callback if live_stream else None,
