@@ -1,0 +1,6 @@
+services:
+  app:
+    restart: always
+    build:
+      context: .
+      network: host
