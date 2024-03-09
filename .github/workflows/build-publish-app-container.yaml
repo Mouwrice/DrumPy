@@ -1,4 +1,4 @@
-name: Build & Publish Postgres image
+name: Build & Publish Image
 
 on:
   push:
