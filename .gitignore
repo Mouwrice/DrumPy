@@ -243,3 +243,6 @@ fabric.properties
 .idea/
 
 data/
+*.dist
+*.onefile-build
+*.bin
