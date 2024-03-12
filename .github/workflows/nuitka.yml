@@ -1,9 +1,8 @@
 name: Build & Publish Binaries
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 
 jobs:
