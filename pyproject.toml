@@ -6,8 +6,8 @@ authors = ["mouwrice <mauricevanwassenhove@fastmail.com>"]
 packages = [{ include = "drumpy" }]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=42", "wheel", "nuitka", "toml"]
+build-backend = "nuitka.distutils.Build"
 
 [tool.poetry.dependencies]
 python = "~3.11"
@@ -22,3 +22,4 @@ matplotlib = "3.8.3"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "3.6.2"
 deptry = "0.12.0"
+nuitka = "2.1"

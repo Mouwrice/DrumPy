@@ -123,8 +123,8 @@ def main():
             source=Source.CAMERA,
             file_path="../recordings/multicam_asil_01_front.mkv",
             live_stream=True,
-            plot=True,
-            delegate=BaseOptions.Delegate.CPU,
+            plot=False,
+            delegate=BaseOptions.Delegate.GPU,
         )
         app.start()
 
