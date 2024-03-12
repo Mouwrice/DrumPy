@@ -30,4 +30,8 @@ The image requires a webcam and display to be made available to the container.
 On Arch Linux I was able to get it running using the following
 steps: https://wiki.archlinux.org/title/Docker#Run_graphical_programs_inside_a_container
 
+```shell
+sudo docker run --device "/dev/video0" -e "DISPLAY=:0" --mount type=bind,src=/tmp/.X11-unix,dst=/tmp/.X11-unix --device=/dev/dri:/dev/dri  ghcr.io/mouwrice/drumpy:main
+```
+
 Windows yet to be tested.
