@@ -246,3 +246,4 @@ data/
 *.dist
 *.onefile-build
 *.bin
+*.build

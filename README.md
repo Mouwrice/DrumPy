@@ -9,9 +9,12 @@ Air drumming using body pose estimation.
 1. Have a working python 3.11 environment.
 2. Install poetry to install the dependencies and create a virtual environment. https://python-poetry.org/
 
+It might be that poetry is not added to PATH when installing with pip. In that case execute `python -m poetry` instead
+in the following commands.
+
 ```shell
-poetry install
-poetry run python -m drumpy.app.main
+poetry install --no-dev # Installs the project and dependencies in a virtual environment. Omitting the --no-dev flag will install development dependencies as well.
+poetry run python -m drumpy.app.main # Run the application
 ```
 
 ### Docker
