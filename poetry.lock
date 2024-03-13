@@ -825,12 +825,12 @@ setuptools = "*"
 
 [[package]]
 name = "nuitka"
-version = "2.1"
+version = "2.1.1"
 description = "Python compiler with full language support and CPython compatibility"
 optional = false
 python-versions = "*"
 files = [
-    {file = "Nuitka-2.1.tar.gz", hash = "sha256:7afe7789491153fd76c260bd33ceedc2441119309d4e33bcf026645352a1c46d"},
+    {file = "Nuitka-2.1.1.tar.gz", hash = "sha256:c68744c64cd7e2a3117cfe505cfce56bba811c6fea5564d7265d46d529970ab6"},
 ]
 
 [package.dependencies]
@@ -1008,6 +1008,7 @@ description = "Nvidia JIT LTO Library"
 optional = false
 python-versions = ">=3"
 files = [
+    {file = "nvidia_nvjitlink_cu12-12.4.99-py3-none-manylinux2014_aarch64.whl", hash = "sha256:75d6498c96d9adb9435f2bbdbddb479805ddfb97b5c1b32395c694185c20ca57"},
     {file = "nvidia_nvjitlink_cu12-12.4.99-py3-none-manylinux2014_x86_64.whl", hash = "sha256:c6428836d20fe7e327191c175791d38570e10762edc588fb46749217cd444c74"},
     {file = "nvidia_nvjitlink_cu12-12.4.99-py3-none-win_amd64.whl", hash = "sha256:991905ffa2144cb603d8ca7962d75c35334ae82bf92820b6ba78157277da1ad2"},
 ]
@@ -1810,4 +1811,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "b5febedb0d5409c1025a3d2e6e769823618fedee3cf7db667509fe1f606bea87"
+content-hash = "f9de95acefa90ed09f5679d63735ddd4b489e99682637f15ecdfbe024b0eb736"
