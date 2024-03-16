@@ -1,5 +1,3 @@
-from multiprocessing import Pool
-
 import pygame
 import pygame.camera
 from mediapipe.tasks.python import BaseOptions
@@ -7,8 +5,6 @@ from pygame_gui import UIManager
 
 from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
-from drumpy.app.graphs.latency_graph import LatencyGraph
-from drumpy.app.graphs.marker_location_graphs import MarkerLocationGraphs
 from drumpy.app.video_source import CameraSource, VideoFileSource, Source
 from drumpy.mediapipe_pose import MediaPipePose, LandmarkerModel
 
@@ -20,7 +16,6 @@ class App:
 
     def __init__(
         self,
-        pool: Pool,
         source: Source = Source.CAMERA,
         camera_id: str | int = "/dev/video0",
         file_path: str = None,
@@ -38,7 +33,6 @@ class App:
         :param log_file: The file to log the landmarks to, if None no logging will be done
         :delegate: The delegate to use for the pose estimation, Either CPU or GPU
         """
-        self.pool = pool  # Pool of processes for multiprocessing, required to not block the main thread
 
         self.model = model
 
@@ -67,9 +61,9 @@ class App:
         self.video_source = None
         match source:
             case Source.CAMERA:
-                self.video_source = CameraSource(camera_id, pool)
+                self.video_source = CameraSource(camera_id)
             case Source.FILE:
-                self.video_source = VideoFileSource(file_path, pool)
+                self.video_source = VideoFileSource(file_path)
 
         self.fps = self.video_source.get_fps()
 
@@ -83,14 +77,6 @@ class App:
         )
 
     def start(self):
-        if self.plot:
-            LatencyGraph(
-                pool=self.pool,
-                media_pipe_pose=self.media_pipe_pose,
-            )
-
-            MarkerLocationGraphs(self.pool, self.media_pipe_pose)
-
         frame = 0
         clock = pygame.time.Clock()
         running = True
@@ -115,18 +101,14 @@ class App:
 
 
 def main():
-    # Apply multiprocessing using Pool
-    # Can be used to execute long-running tasks in parallel without blocking the main thread
-    with Pool(processes=6) as pool:
-        app = App(
-            pool,
-            source=Source.CAMERA,
-            file_path="../recordings/multicam_asil_01_front.mkv",
-            live_stream=True,
-            plot=False,
-            delegate=BaseOptions.Delegate.GPU,
-        )
-        app.start()
+    app = App(
+        source=Source.CAMERA,
+        file_path="../recordings/multicam_asil_01_front.mkv",
+        live_stream=True,
+        plot=False,
+        delegate=BaseOptions.Delegate.GPU,
+    )
+    app.start()
 
 
 if __name__ == "__main__":
