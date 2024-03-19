@@ -126,6 +126,7 @@ class CameraSource(VideoSource):
         super().__init__()
         self.camera_id = camera_id
         self.camera = camera.Camera(camera_id)
+        self.camera.start()
         self.size = self.camera.get_size()
         self.camera.start()
 

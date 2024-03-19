@@ -42,7 +42,8 @@ class App:
         pygame.camera.init()
 
         print(pygame.camera.get_backends())
-        print(pygame.camera.list_cameras())
+        cameras = pygame.camera.list_cameras()
+        print(cameras)
 
         pygame.display.set_caption("DrumPy")
         initial_window_size = (1800, 1000)
@@ -61,7 +62,7 @@ class App:
         self.video_source = None
         match source:
             case Source.CAMERA:
-                self.video_source = CameraSource(camera_id)
+                self.video_source = CameraSource(cameras[0])
             case Source.FILE:
                 self.video_source = VideoFileSource(file_path)
 
@@ -106,7 +107,7 @@ def main():
         file_path="../recordings/multicam_asil_01_front.mkv",
         live_stream=True,
         plot=False,
-        delegate=BaseOptions.Delegate.GPU,
+        delegate=BaseOptions.Delegate.CPU,
     )
     app.start()
 
