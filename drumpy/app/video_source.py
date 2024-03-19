@@ -22,8 +22,7 @@ class VideoSource(ABC):
     Abstract base class for a video source
     """
 
-    def __init__(self, pool: Pool):
-        self.pool = pool
+    def __init__(self):
         self.stopped = False
 
     def get_fps(self) -> float:
@@ -67,8 +66,8 @@ class VideoFileSource(VideoSource):
     Class to handle a video source from a file
     """
 
-    def __init__(self, file_path: str, pool: Pool):
-        super().__init__(pool)
+    def __init__(self, file_path: str):
+        super().__init__()
         self.file_path = file_path
         self.cap = cv2.VideoCapture(file_path)
         self.source_fps = self.cap.get(cv2.CAP_PROP_FPS)
@@ -123,8 +122,8 @@ class CameraSource(VideoSource):
     Class to handle a video source from a camera
     """
 
-    def __init__(self, camera_id: int | str, pool: Pool):
-        super().__init__(pool)
+    def __init__(self, camera_id: int | str):
+        super().__init__()
         self.camera_id = camera_id
         self.camera = camera.Camera(camera_id)
         self.size = self.camera.get_size()
@@ -166,6 +165,3 @@ class CameraSource(VideoSource):
         :return: The timestamp of the current frame
         """
         return pygame.time.get_ticks()
-
-    def is_opened(self):
-        return True
