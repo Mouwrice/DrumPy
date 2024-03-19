@@ -20,5 +20,5 @@ pygame-gui = "0.6.9"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "3.6.2"
-deptry = "0.14.0"
+deptry = "0.14.2"
 nuitka = "2.1.2"
