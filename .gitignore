@@ -247,3 +247,5 @@ data/
 *.onefile-build
 *.bin
 *.build
+*.exe
+*.zip
