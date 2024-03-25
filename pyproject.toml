@@ -6,8 +6,8 @@ authors = ["mouwrice <mauricevanwassenhove@fastmail.com>"]
 packages = [{ include = "drumpy" }]
 
 [build-system]
-requires = ["setuptools>=42", "wheel", "nuitka", "toml"]
-build-backend = "nuitka.distutils.Build"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "~3.11"
