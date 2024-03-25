@@ -94,11 +94,11 @@ class MediaPipePose:
         self.latest_timestamp: int = (
             0  # The timestamp of the latest frame that was processed
         )
-        self.latency: int = 1  # The latency of the pose estimation, in milliseconds
+        self.latency: int = 0  # The latency of the pose estimation, in milliseconds
         self.live_stream = (
             live_stream  # Whether the pose estimation is in live stream mode
         )
-        self.visualisation = None
+        self.visualisation: ndarray | None = None
 
         self.csv_writer = None
         if log_file is not None:

@@ -1,6 +1,7 @@
 from abc import ABC
 from enum import Enum
 from multiprocessing import Pool
+from pathlib import Path
 
 import cv2
 import pygame.transform
@@ -68,11 +69,18 @@ class VideoFileSource(VideoSource):
 
     def __init__(self, file_path: str):
         super().__init__()
+
+        assert Path(file_path).exists(), f"File {file_path} does not exist"
+
         self.file_path = file_path
         self.cap = cv2.VideoCapture(file_path)
         self.source_fps = self.cap.get(cv2.CAP_PROP_FPS)
-        self.source_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.source_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        source_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        source_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        smallest = min(source_width, source_height)
+        self.size = (smallest, smallest)
+        self.left_offset = (source_width - smallest) // 2
+        self.top_offset = (source_height - smallest) // 2
         self.pool: Pool = None
 
     def get_fps(self) -> float:
@@ -93,7 +101,12 @@ class VideoFileSource(VideoSource):
             return None
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        return frame
+        # Crop the image to a square aspect ratio
+        cropped = frame[
+            self.top_offset : self.top_offset + self.size[1],
+            self.left_offset : self.left_offset + self.size[0],
+        ].copy()
+        return cropped
 
     def release(self):
         """
@@ -107,7 +120,7 @@ class VideoFileSource(VideoSource):
         Get the size of the video source
         :return: The width and height of the video source
         """
-        return self.source_width, self.source_height
+        return self.size
 
     def get_timestamp_ms(self) -> int:
         """
@@ -127,8 +140,12 @@ class CameraSource(VideoSource):
         self.camera_id = camera_id
         self.camera = camera.Camera(camera_id)
         self.camera.start()
-        self.size = self.camera.get_size()
-        self.camera.start()
+        original_size = self.camera.get_size()
+        # Crop the image to a square aspect ratio
+        min_size = min(original_size)
+        self.size = (min_size, min_size)
+        self.left_offset = (original_size[0] - min_size) // 2
+        self.top_offset = (original_size[1] - min_size) // 2
 
     def get_fps(self) -> float:
         """
@@ -142,9 +159,10 @@ class CameraSource(VideoSource):
         :return: The frame and the timestamp
         """
         if self.camera.query_image():
+            frame = pygame.Surface(self.size)
             image = self.camera.get_image()
-            image = pygame.transform.flip(image, True, False)
-            frame = surfarray.array3d(image)
+            frame.blit(image, (0, 0), ((self.left_offset, self.top_offset), self.size))
+            frame = surfarray.array3d(frame)
 
             return frame
 

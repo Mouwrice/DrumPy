@@ -18,7 +18,7 @@ class FPSDisplay(UILabel):
         mode = "Async Mode" if media_pipe_pose.live_stream else "Blocking Mode"
         self.model = media_pipe_pose.model
         super().__init__(
-            Rect((0, 0), (800, 50)),
+            Rect((0, 0), (900, 50)),
             f"UI FPS: -:--  Camera FPS: -:--   {mode}  Model: {self.model}",
             manager=ui_manager,
             anchors={"top": "top", "left": "left"},
@@ -41,9 +41,20 @@ class FPSDisplay(UILabel):
         if len(self.mediapipe_time_deltas) > 30:
             self.mediapipe_time_deltas.pop(0)
 
-        ui_fps = 1 / (sum(self.ui_time_deltas) / len(self.ui_time_deltas))
+        if len(self.ui_time_deltas) == 0 or len(self.mediapipe_time_deltas) == 0:
+            return
+
+        ui_time_deltas_sum = sum(self.ui_time_deltas)
+        if ui_time_deltas_sum <= 0:
+            return
+
+        ui_fps = 1 / (ui_time_deltas_sum / len(self.ui_time_deltas))
+
+        mediapipe_time_deltas_sum = sum(self.mediapipe_time_deltas)
+        if mediapipe_time_deltas_sum <= 0:
+            return
         camera_fps = 1000 / (
-            sum(self.mediapipe_time_deltas) / len(self.mediapipe_time_deltas)
+            mediapipe_time_deltas_sum / len(self.mediapipe_time_deltas)
         )
 
         mode = "Async Mode" if self.media_pipe_pose.live_stream else "Blocking Mode"
