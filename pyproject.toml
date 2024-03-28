@@ -2,7 +2,7 @@
 name = "drumpy"
 version = "0.1.0"
 description = ""
-authors = ["mouwrice <mauricevanwassenhove@fastmail.com>"]
+authors = ["Maurice Van Wassenhove <mauricevanwassenhove@fastmail.com>"]
 
 [build-system]
 requires = ["poetry-core"]
