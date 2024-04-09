@@ -1,5 +1,4 @@
 import time
-from enum import Enum
 from typing import Any
 
 import numpy as np
@@ -16,12 +15,7 @@ from mediapipe.tasks.python.vision import (
 from numpy import ndarray, dtype
 
 from drumpy.trajectory_file import TrajectoryFile
-
-
-class LandmarkerModel(Enum):
-    LITE = "./pose_landmarker_lite.task"
-    FULL = "./pose_landmarker_full.task"
-    HEAVY = "./pose_landmarker_heavy.task"
+from landmarkermodel import LandmarkerModel
 
 
 def visualize_landmarks(
@@ -68,6 +62,7 @@ class MediaPipePose:
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         log_file: str | None = None,
+        world_landmarks: bool = False,
     ):
         """
         Initialize the MediaPipePose class
@@ -75,7 +70,8 @@ class MediaPipePose:
         returned asynchronously and frames can be dropped
         :param model: The model to use for the pose estimation
         :param log_file: The file to log the landmarks to, if None no logging will be done
-        :delegate: The delegate to use for the pose estimation, Either CPU or GPU
+        :param delegate: The delegate to use for the pose estimation, Either CPU or GPU
+        :param world_landmarks: Whether to use world landmarks or not
         """
         self.frame_count = 0
         self.model = model
@@ -99,6 +95,8 @@ class MediaPipePose:
             live_stream  # Whether the pose estimation is in live stream mode
         )
         self.visualisation: ndarray | None = None
+
+        self.world_landmarks = world_landmarks
 
         self.csv_writer = None
         if log_file is not None:
@@ -139,9 +137,13 @@ class MediaPipePose:
         if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
             return
 
-        pose_landmarsks = result.pose_landmarks[0]
+        pose_landmarks = (
+            result.pose_world_landmarks[0]
+            if self.world_landmarks
+            else result.pose_landmarks[0]
+        )
 
-        for i, landmark in enumerate(pose_landmarsks):
+        for i, landmark in enumerate(pose_landmarks):
             self.csv_writer.write(
                 self.frame_count,
                 timestamp_ms,
@@ -151,7 +153,7 @@ class MediaPipePose:
                 landmark.z,
                 landmark.visibility,
                 landmark.presence,
-                normalized=False,
+                normalized=not self.world_landmarks,
             )
 
     def process_image(self, image_array: ndarray, timestamp_ms: int):

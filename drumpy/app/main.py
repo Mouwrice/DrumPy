@@ -24,6 +24,7 @@ class App:
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         plot: bool = False,
         log_file: None | str = None,
+        world_landmarks: bool = False,
     ):
         """
         Initialize the application
@@ -32,6 +33,8 @@ class App:
         :param model: The model to use for the pose estimation
         :param log_file: The file to log the landmarks to, if None no logging will be done
         :delegate: The delegate to use for the pose estimation, Either CPU or GPU
+        :param plot: Whether to plot the results or not
+        :param world_landmarks: Whether to use world landmarks or not
         """
 
         self.model = model
@@ -54,7 +57,11 @@ class App:
         self.manager = UIManager(initial_window_size)
 
         self.media_pipe_pose = MediaPipePose(
-            live_stream=live_stream, model=model, log_file=log_file, delegate=delegate
+            live_stream=live_stream,
+            model=model,
+            log_file=log_file,
+            delegate=delegate,
+            world_landmarks=world_landmarks,
         )
 
         FPSDisplay(
@@ -115,6 +122,7 @@ def main():
         live_stream=False,
         plot=False,
         delegate=BaseOptions.Delegate.GPU,
+        world_landmarks=True,
     )
     app.start()
 
