@@ -17,24 +17,22 @@ class VideoDisplay:
         media_pipe_pose: MediaPipePose,
         window: Surface,
         source: Source,
-        dimensions: tuple[int, int],  # (width, height)
-        offset: tuple[int, int] = (0, 0),  # (x, y)
+        rect: pygame.Rect,  # dimensions Rect((left, top), (width, height))
     ):
         self.source = source
-        self.dimensions = dimensions
-        self.offset = offset
+        self.rect = rect
         self.window = window
         self.media_pipe_pose = media_pipe_pose
         self.video_source = video_source
-        self._size = self.video_source.get_size()
         self.prev_surface = None
 
     def update(self):
         frame = self.video_source.get_frame()
+        assert frame is None or frame.shape[0] == frame.shape[1], "Frame is not square"
 
         # There is no new frame to display
         if frame is None and self.prev_surface is not None:
-            self.window.blit(self.prev_surface, self.offset)
+            self.window.blit(self.prev_surface, self.rect.topleft)
             return
 
         # There is no new frame to display and no previous frame to display
@@ -50,26 +48,18 @@ class VideoDisplay:
             frame = self.media_pipe_pose.visualisation
 
         if self.source == Source.CAMERA:
-            size = frame.shape[0], frame.shape[1]
             frame = frame.swapaxes(0, 1)
-        else:
-            size = frame.shape[1], frame.shape[0]
 
-        image_surface = pygame.image.frombuffer(frame.flatten(), size, "RGB")
+        image_surface = pygame.image.frombuffer(
+            frame.flatten(), (frame.shape[0], frame.shape[0]), "RGB"
+        )
 
         # # Rotate the image 90 degrees
         # if self.source == Source.CAMERA:
         #     image_surface = pygame.transform.rotate(image_surface, -90)
 
-        # Resize the image to fit the window but maintain the aspect ratio
-        if size[0] > size[1]:
-            new_width = self.dimensions[0]
-            new_height = int(size[1] * (new_width / size[0]))
-        else:
-            new_height = self.dimensions[1]
-            new_width = int(size[0] * (new_height / size[1]))
-
-        image_surface = pygame.transform.scale(image_surface, (new_width, new_height))
+        # Scale the image to fit the window
+        image_surface = pygame.transform.scale(image_surface, self.rect.size)
 
         self.prev_surface = image_surface
-        self.window.blit(image_surface, self.offset)
+        self.window.blit(image_surface, self.rect.topleft)

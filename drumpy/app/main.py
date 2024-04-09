@@ -24,6 +24,7 @@ class App:
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         plot: bool = False,
         log_file: None | str = None,
+        world_landmarks: bool = False,
     ):
         """
         Initialize the application
@@ -32,6 +33,8 @@ class App:
         :param model: The model to use for the pose estimation
         :param log_file: The file to log the landmarks to, if None no logging will be done
         :delegate: The delegate to use for the pose estimation, Either CPU or GPU
+        :param plot: Whether to plot the results or not
+        :param world_landmarks: Whether to use world landmarks or not
         """
 
         self.model = model
@@ -46,12 +49,19 @@ class App:
         print(cameras)
 
         pygame.display.set_caption("DrumPy")
-        initial_window_size = (1800, 1000)
+        if self.plot:
+            initial_window_size = (1300, 900)
+        else:
+            initial_window_size = (900, 900)
         self.window_surface = pygame.display.set_mode(initial_window_size)
         self.manager = UIManager(initial_window_size)
 
         self.media_pipe_pose = MediaPipePose(
-            live_stream=live_stream, model=model, log_file=log_file, delegate=delegate
+            live_stream=live_stream,
+            model=model,
+            log_file=log_file,
+            delegate=delegate,
+            world_landmarks=world_landmarks,
         )
 
         FPSDisplay(
@@ -68,11 +78,15 @@ class App:
 
         self.fps = self.video_source.get_fps()
 
+        if self.plot:
+            rect = pygame.Rect((400, 50), (900, 900))
+        else:
+            rect = pygame.Rect((0, 50), (900, 900))
+
         self.video_display = VideoDisplay(
             video_source=self.video_source,
             media_pipe_pose=self.media_pipe_pose,
-            dimensions=(1000, 800) if self.plot else (1800, 950),
-            offset=(400, 50) if self.plot else (0, 50),
+            rect=rect,
             window=self.window_surface,
             source=source,
         )
@@ -103,11 +117,12 @@ class App:
 
 def main():
     app = App(
-        source=Source.CAMERA,
-        file_path="../recordings/multicam_asil_01_front.mkv",
-        live_stream=True,
+        source=Source.FILE,
+        file_path="../../recordings/multicam_asil_01_front.mkv",
+        live_stream=False,
         plot=False,
-        delegate=BaseOptions.Delegate.CPU,
+        delegate=BaseOptions.Delegate.GPU,
+        world_landmarks=True,
     )
     app.start()
 
