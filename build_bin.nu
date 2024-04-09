@@ -1,0 +1,1 @@
+(poetry run python -m nuitka --include-plugin-directory=".venv/lib/python3.11/site-packages/pygame_gui/data/" --include-data-files=./.venv/lib/python3.11/site-packages/pygame_gui/data/*.*=pygame_gui/data/ --include-data-files=./.venv/lib/python3.11/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/ --onefile ./drumpy/app/main.py)
