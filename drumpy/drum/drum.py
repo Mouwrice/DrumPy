@@ -1,6 +1,6 @@
 from enum import auto, Enum
 from time import sleep
-from typing import Self
+from typing import Self, Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -50,7 +50,7 @@ class Drum:
         self: Self,
         margin: float,
         min_margin: float,
-        presets: dict[str, tuple[float, float, float]] | None = None,
+        presets: Optional[dict[str, tuple[float, float, float]]] = None,
         sleep_option: SleepOption = SleepOption.SLEEP,
     ) -> None:
         snare_drum = Sound(
@@ -162,7 +162,7 @@ class Drum:
                 f"with distance {closest_distance:.3f}"
             )
 
-    def auto_calibrate(self: Self, sounds: list[int] | None = None) -> None:
+    def auto_calibrate(self: Self, sounds: Optional[list[int]] = None) -> None:
         """
         Automatically calibrate all sounds
         :param sounds: List of sounds to calibrate, if None, all sounds will be calibrated in order

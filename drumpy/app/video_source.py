@@ -91,7 +91,7 @@ class VideoFileSource(VideoSource):
         """
         return self.source_fps
 
-    def get_frame(self: Self) -> ndarray | None:
+    def get_frame(self: Self) -> Optional[ndarray]:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
@@ -153,7 +153,7 @@ class CameraSource(VideoSource):
         """
         return 60
 
-    def get_frame(self: Self) -> ndarray | None:
+    def get_frame(self: Self) -> Optional[ndarray]:
         """
         Get the next frame from the video
         :return: The frame and the timestamp

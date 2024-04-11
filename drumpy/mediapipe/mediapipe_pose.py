@@ -16,7 +16,7 @@ from numpy import ndarray, dtype
 
 from drumpy.landmarkermodel import LandmarkerModel
 from drumpy.trajectory_file import TrajectoryFile
-from options.landmark_type import LandmarkType
+from mediapipe.landmark_type import LandmarkType
 
 
 def visualize_landmarks(

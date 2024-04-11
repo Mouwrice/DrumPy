@@ -10,7 +10,7 @@ from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
 from drumpy.app.video_source import CameraSource, VideoFileSource, Source
 from drumpy.mediapipe_pose import MediaPipePose, LandmarkerModel
-from options.landmark_type import LandmarkType
+from mediapipe.landmark_type import LandmarkType
 
 
 class App:
@@ -25,7 +25,7 @@ class App:
         running_mode: RunningMode = RunningMode.LIVE_STREAM,
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
-        log_file: None | str = None,
+        log_file: Optional[str] = None,
         landmark_type: LandmarkType = LandmarkType.WORLD_LANDMARKS,
     ) -> None:
         """
