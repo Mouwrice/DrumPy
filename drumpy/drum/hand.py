@@ -18,7 +18,7 @@ class Hand:
         self.hand_out: Marker = hand_out
         self.hand_in: Marker = hand_in
 
-        self.tracker: MarkerTracker = tracker
+        self.tracker = tracker
 
         self.position = np.array([0, 0, 0])
 
