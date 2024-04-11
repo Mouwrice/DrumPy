@@ -4,6 +4,10 @@ version = "0.1.0"
 description = ""
 authors = ["Maurice Van Wassenhove <mauricevanwassenhove@fastmail.com>"]
 
+[tool.poetry.virtualenvs]
+create = true
+in-project = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
