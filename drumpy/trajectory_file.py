@@ -1,7 +1,7 @@
 import csv
 from typing import Optional, Self
 
-from mediapipe.landmark_type import LandmarkType
+from drumpy.tracking.landmark_type import LandmarkType
 
 
 class TrajectoryFile:

@@ -5,7 +5,7 @@ from pygame import Rect
 from pygame_gui import UIManager
 from pygame_gui.elements import UILabel
 
-from drumpy.mediapipe_pose import MediaPipePose
+from drumpy.tracking.mediapipe_pose import MediaPipePose
 
 MEMORY = 30
 

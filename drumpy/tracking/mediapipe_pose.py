@@ -14,9 +14,9 @@ from mediapipe.tasks.python.vision import (
 )
 from numpy import ndarray, dtype
 
-from drumpy.landmarkermodel import LandmarkerModel
+from drumpy.tracking.landmarker_model import LandmarkerModel
 from drumpy.trajectory_file import TrajectoryFile
-from mediapipe.landmark_type import LandmarkType
+from drumpy.tracking.landmark_type import LandmarkType
 
 
 def visualize_landmarks(
