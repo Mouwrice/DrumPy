@@ -14,7 +14,7 @@ class FPSDisplay(UILabel):
         self,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
-    ):
+    ) -> None:
         mode = "Async Mode" if media_pipe_pose.live_stream else "Blocking Mode"
         self.model = media_pipe_pose.model
         super().__init__(
@@ -30,7 +30,7 @@ class FPSDisplay(UILabel):
         self.media_pipe_pose = media_pipe_pose
         self.ui_manager = ui_manager
 
-    def update(self, time_delta: float):
+    def update(self, time_delta: float) -> None:
         super().update(time_delta)
 
         self.ui_time_deltas.append(time_delta)

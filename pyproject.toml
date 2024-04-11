@@ -21,3 +21,8 @@ pygame-gui = "0.6.9"
 pre-commit = "3.7.0"
 deptry = "0.16.1"
 nuitka = "2.1.5"
+ruff-lsp = "^0.0.53"
+
+[tool.ruff.lint]
+select = [ "E", "F", "N", "ANN", "FBT", "B", "A", "C4", "PIE", "Q", "RET", "SLF", "SIM", "ARG", "PL", "PERF", "RUF"]
+fixable = ["ALL"]

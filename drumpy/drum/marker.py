@@ -6,7 +6,7 @@ class Marker:
     A marker is a point on the body that can be tracked by QTM.
     """
 
-    def __init__(self, label: str, index: int):
+    def __init__(self, label: str, index: int) -> None:
         self.label = label
         # index is the index of the marker in the QTM project
         # because the python SDK is made by baboons, the label is not available

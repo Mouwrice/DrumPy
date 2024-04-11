@@ -18,7 +18,7 @@ class VideoDisplay:
         window: Surface,
         source: Source,
         rect: pygame.Rect,  # dimensions Rect((left, top), (width, height))
-    ):
+    ) -> None:
         self.source = source
         self.rect = rect
         self.window = window
@@ -26,7 +26,7 @@ class VideoDisplay:
         self.video_source = video_source
         self.prev_surface = None
 
-    def update(self):
+    def update(self) -> None:
         frame = self.video_source.get_frame()
         assert frame is None or frame.shape[0] == frame.shape[1], "Frame is not square"
 

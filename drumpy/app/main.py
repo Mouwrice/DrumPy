@@ -7,6 +7,7 @@ from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
 from drumpy.app.video_source import CameraSource, VideoFileSource, Source
 from drumpy.mediapipe_pose import MediaPipePose, LandmarkerModel
+from typing import Optional
 
 
 class App:
@@ -18,14 +19,14 @@ class App:
         self,
         source: Source = Source.CAMERA,
         camera_id: str | int = "/dev/video0",
-        file_path: str = None,
+        file_path: Optional[str] = None,
         live_stream: bool = True,
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         plot: bool = False,
         log_file: None | str = None,
         world_landmarks: bool = False,
-    ):
+    ) -> None:
         """
         Initialize the application
         :param live_stream: Whether the pose estimation is in live stream mode, causing the result to be
@@ -49,10 +50,7 @@ class App:
         print(cameras)
 
         pygame.display.set_caption("DrumPy")
-        if self.plot:
-            initial_window_size = (1300, 900)
-        else:
-            initial_window_size = (900, 900)
+        initial_window_size = (1300, 900) if self.plot else (900, 900)
         self.window_surface = pygame.display.set_mode(initial_window_size)
         self.manager = UIManager(initial_window_size)
 
@@ -91,7 +89,7 @@ class App:
             source=source,
         )
 
-    def start(self):
+    def start(self) -> None:
         frame = 0
         clock = pygame.time.Clock()
         running = True
@@ -115,7 +113,7 @@ class App:
         pygame.quit()
 
 
-def main():
+def main() -> None:
     app = App(
         source=Source.FILE,
         file_path="../../recordings/multicam_asil_01_front.mkv",

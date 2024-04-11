@@ -11,7 +11,7 @@ class Hand:
         hand_out: Marker,
         hand_in: Marker,
         tracker: MarkerTracker,
-    ):
+    ) -> None:
         self.wrist_out: Marker = wrist_out
         self.hand_out: Marker = hand_out
         self.hand_in: Marker = hand_in
@@ -20,7 +20,7 @@ class Hand:
 
         self.position = np.array([0, 0, 0])
 
-    def update(self, markers):
+    def update(self, markers) -> None:
         self.wrist_out.pos = np.array(markers[self.wrist_out.index])
         self.hand_out.pos = np.array(markers[self.hand_out.index])
         self.hand_in.pos = np.array(markers[self.hand_in.index])

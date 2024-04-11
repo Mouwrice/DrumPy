@@ -41,7 +41,7 @@ class Drum:
         min_margin: float,
         presets: dict[str, tuple[float, float, float]] | None = None,
         no_sleep: bool = False,
-    ):
+    ) -> None:
         """
         :param presets:
         :param no_sleep: Whether to sleep between calibrations or not
@@ -108,7 +108,7 @@ class Drum:
 
         self.no_sleep = no_sleep
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "\n".join([str(sound) for sound in self.sounds])
 
     def find_and_play_sound(
@@ -116,7 +116,7 @@ class Drum:
         position: npt.NDArray[np.float64],
         marker_label: str,
         sounds: list[int] | None = None,
-    ):
+    ) -> None:
         """
         Find the closest sound to the given position and play it
         If the drum is calibrating sounds, the to be calibrated sound will be played
@@ -153,7 +153,7 @@ class Drum:
                 f"{marker_label}: No sound found for position {print_float_array(position)} with distance {closest_distance:.3f}"
             )
 
-    def auto_calibrate(self, sounds: list[int] | None = None):
+    def auto_calibrate(self, sounds: list[int] | None = None) -> None:
         """
         Automatically calibrate all sounds
         :param sounds: List of sounds to calibrate, if None, all sounds will be calibrated in order
@@ -164,7 +164,7 @@ class Drum:
 
         self.auto_calibrations = sounds
 
-    def check_calibrations(self):
+    def check_calibrations(self) -> None:
         """
         Check if there are any sounds that need to be calibrated
         :return:

@@ -28,7 +28,7 @@ class Sound:
         min_margin: float,
         margin: float,
         position: tuple[float, float, float] | None = None,
-    ):
+    ) -> None:
         self.name = name
         self.sound = pygame.mixer.Sound(path)
 
@@ -49,7 +49,7 @@ class Sound:
             margin  # the current margin will move towards the minimum margin over time
         )
 
-    def calibrate(self):
+    def calibrate(self) -> None:
         """
         Set the sound to calibrate mode
         """
@@ -93,7 +93,7 @@ class Sound:
 
         return None
 
-    def hit(self, position: npt.NDArray[np.float64]):
+    def hit(self, position: npt.NDArray[np.float64]) -> None:
         """
         Update the position of the sound slowly to the given position and play it
         :param position:

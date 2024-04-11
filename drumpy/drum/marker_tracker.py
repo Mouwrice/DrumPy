@@ -19,7 +19,7 @@ class MarkerTracker:
         memory: int = 15,
         downward_trend: float = -2,
         upward_trend: float = 1,
-    ):
+    ) -> None:
         self.label = label
 
         # the sounds that can be played by this marker
@@ -47,11 +47,11 @@ class MarkerTracker:
         self.upward_trend = upward_trend
 
         # clustering the hit positions
-        self.hits = dict()
+        self.hits = {}
 
         self.drum = drum
 
-    def update(self, position: npt.NDArray[np.float64]):
+    def update(self, position: npt.NDArray[np.float64]) -> None:
         if self.time_until_next_hit > 0:
             self.time_until_next_hit -= 1
 
@@ -75,7 +75,7 @@ class MarkerTracker:
                 self.positions[-self.look_ahead], self.label, self.sounds
             )
 
-    def register_hit(self, position: tuple[float, float, float]):
+    def register_hit(self, position: tuple[float, float, float]) -> None:
         closest_hit = None
         closest_distance = float("inf")
         for key in self.hits:
@@ -122,7 +122,7 @@ class MarkerTracker:
             and self.time_until_next_hit == 0
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{}: \n{}  {}".format(
             self.label, self.positions[-1], self.velocities[-1]
         )

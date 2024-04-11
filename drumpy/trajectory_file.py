@@ -1,4 +1,5 @@
 import csv
+from typing import Optional
 
 
 class TrajectoryFile:
@@ -6,7 +7,7 @@ class TrajectoryFile:
     Class to read and write the captured data to a CSV file.
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         fieldnames = [
             "frame",
             "time",
@@ -30,10 +31,10 @@ class TrajectoryFile:
         x: float,
         y: float,
         z: float,
-        visibility: float = None,
-        presence: float = None,
+        visibility: Optional[float] = None,
+        presence: Optional[float] = None,
         normalized: bool = False,
-    ):
+    ) -> None:
         """
         Write a line to the CSV file
         """
@@ -51,6 +52,6 @@ class TrajectoryFile:
             }
         )
 
-    def close(self):
+    def close(self) -> None:
         self.file.flush()
         self.file.close()

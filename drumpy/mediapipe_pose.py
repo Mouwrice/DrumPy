@@ -63,7 +63,7 @@ class MediaPipePose:
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         log_file: str | None = None,
         world_landmarks: bool = False,
-    ):
+    ) -> None:
         """
         Initialize the MediaPipePose class
         :param live_stream: Whether the pose estimation is in live stream mode, causing the result to be
@@ -109,7 +109,7 @@ class MediaPipePose:
 
     def result_callback(
         self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
-    ):
+    ) -> None:
         """
         Callback method to receive the result of the pose estimation
         :param result:
@@ -127,7 +127,7 @@ class MediaPipePose:
         if self.csv_writer is not None:
             self.write_landmarks(result, timestamp_ms)
 
-    def write_landmarks(self, result: PoseLandmarkerResult, timestamp_ms: int):
+    def write_landmarks(self, result: PoseLandmarkerResult, timestamp_ms: int) -> None:
         """
         Write the landmarks to a file
         :param result: The result of the pose estimation
@@ -156,7 +156,7 @@ class MediaPipePose:
                 normalized=not self.world_landmarks,
             )
 
-    def process_image(self, image_array: ndarray, timestamp_ms: int):
+    def process_image(self, image_array: ndarray, timestamp_ms: int) -> None:
         """
         Process the image
         :param timestamp_ms: The timestamp of the frame

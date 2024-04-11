@@ -23,7 +23,7 @@ class VideoSource(ABC):
     Abstract base class for a video source
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.stopped = False
 
     def get_fps(self) -> float:
@@ -31,35 +31,30 @@ class VideoSource(ABC):
         Get the frames per second of the video
         :return: The frames per second
         """
-        pass
 
     def get_frame(self) -> ndarray | None:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
         """
-        pass
 
-    def release(self):
+    def release(self) -> None:
         """
         Release the video source
         :return:
         """
-        pass
 
     def get_size(self) -> tuple[int, int]:
         """
         Get the size of the video source
         :return: The width and height of the video source
         """
-        pass
 
     def get_timestamp_ms(self) -> int:
         """
         Get the timestamp of the current frame
         :return: The timestamp of the current frame
         """
-        pass
 
 
 class VideoFileSource(VideoSource):
@@ -67,7 +62,7 @@ class VideoFileSource(VideoSource):
     Class to handle a video source from a file
     """
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str) -> None:
         super().__init__()
 
         assert Path(file_path).exists(), f"File {file_path} does not exist"
@@ -102,13 +97,12 @@ class VideoFileSource(VideoSource):
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # Crop the image to a square aspect ratio
-        cropped = frame[
+        return frame[
             self.top_offset : self.top_offset + self.size[1],
             self.left_offset : self.left_offset + self.size[0],
         ].copy()
-        return cropped
 
-    def release(self):
+    def release(self) -> None:
         """
         Release the video capture
         :return:
@@ -135,7 +129,7 @@ class CameraSource(VideoSource):
     Class to handle a video source from a camera
     """
 
-    def __init__(self, camera_id: int | str):
+    def __init__(self, camera_id: int | str) -> None:
         super().__init__()
         self.camera_id = camera_id
         self.camera = camera.Camera(camera_id)
@@ -162,18 +156,15 @@ class CameraSource(VideoSource):
             frame = pygame.Surface(self.size)
             image = self.camera.get_image()
             frame.blit(image, (0, 0), ((self.left_offset, self.top_offset), self.size))
-            frame = surfarray.array3d(frame)
-
-            return frame
+            return surfarray.array3d(frame)
 
         return None
 
-    def release(self):
+    def release(self) -> None:
         """
         Release the video capture
         :return:
         """
-        pass
 
     def get_size(self) -> tuple[int, int]:
         return self.size
