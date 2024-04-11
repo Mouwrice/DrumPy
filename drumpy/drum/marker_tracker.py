@@ -1,9 +1,12 @@
 from statistics import mean
+from typing import Self
 
 import numpy as np
 import numpy.typing as npt
 
 from drumpy.drum.drum import Drum
+
+MAX_DISTANCE = 100
 
 
 class MarkerTracker:
@@ -12,7 +15,7 @@ class MarkerTracker:
     """
 
     def __init__(
-        self,
+        self: Self,
         label: str,
         sounds: list[int],
         drum: Drum,
@@ -51,7 +54,7 @@ class MarkerTracker:
 
         self.drum = drum
 
-    def update(self, position: npt.NDArray[np.float64]) -> None:
+    def update(self: Self, position: npt.NDArray[np.float64]) -> None:
         if self.time_until_next_hit > 0:
             self.time_until_next_hit -= 1
 
@@ -75,12 +78,12 @@ class MarkerTracker:
                 self.positions[-self.look_ahead], self.label, self.sounds
             )
 
-    def register_hit(self, position: tuple[float, float, float]) -> None:
+    def register_hit(self: Self, position: tuple[float, float, float]) -> None:
         closest_hit = None
         closest_distance = float("inf")
         for key in self.hits:
             distance = np.linalg.norm(np.array(key) - np.array(position))
-            if distance < closest_distance and distance < 100:
+            if distance < closest_distance and distance < MAX_DISTANCE:
                 closest_hit = key
                 closest_distance = distance
 
@@ -96,13 +99,13 @@ class MarkerTracker:
         else:
             self.hits[position] = 1
 
-    def get_velocity(self) -> float:
-        if len(self.positions) < 2:
+    def get_velocity(self: Self) -> float:
+        if len(self.positions) < 2:  # noqa: PLR2004
             return 0
 
         return self.positions[-1][2] - self.positions[-2][2]
 
-    def is_hit(self) -> bool:
+    def is_hit(self: Self) -> bool:
         """
         A hit occurs when the z-axis has a downward trend followed by an upward trend
         :return:
@@ -122,7 +125,7 @@ class MarkerTracker:
             and self.time_until_next_hit == 0
         )
 
-    def __str__(self) -> str:
+    def __str__(self: Self) -> str:
         return "{}: \n{}  {}".format(
             self.label, self.positions[-1], self.velocities[-1]
         )

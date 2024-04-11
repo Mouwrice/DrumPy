@@ -1,5 +1,5 @@
 import time
-from typing import Any
+from typing import Any, Self
 
 import numpy as np
 from mediapipe import Image, ImageFormat
@@ -14,8 +14,9 @@ from mediapipe.tasks.python.vision import (
 )
 from numpy import ndarray, dtype
 
-from drumpy.trajectory_file import TrajectoryFile
 from drumpy.landmarkermodel import LandmarkerModel
+from drumpy.trajectory_file import TrajectoryFile
+from options.landmark_type import LandmarkType
 
 
 def visualize_landmarks(
@@ -57,46 +58,44 @@ class MediaPipePose:
     """
 
     def __init__(
-        self,
-        live_stream: bool = True,
+        self: Self,
+        running_mode: RunningMode,
+        landmark_type: LandmarkType,
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         log_file: str | None = None,
-        world_landmarks: bool = False,
     ) -> None:
         """
         Initialize the MediaPipePose class
-        :param live_stream: Whether the pose estimation is in live stream mode, causing the result to be
+        :param running_mode: Whether the pose estimation is in live stream mode, causing the result to be
         returned asynchronously and frames can be dropped
         :param model: The model to use for the pose estimation
         :param log_file: The file to log the landmarks to, if None no logging will be done
         :param delegate: The delegate to use for the pose estimation, Either CPU or GPU
-        :param world_landmarks: Whether to use world landmarks or not
         """
         self.frame_count = 0
         self.model = model
 
-        options = PoseLandmarkerOptions(
+        self.options = PoseLandmarkerOptions(
             base_options=BaseOptions(
                 model_asset_path=self.model.value,
                 delegate=delegate,
             ),
-            running_mode=RunningMode.LIVE_STREAM if live_stream else RunningMode.VIDEO,
-            result_callback=self.result_callback if live_stream else None,
+            running_mode=running_mode,
+            result_callback=self.result_callback
+            if running_mode == RunningMode.LIVE_STREAM
+            else None,
         )
 
-        self.landmarker = PoseLandmarker.create_from_options(options)
+        self.landmarker = PoseLandmarker.create_from_options(self.options)
         self.detection_result = None
         self.latest_timestamp: int = (
             0  # The timestamp of the latest frame that was processed
         )
         self.latency: int = 0  # The latency of the pose estimation, in milliseconds
-        self.live_stream = (
-            live_stream  # Whether the pose estimation is in live stream mode
-        )
         self.visualisation: ndarray | None = None
 
-        self.world_landmarks = world_landmarks
+        self.landmark_type = landmark_type
 
         self.csv_writer = None
         if log_file is not None:
@@ -108,7 +107,7 @@ class MediaPipePose:
             self.csv_writer = TrajectoryFile(self.log_file)
 
     def result_callback(
-        self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
+        self: Self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
     ) -> None:
         """
         Callback method to receive the result of the pose estimation
@@ -127,7 +126,9 @@ class MediaPipePose:
         if self.csv_writer is not None:
             self.write_landmarks(result, timestamp_ms)
 
-    def write_landmarks(self, result: PoseLandmarkerResult, timestamp_ms: int) -> None:
+    def write_landmarks(
+        self: Self, result: PoseLandmarkerResult, timestamp_ms: int
+    ) -> None:
         """
         Write the landmarks to a file
         :param result: The result of the pose estimation
@@ -137,11 +138,12 @@ class MediaPipePose:
         if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
             return
 
-        pose_landmarks = (
-            result.pose_world_landmarks[0]
-            if self.world_landmarks
-            else result.pose_landmarks[0]
-        )
+        pose_landmarks = None
+        match self.landmark_type:
+            case LandmarkType.LANDMARKS:
+                pose_landmarks = result.pose_landmarks[0]
+            case LandmarkType.WORLD_LANDMARKS:
+                pose_landmarks = result.pose_world_landmarks[0]
 
         for i, landmark in enumerate(pose_landmarks):
             self.csv_writer.write(
@@ -151,12 +153,12 @@ class MediaPipePose:
                 landmark.x,
                 landmark.y,
                 landmark.z,
+                self.landmark_type,
                 landmark.visibility,
                 landmark.presence,
-                normalized=not self.world_landmarks,
             )
 
-    def process_image(self, image_array: ndarray, timestamp_ms: int) -> None:
+    def process_image(self: Self, image_array: ndarray, timestamp_ms: int) -> None:
         """
         Process the image
         :param timestamp_ms: The timestamp of the frame
@@ -164,8 +166,9 @@ class MediaPipePose:
         :return: The landmarks
         """
         image = Image(image_format=ImageFormat.SRGB, data=image_array)
-        if self.live_stream:
-            self.landmarker.detect_async(image, timestamp_ms)
-        else:
-            result = self.landmarker.detect_for_video(image, timestamp_ms)
-            self.result_callback(result, image, timestamp_ms)
+        match self.options.running_mode:
+            case RunningMode.LIVE_STREAM:
+                self.landmarker.detect_async(image, timestamp_ms)
+            case RunningMode.VIDEO:
+                result = self.landmarker.detect_for_video(image, timestamp_ms)
+                self.result_callback(result, image, timestamp_ms)

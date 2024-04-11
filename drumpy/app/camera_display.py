@@ -53,7 +53,7 @@ class VideoDisplay:
             frame = frame.swapaxes(0, 1)
 
         image_surface = pygame.image.frombuffer(
-            frame.flatten(), (frame.shape[0], frame.shape[0]), "RGB"
+            frame.tobytes(), (frame.shape[0], frame.shape[0]), "RGB"
         )
 
         # # Rotate the image 90 degrees

@@ -1,5 +1,7 @@
 import csv
-from typing import Optional
+from typing import Optional, Self
+
+from options.landmark_type import LandmarkType
 
 
 class TrajectoryFile:
@@ -7,7 +9,7 @@ class TrajectoryFile:
     Class to read and write the captured data to a CSV file.
     """
 
-    def __init__(self, path: str) -> None:
+    def __init__(self: Self, path: str) -> None:
         fieldnames = [
             "frame",
             "time",
@@ -19,21 +21,22 @@ class TrajectoryFile:
             "presence",
             "normalized",
         ]
-        self.file = open(path, "w", newline="")
-        self.writer = csv.DictWriter(self.file, fieldnames=fieldnames)
-        self.writer.writeheader()
+        with open(path, "w", newline="") as file:
+            self.file = file
+            self.writer = csv.DictWriter(file, fieldnames=fieldnames)
+            self.writer.writeheader()
 
     def write(
-        self,
+        self: Self,
         frame: int,
         time: int,
         index: int,
         x: float,
         y: float,
         z: float,
+        landmark_type: LandmarkType,
         visibility: Optional[float] = None,
         presence: Optional[float] = None,
-        normalized: bool = False,
     ) -> None:
         """
         Write a line to the CSV file
@@ -48,10 +51,10 @@ class TrajectoryFile:
                 "z": z,
                 "visibility": visibility,
                 "presence": presence,
-                "normalized": normalized,
+                "landmark_type": landmark_type.value,
             }
         )
 
-    def close(self) -> None:
+    def close(self: Self) -> None:
         self.file.flush()
         self.file.close()

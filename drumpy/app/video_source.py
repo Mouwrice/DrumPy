@@ -1,7 +1,8 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from enum import Enum
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Self, Optional
 
 import cv2
 import pygame.transform
@@ -23,34 +24,39 @@ class VideoSource(ABC):
     Abstract base class for a video source
     """
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         self.stopped = False
 
-    def get_fps(self) -> float:
+    @abstractmethod
+    def get_fps(self: Self) -> float:
         """
         Get the frames per second of the video
         :return: The frames per second
         """
 
-    def get_frame(self) -> ndarray | None:
+    @abstractmethod
+    def get_frame(self: Self) -> Optional[ndarray]:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
         """
 
-    def release(self) -> None:
+    @abstractmethod
+    def release(self: Self) -> None:
         """
         Release the video source
         :return:
         """
 
-    def get_size(self) -> tuple[int, int]:
+    @abstractmethod
+    def get_size(self: Self) -> tuple[int, int]:
         """
         Get the size of the video source
         :return: The width and height of the video source
         """
 
-    def get_timestamp_ms(self) -> int:
+    @abstractmethod
+    def get_timestamp_ms(self: Self) -> int:
         """
         Get the timestamp of the current frame
         :return: The timestamp of the current frame
@@ -62,7 +68,7 @@ class VideoFileSource(VideoSource):
     Class to handle a video source from a file
     """
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self: Self, file_path: str) -> None:
         super().__init__()
 
         assert Path(file_path).exists(), f"File {file_path} does not exist"
@@ -78,14 +84,14 @@ class VideoFileSource(VideoSource):
         self.top_offset = (source_height - smallest) // 2
         self.pool: Pool = None
 
-    def get_fps(self) -> float:
+    def get_fps(self: Self) -> float:
         """
         Get the frames per second of the video
         :return: The frames per second
         """
         return self.source_fps
 
-    def get_frame(self) -> ndarray | None:
+    def get_frame(self: Self) -> ndarray | None:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
@@ -102,21 +108,21 @@ class VideoFileSource(VideoSource):
             self.left_offset : self.left_offset + self.size[0],
         ].copy()
 
-    def release(self) -> None:
+    def release(self: Self) -> None:
         """
         Release the video capture
         :return:
         """
         self.cap.release()
 
-    def get_size(self) -> tuple[int, int]:
+    def get_size(self: Self) -> tuple[int, int]:
         """
         Get the size of the video source
         :return: The width and height of the video source
         """
         return self.size
 
-    def get_timestamp_ms(self) -> int:
+    def get_timestamp_ms(self: Self) -> int:
         """
         Get the timestamp of the current frame
         :return: The timestamp of the current frame
@@ -129,7 +135,7 @@ class CameraSource(VideoSource):
     Class to handle a video source from a camera
     """
 
-    def __init__(self, camera_id: int | str) -> None:
+    def __init__(self: Self, camera_id: int | str) -> None:
         super().__init__()
         self.camera_id = camera_id
         self.camera = camera.Camera(camera_id)
@@ -141,13 +147,13 @@ class CameraSource(VideoSource):
         self.left_offset = (original_size[0] - min_size) // 2
         self.top_offset = (original_size[1] - min_size) // 2
 
-    def get_fps(self) -> float:
+    def get_fps(self: Self) -> float:
         """
         Return a default value of 60 fps for the camera
         """
         return 60
 
-    def get_frame(self) -> ndarray | None:
+    def get_frame(self: Self) -> ndarray | None:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
@@ -160,16 +166,16 @@ class CameraSource(VideoSource):
 
         return None
 
-    def release(self) -> None:
+    def release(self: Self) -> None:
         """
         Release the video capture
         :return:
         """
 
-    def get_size(self) -> tuple[int, int]:
+    def get_size(self: Self) -> tuple[int, int]:
         return self.size
 
-    def get_timestamp_ms(self) -> int:
+    def get_timestamp_ms(self: Self) -> int:
         """
         Get the timestamp of the current frame
         :return: The timestamp of the current frame

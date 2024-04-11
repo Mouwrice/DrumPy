@@ -1,13 +1,16 @@
+from typing import Optional, Self
+
 import pygame
 import pygame.camera
 from mediapipe.tasks.python import BaseOptions
+from mediapipe.tasks.python.vision import RunningMode
 from pygame_gui import UIManager
 
 from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
 from drumpy.app.video_source import CameraSource, VideoFileSource, Source
 from drumpy.mediapipe_pose import MediaPipePose, LandmarkerModel
-from typing import Optional
+from options.landmark_type import LandmarkType
 
 
 class App:
@@ -16,31 +19,22 @@ class App:
     """
 
     def __init__(
-        self,
+        self: Self,
         source: Source = Source.CAMERA,
-        camera_id: str | int = "/dev/video0",
         file_path: Optional[str] = None,
-        live_stream: bool = True,
+        running_mode: RunningMode = RunningMode.LIVE_STREAM,
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
-        plot: bool = False,
         log_file: None | str = None,
-        world_landmarks: bool = False,
+        landmark_type: LandmarkType = LandmarkType.WORLD_LANDMARKS,
     ) -> None:
         """
         Initialize the application
-        :param live_stream: Whether the pose estimation is in live stream mode, causing the result to be
-        returned asynchronously and frames can be dropped
         :param model: The model to use for the pose estimation
         :param log_file: The file to log the landmarks to, if None no logging will be done
         :delegate: The delegate to use for the pose estimation, Either CPU or GPU
-        :param plot: Whether to plot the results or not
-        :param world_landmarks: Whether to use world landmarks or not
         """
-
         self.model = model
-
-        self.plot = plot
 
         pygame.init()
         pygame.camera.init()
@@ -50,16 +44,16 @@ class App:
         print(cameras)
 
         pygame.display.set_caption("DrumPy")
-        initial_window_size = (1300, 900) if self.plot else (900, 900)
+        initial_window_size = (900, 900)
         self.window_surface = pygame.display.set_mode(initial_window_size)
         self.manager = UIManager(initial_window_size)
 
         self.media_pipe_pose = MediaPipePose(
-            live_stream=live_stream,
+            running_mode=running_mode,
             model=model,
             log_file=log_file,
             delegate=delegate,
-            world_landmarks=world_landmarks,
+            landmark_type=landmark_type,
         )
 
         FPSDisplay(
@@ -75,18 +69,15 @@ class App:
                 self.video_source = VideoFileSource(file_path)
 
         self.fps = self.video_source.get_fps()
-
-        rect = pygame.Rect((400, 50), (900, 900)) if self.plot else pygame.Rect((0, 50), (900, 900))
-
         self.video_display = VideoDisplay(
             video_source=self.video_source,
             media_pipe_pose=self.media_pipe_pose,
-            rect=rect,
+            rect=pygame.Rect((0, 50), (900, 900)),
             window=self.window_surface,
             source=source,
         )
 
-    def start(self) -> None:
+    def start(self: Self) -> None:
         frame = 0
         clock = pygame.time.Clock()
         running = True
@@ -114,10 +105,6 @@ def main() -> None:
     app = App(
         source=Source.FILE,
         file_path="../../recordings/multicam_asil_01_front.mkv",
-        live_stream=False,
-        plot=False,
-        delegate=BaseOptions.Delegate.GPU,
-        world_landmarks=True,
     )
     app.start()
 

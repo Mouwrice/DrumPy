@@ -1,4 +1,6 @@
+from enum import auto, Enum
 from time import sleep
+from typing import Self
 
 import numpy as np
 import numpy.typing as npt
@@ -28,6 +30,15 @@ class DrumPresets:
         }
 
 
+class SleepOption(Enum):
+    """
+    Options for sleeping between calibrations
+    """
+
+    NO_SLEEP = auto()
+    SLEEP = auto()
+
+
 class Drum:
     """
     A drum kit consists of multiple sounds
@@ -36,16 +47,12 @@ class Drum:
     """
 
     def __init__(
-        self,
+        self: Self,
         margin: float,
         min_margin: float,
         presets: dict[str, tuple[float, float, float]] | None = None,
-        no_sleep: bool = False,
+        sleep_option: SleepOption = SleepOption.SLEEP,
     ) -> None:
-        """
-        :param presets:
-        :param no_sleep: Whether to sleep between calibrations or not
-        """
         snare_drum = Sound(
             "Snare Drum",
             "./DrumSamples/Snare/CKV1_Snare Loud.wav",
@@ -106,13 +113,13 @@ class Drum:
         # Queue to keep track of sounds that need to be calibrated
         self.auto_calibrations = []
 
-        self.no_sleep = no_sleep
+        self.sleep_option = sleep_option
 
-    def __str__(self) -> str:
+    def __str__(self: Self) -> str:
         return "\n".join([str(sound) for sound in self.sounds])
 
     def find_and_play_sound(
-        self,
+        self: Self,
         position: npt.NDArray[np.float64],
         marker_label: str,
         sounds: list[int] | None = None,
@@ -155,7 +162,7 @@ class Drum:
                 f"with distance {closest_distance:.3f}"
             )
 
-    def auto_calibrate(self, sounds: list[int] | None = None) -> None:
+    def auto_calibrate(self: Self, sounds: list[int] | None = None) -> None:
         """
         Automatically calibrate all sounds
         :param sounds: List of sounds to calibrate, if None, all sounds will be calibrated in order
@@ -166,7 +173,7 @@ class Drum:
 
         self.auto_calibrations = sounds
 
-    def check_calibrations(self) -> None:
+    def check_calibrations(self: Self) -> None:
         """
         Check if there are any sounds that need to be calibrated
         :return:
@@ -178,7 +185,7 @@ class Drum:
 
         if sound.state == SoundState.UNINITIALIZED:
             sound.calibrate()
-            if not self.no_sleep:
+            if self.sleep_option == SleepOption.SLEEP:
                 sleep(2)
 
         if sound.state == SoundState.READY:

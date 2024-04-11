@@ -1,5 +1,6 @@
 from typing import Self
 
+from mediapipe.tasks.python.vision import RunningMode
 from pygame import Rect
 from pygame_gui import UIManager
 from pygame_gui.elements import UILabel
@@ -19,7 +20,12 @@ class FPSDisplay(UILabel):
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ) -> None:
-        mode = "Async Mode" if media_pipe_pose.live_stream else "Blocking Mode"
+        mode = ""
+        match media_pipe_pose.options.running_mode:
+            case RunningMode.LIVE_STREAM:
+                mode = "Async Mode"
+            case RunningMode.VIDEO:
+                mode = "Blocking Mode"
         self.model = media_pipe_pose.model
         super().__init__(
             Rect((0, 0), (900, 50)),
@@ -61,7 +67,12 @@ class FPSDisplay(UILabel):
             mediapipe_time_deltas_sum / len(self.mediapipe_time_deltas)
         )
 
-        mode = "Async Mode" if self.media_pipe_pose.live_stream else "Blocking Mode"
+        mode = ""
+        match self.media_pipe_pose.options.running_mode:
+            case RunningMode.LIVE_STREAM:
+                mode = "Async Mode"
+            case RunningMode.VIDEO:
+                mode = "Blocking Mode"
         self.set_text(
             f"UI FPS: {ui_fps:.2f}  Camera FPS: {camera_fps:.2f}   {mode}  Model: {self.model}"
         )
