@@ -146,11 +146,13 @@ class Drum:
         if closest_sound is not None:
             closest_sound.hit(position)
             print(
-                f"{marker_label}: {closest_sound.name} with distance {closest_distance:.3f} ] at {print_float_array(position)}"
+                f"{marker_label}: {closest_sound.name} with distance {closest_distance:.3f} "
+                f"at {print_float_array(position)}"
             )
         else:
             print(
-                f"{marker_label}: No sound found for position {print_float_array(position)} with distance {closest_distance:.3f}"
+                f"{marker_label}: No sound found for position {print_float_array(position)} "
+                f"with distance {closest_distance:.3f}"
             )
 
     def auto_calibrate(self, sounds: list[int] | None = None) -> None:

@@ -26,3 +26,7 @@ ruff-lsp = "^0.0.53"
 [tool.ruff.lint]
 select = [ "E", "F", "N", "ANN", "FBT", "B", "A", "C4", "PIE", "Q", "RET", "SLF", "SIM", "ARG", "PL", "PERF", "RUF"]
 fixable = ["ALL"]
+pylint.max-args = 10
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120

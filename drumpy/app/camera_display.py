@@ -1,3 +1,5 @@
+from typing import Self
+
 import pygame.time
 from pygame import Surface
 
@@ -12,7 +14,7 @@ class VideoDisplay:
     """
 
     def __init__(
-        self,
+        self: Self,
         video_source: VideoSource,
         media_pipe_pose: MediaPipePose,
         window: Surface,
@@ -26,7 +28,7 @@ class VideoDisplay:
         self.video_source = video_source
         self.prev_surface = None
 
-    def update(self) -> None:
+    def update(self: Self) -> None:
         frame = self.video_source.get_frame()
         assert frame is None or frame.shape[0] == frame.shape[1], "Frame is not square"
 

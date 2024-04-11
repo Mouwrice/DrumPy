@@ -1,8 +1,12 @@
+from typing import Self
+
 from pygame import Rect
 from pygame_gui import UIManager
 from pygame_gui.elements import UILabel
 
 from drumpy.mediapipe_pose import MediaPipePose
+
+MEMORY = 30
 
 
 class FPSDisplay(UILabel):
@@ -11,7 +15,7 @@ class FPSDisplay(UILabel):
     """
 
     def __init__(
-        self,
+        self: Self,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ) -> None:
@@ -30,15 +34,15 @@ class FPSDisplay(UILabel):
         self.media_pipe_pose = media_pipe_pose
         self.ui_manager = ui_manager
 
-    def update(self, time_delta: float) -> None:
+    def update(self: Self, time_delta: float) -> None:
         super().update(time_delta)
 
         self.ui_time_deltas.append(time_delta)
-        if len(self.ui_time_deltas) > 30:
+        if len(self.ui_time_deltas) > MEMORY:
             self.ui_time_deltas.pop(0)
 
         self.mediapipe_time_deltas.append(self.media_pipe_pose.latency)
-        if len(self.mediapipe_time_deltas) > 30:
+        if len(self.mediapipe_time_deltas) > MEMORY:
             self.mediapipe_time_deltas.pop(0)
 
         if len(self.ui_time_deltas) == 0 or len(self.mediapipe_time_deltas) == 0:

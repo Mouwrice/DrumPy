@@ -76,10 +76,7 @@ class App:
 
         self.fps = self.video_source.get_fps()
 
-        if self.plot:
-            rect = pygame.Rect((400, 50), (900, 900))
-        else:
-            rect = pygame.Rect((0, 50), (900, 900))
+        rect = pygame.Rect((400, 50), (900, 900)) if self.plot else pygame.Rect((0, 50), (900, 900))
 
         self.video_display = VideoDisplay(
             video_source=self.video_source,
