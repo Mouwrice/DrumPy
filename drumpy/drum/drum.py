@@ -2,11 +2,9 @@ from enum import auto, Enum
 from time import sleep
 from typing import Self, Optional
 
-import numpy as np
-import numpy.typing as npt
 
 from drumpy.drum.sound import Sound, SoundState
-from drumpy.util import print_float_array
+from drumpy.util import print_float_array, Position
 
 
 class DrumPresets:
@@ -48,67 +46,10 @@ class Drum:
 
     def __init__(
         self: Self,
-        margin: float,
-        min_margin: float,
-        presets: Optional[dict[str, tuple[float, float, float]]] = None,
+        sounds: list[Sound],
         sleep_option: SleepOption = SleepOption.SLEEP,
     ) -> None:
-        snare_drum = Sound(
-            "Snare Drum",
-            "./DrumSamples/Snare/CKV1_Snare Loud.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["snare"] if presets is not None else None,
-        )
-        hi_hat = Sound(
-            "High Hat",
-            "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["hi_hat"] if presets is not None else None,
-        )
-        kick_drum = Sound(
-            "Kick Drum",
-            "./DrumSamples/Kick/CKV1_Kick Loud.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["kick"] if presets is not None else None,
-        )
-        _hi_hat_foot = Sound(
-            "High Hat Foot",
-            "./DrumSamples/HiHat/CKV1_HH Foot.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["hi_hat_foot"] if presets is not None else None,
-        )
-        _tom1 = Sound(
-            "Tom 1",
-            "./DrumSamples/Perc/Tom1.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["tom1"] if presets is not None else None,
-        )
-        _tom2 = Sound(
-            "Tom 2",
-            "./DrumSamples/Perc/Tom2.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["tom2"] if presets is not None else None,
-        )
-        cymbal = Sound(
-            "Cymbal",
-            "./DrumSamples/cymbals/Hop_Crs.wav",
-            margin=margin,
-            min_margin=min_margin,
-            position=presets["cymbal"] if presets is not None else None,
-        )
-
-        self.sounds = [
-            snare_drum,
-            hi_hat,
-            kick_drum,
-            cymbal,
-        ]  # , hi_hat_foot, tom1, tom2, cymbal]
+        self.sounds = sounds
 
         # Queue to keep track of sounds that need to be calibrated
         self.auto_calibrations = []
@@ -120,9 +61,9 @@ class Drum:
 
     def find_and_play_sound(
         self: Self,
-        position: npt.NDArray[np.float64],
+        position: Position,
         marker_label: str,
-        sounds: list[int] | None = None,
+        sounds: Optional[list[Sound]],
     ) -> None:
         """
         Find the closest sound to the given position and play it
@@ -135,8 +76,8 @@ class Drum:
 
         closest_sound = None
         closest_distance = float("inf")
-        for i in sounds:
-            sound = self.sounds[i]
+        sounds = sounds if sounds is not None else self.sounds
+        for sound in sounds:
             if (distance := sound.is_hit(position)) is not None:
                 # Check if the sound is calibrating
                 if sound.state == SoundState.CALIBRATING:
@@ -183,11 +124,12 @@ class Drum:
 
         sound = self.sounds[self.auto_calibrations[0]]
 
-        if sound.state == SoundState.UNINITIALIZED:
-            sound.calibrate()
-            if self.sleep_option == SleepOption.SLEEP:
-                sleep(2)
+        match sound.state.value:
+            case SoundState.UNINITIALIZED.value:
+                sound.calibrate()
+                if self.sleep_option == SleepOption.SLEEP:
+                    sleep(2)
 
-        if sound.state == SoundState.READY:
-            self.auto_calibrations.pop(0)
-            return
+            case SoundState.READY.value:
+                self.auto_calibrations.pop(0)
+                return

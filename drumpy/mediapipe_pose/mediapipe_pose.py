@@ -1,5 +1,5 @@
 import time
-from typing import Any, Self
+from typing import Any, Self, Optional
 
 import numpy as np
 from mediapipe import Image, ImageFormat
@@ -14,9 +14,10 @@ from mediapipe.tasks.python.vision import (
 )
 from numpy import ndarray, dtype
 
-from drumpy.tracking.landmarker_model import LandmarkerModel
 from drumpy.trajectory_file import TrajectoryFile
-from drumpy.tracking.landmark_type import LandmarkType
+from drumpy.mediapipe_pose.landmark_type import LandmarkType
+from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
+from drumpy.tracking.drum_trackers import DrumTrackers
 
 
 def visualize_landmarks(
@@ -61,9 +62,10 @@ class MediaPipePose:
         self: Self,
         running_mode: RunningMode,
         landmark_type: LandmarkType,
+        drum_trackers: DrumTrackers,
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
-        log_file: str | None = None,
+        log_file: Optional[str] = None,
     ) -> None:
         """
         Initialize the MediaPipePose class
@@ -106,6 +108,8 @@ class MediaPipePose:
             )
             self.csv_writer = TrajectoryFile(self.log_file)
 
+        self.drum_trackers = drum_trackers
+
     def result_callback(
         self: Self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
     ) -> None:
@@ -119,6 +123,8 @@ class MediaPipePose:
         self.detection_result = result
         self.latency = timestamp_ms - self.latest_timestamp
         self.latest_timestamp = timestamp_ms
+        self.drum_trackers.drum.check_calibrations()
+        self.drum_trackers.update(result.pose_world_landmarks[0])
         self.visualisation = visualize_landmarks(
             image.numpy_view(), self.detection_result
         )

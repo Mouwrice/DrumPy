@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import Self
+from typing import Self, Optional
 
 import numpy as np
 import numpy.typing as npt
 import pygame
 from termcolor import cprint
 
-from drumpy.util import print_float_array
+from drumpy.util import print_float_array, Position
 
 MIN_MARGIN = 0.01
 MIN_HIT_COUNT = 10
@@ -63,7 +63,7 @@ class Sound:
         self.hits = []
         self.position = np.array([0, 0, 0])
 
-    def is_hit(self: Self, position: np.array) -> None | float:
+    def is_hit(self: Self, position: Position) -> Optional[float]:
         """
         Returns whether the given position is close enough to the sound to be considered a hit.
         If the sound position is being calibrated, the position is automatically set to running average of the hits
@@ -106,3 +106,76 @@ class Sound:
         self.hit_count += 1
         self.position = 0.99 * self.position + 0.01 * position
         self.margin = max(self.min_margin, 0.99 * self.margin)
+
+
+MARGIN = 0.1
+
+
+class SnareDrum(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "Snare Drum",
+            "./DrumSamples/Snare/CKV1_Snare Loud.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )
+
+
+class HiHat(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "High Hat",
+            "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )
+
+
+class KickDrum(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "Kick Drum",
+            "./DrumSamples/Kick/CKV1_Kick Loud.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )
+
+
+class HiHatFoot(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "High Hat Foot",
+            "./DrumSamples/HiHat/CKV1_HH Foot.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )
+
+
+class Tom1(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "Tom 1",
+            "./DrumSamples/Perc/Tom1.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )
+
+
+class Tom2(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "Tom 2",
+            "./DrumSamples/Perc/Tom2.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )
+
+
+class Cymbal(Sound):
+    def __init__(self: Self) -> None:
+        super().__init__(
+            "Cymbal",
+            "./DrumSamples/cymbals/Hop_Crs.wav",
+            margin=MARGIN,
+            min_margin=MIN_MARGIN,
+        )

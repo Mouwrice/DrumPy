@@ -1,10 +1,9 @@
 from statistics import mean
 from typing import Self
 
-import numpy as np
-import numpy.typing as npt
-
+from drumpy.drum.sound import Sound
 from drumpy.drum.drum import Drum
+from drumpy.util import Position
 
 MAX_DISTANCE = 100
 
@@ -17,8 +16,8 @@ class MarkerTracker:
     def __init__(
         self: Self,
         label: str,
-        sounds: list[int],
         drum: Drum,
+        sounds: list[Sound],
         memory: int = 15,
         downward_trend: float = -2,
         upward_trend: float = 1,
@@ -26,14 +25,13 @@ class MarkerTracker:
         self.label = label
 
         # the sounds that can be played by this marker
-        # sounds are identified by their index in the drum
-        self.sounds: list[int] = sounds
+        self.sounds: list[Sound] = sounds
 
         # keep track of the last 10 velocities on the z-axis
         self.velocities = []
 
         # keep track of the last 10 positions
-        self.positions: [npt.NDArray[np.float64]] = []
+        self.positions: list[Position] = []
 
         # time until next hit can be registered
         self.time_until_next_hit = 0
@@ -49,12 +47,9 @@ class MarkerTracker:
         self.downward_trend = downward_trend
         self.upward_trend = upward_trend
 
-        # clustering the hit positions
-        self.hits = {}
-
         self.drum = drum
 
-    def update(self: Self, position: npt.NDArray[np.float64]) -> None:
+    def update(self: Self, position: Position) -> None:
         if self.time_until_next_hit > 0:
             self.time_until_next_hit -= 1
 
@@ -69,35 +64,12 @@ class MarkerTracker:
             self.velocities.pop(0)
 
         if self.is_hit():
-            hit = self.positions[-self.look_ahead]
-            pos_tuple = (hit[0], hit[1], hit[2])
-            self.register_hit(pos_tuple)
+            position = self.positions[-self.look_ahead]
 
             self.time_until_next_hit = self.memory
             self.drum.find_and_play_sound(
                 self.positions[-self.look_ahead], self.label, self.sounds
             )
-
-    def register_hit(self: Self, position: tuple[float, float, float]) -> None:
-        closest_hit = None
-        closest_distance = float("inf")
-        for key in self.hits:
-            distance = np.linalg.norm(np.array(key) - np.array(position))
-            if distance < closest_distance and distance < MAX_DISTANCE:
-                closest_hit = key
-                closest_distance = distance
-
-        if closest_hit is not None:
-            occurrences = self.hits[closest_hit]
-            # create a new element with the new updated average position
-            new_key = (occurrences * np.array(closest_hit) + np.array(position)) / (
-                occurrences + 1
-            )
-            new_key = tuple(new_key)
-            self.hits[new_key] = occurrences + 1
-            del self.hits[closest_hit]
-        else:
-            self.hits[position] = 1
 
     def get_velocity(self: Self) -> float:
         if len(self.positions) < 2:  # noqa: PLR2004

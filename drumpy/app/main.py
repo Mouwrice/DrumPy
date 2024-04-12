@@ -9,9 +9,10 @@ from pygame_gui import UIManager
 from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
 from drumpy.app.video_source import CameraSource, VideoFileSource, Source
-from drumpy.tracking.mediapipe_pose import MediaPipePose
-from drumpy.tracking.landmarker_model import LandmarkerModel
-from drumpy.tracking.landmark_type import LandmarkType
+from drumpy.mediapipe_pose.landmark_type import LandmarkType
+from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
+from drumpy.mediapipe_pose.mediapipe_pose import MediaPipePose
+from drumpy.tracking.drum_trackers import DrumTrackers
 
 
 class App:
@@ -49,12 +50,15 @@ class App:
         self.window_surface = pygame.display.set_mode(initial_window_size)
         self.manager = UIManager(initial_window_size)
 
+        self.drum_trackers = DrumTrackers()
+
         self.media_pipe_pose = MediaPipePose(
             running_mode=running_mode,
             model=model,
             log_file=log_file,
             delegate=delegate,
             landmark_type=landmark_type,
+            drum_trackers=self.drum_trackers,
         )
 
         FPSDisplay(
@@ -105,6 +109,7 @@ class App:
 def main() -> None:
     app = App(
         source=Source.FILE,
+        running_mode=RunningMode.VIDEO,
         file_path="../../recordings/multicam_asil_01_front.mkv",
     )
     app.start()
