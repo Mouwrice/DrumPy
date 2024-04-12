@@ -111,6 +111,7 @@ def main() -> None:
         source=Source.FILE,
         running_mode=RunningMode.VIDEO,
         file_path="../../recordings/multicam_asil_01_front.mkv",
+        log_file="test.csv",
     )
     app.start()
 

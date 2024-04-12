@@ -1,4 +1,3 @@
-import time
 from typing import Any, Self, Optional
 
 import numpy as np
@@ -101,12 +100,8 @@ class MediaPipePose:
 
         self.csv_writer = None
         if log_file is not None:
-            self.log_file = (
-                log_file
-                if log_file is not None
-                else f"./data/mediapipe_{self.model.name}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            )
-            self.csv_writer = TrajectoryFile(self.log_file)
+            self.log_file_path = log_file
+            self.csv_writer = TrajectoryFile(self.log_file_path)
 
         self.drum_trackers = drum_trackers
 
@@ -124,7 +119,8 @@ class MediaPipePose:
         self.latency = timestamp_ms - self.latest_timestamp
         self.latest_timestamp = timestamp_ms
         self.drum_trackers.drum.check_calibrations()
-        self.drum_trackers.update(result.pose_world_landmarks[0])
+        if result.pose_landmarks is not None and len(result.pose_landmarks) > 0:
+            self.drum_trackers.update(result.pose_world_landmarks[0])
         self.visualisation = visualize_landmarks(
             image.numpy_view(), self.detection_result
         )

@@ -19,12 +19,11 @@ class TrajectoryFile:
             "z",
             "visibility",
             "presence",
-            "normalized",
+            "landmark_type",
         ]
-        with open(path, "w", newline="") as file:
-            self.file = file
-            self.writer = csv.DictWriter(file, fieldnames=fieldnames)
-            self.writer.writeheader()
+        self.file = open(path, "w", newline="")  # noqa: SIM115
+        self.writer = csv.DictWriter(self.file, fieldnames=fieldnames)
+        self.writer.writeheader()
 
     def write(
         self: Self,
