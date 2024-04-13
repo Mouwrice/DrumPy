@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 from typing import Self
 
 import numpy as np
-from mediapipe.tasks.python.components.containers.landmark import Landmark
+from mediapipe.tasks.python.components.containers.landmark import Landmark  # pyright: ignore
 
-from drumpy.drum.sound import Sound
 from drumpy.drum.drum import Drum
+from drumpy.drum.sound import Sound
 from drumpy.mediapipe_pose.mediapipe_markers import MarkerEnum
 from drumpy.tracking.marker_tracker import MarkerTracker
-from drumpy.util import landmark_to_numpy
+from drumpy.util import landmark_to_position, Position
 
 
 class MarkerTrackerWrapper(ABC):
@@ -24,7 +24,7 @@ class MarkerTrackerWrapper(ABC):
         """
 
 
-class Hand(MarkerTrackerWrapper):
+class DrumStick(MarkerTrackerWrapper):
     def __init__(
         self: Self,
         wrist: MarkerEnum,
@@ -45,18 +45,14 @@ class Hand(MarkerTrackerWrapper):
         pinky_landmark = markers[self.pinky.value]
         index_landmark = markers[self.index.value]
 
-        self.wrist.pos = landmark_to_numpy(wrist_landmark)
-        self.pinky.pos = landmark_to_numpy(pinky_landmark)
-        self.index.pos = landmark_to_numpy(index_landmark)
+        wrist_pos = landmark_to_position(wrist_landmark)
+        pinky_pos = landmark_to_position(pinky_landmark)
+        index_pos = landmark_to_position(index_landmark)
 
-        direction = (
-            self.wrist.pos
-            + (self.index.pos - self.wrist.pos)
-            + (self.pinky.pos - self.wrist.pos)
-        )
+        direction = wrist_pos + (index_pos - pinky_pos) + (pinky_pos - wrist_pos)
 
         # increase the length of the direction vector by 50
-        self.position = self.wrist.pos + 50 * direction / np.linalg.norm(direction)
+        self.position = wrist_pos + 50 * direction / np.linalg.norm(direction)
 
         self.tracker.update(self.position)
 
@@ -66,8 +62,11 @@ class Hand(MarkerTrackerWrapper):
         pinky = MarkerEnum.LEFT_PINKY
         index = MarkerEnum.LEFT_INDEX
 
-        return Hand(
-            wrist, pinky, index, MarkerTracker("Left Hand", drum=drum, sounds=sounds)
+        return DrumStick(
+            wrist,
+            pinky,
+            index,
+            MarkerTracker(MarkerEnum.LEFT_DRUM_STICK, drum=drum, sounds=sounds),
         )
 
     @staticmethod
@@ -76,29 +75,35 @@ class Hand(MarkerTrackerWrapper):
         pinky = MarkerEnum.RIGHT_PINKY
         index = MarkerEnum.RIGHT_INDEX
 
-        return Hand(
-            wrist, pinky, index, MarkerTracker("Right Hand", drum=drum, sounds=sounds)
+        return DrumStick(
+            wrist,
+            pinky,
+            index,
+            MarkerTracker(MarkerEnum.RIGHT_DRUM_STICK, drum=drum, sounds=sounds),
         )
 
 
 class Foot(MarkerTrackerWrapper):
     def __init__(self: Self, toe_tip: MarkerEnum, tracker: MarkerTracker) -> None:
         self.toe_tip = toe_tip
-        self.pos: np.array = np.array([0, 0, 0])
+        self.position: Position = np.array([0, 0, 0])
         self.tracker = tracker
 
     def update(self: Self, markers: list[Landmark]) -> None:
-        self.toe_tip.pos = landmark_to_numpy(markers[self.toe_tip.value])
-        self.pos = self.toe_tip.pos
+        self.position = landmark_to_position(markers[self.toe_tip.value])
 
-        self.tracker.update(self.pos)
+        self.tracker.update(self.position)
 
     @staticmethod
     def left_foot(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
         toe_tip = MarkerEnum.LEFT_FOOT_INDEX
-        return Foot(toe_tip, MarkerTracker("Left Foot", drum=drum, sounds=sounds))
+        return Foot(
+            toe_tip, MarkerTracker(MarkerEnum.LEFT_FOOT, drum=drum, sounds=sounds)
+        )
 
     @staticmethod
     def right_foot(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
         toe_tip = MarkerEnum.RIGHT_FOOT_INDEX
-        return Foot(toe_tip, MarkerTracker("Right Foot", drum=drum, sounds=sounds))
+        return Foot(
+            toe_tip, MarkerTracker(MarkerEnum.RIGHT_FOOT, drum=drum, sounds=sounds)
+        )

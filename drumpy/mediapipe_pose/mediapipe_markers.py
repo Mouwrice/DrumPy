@@ -74,5 +74,11 @@ class MarkerEnum(Enum):
     LEFT_FOOT_INDEX = 31
     RIGHT_FOOT_INDEX = 32
 
+    # Some own additions
+    LEFT_DRUM_STICK = 33
+    RIGHT_DRUM_STICK = 34
+    LEFT_FOOT = 35
+    RIGHT_FOOT = 36
+
     def __str__(self: Self) -> str:
         return self.name.replace("_", " ").title()

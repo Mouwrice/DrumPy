@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from multiprocessing import Pool
 from pathlib import Path
-from typing import Self, Optional
+from typing import Self
 
 import cv2
+import numpy as np
 import pygame.transform
-from numpy import ndarray
-from pygame import camera, surfarray
+import numpy.typing as npt
+from pygame import camera, surfarray, Surface
 
 
 class Source(Enum):
@@ -35,7 +35,7 @@ class VideoSource(ABC):
         """
 
     @abstractmethod
-    def get_frame(self: Self) -> Optional[ndarray]:
+    def get_frame(self: Self) -> npt.NDArray[np.float32] | None:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
@@ -68,7 +68,7 @@ class VideoFileSource(VideoSource):
     Class to handle a video source from a file
     """
 
-    def __init__(self: Self, file_path: str) -> None:
+    def __init__(self, file_path: str) -> None:
         super().__init__()
 
         assert Path(file_path).exists(), f"File {file_path} does not exist"
@@ -82,7 +82,6 @@ class VideoFileSource(VideoSource):
         self.size = (smallest, smallest)
         self.left_offset = (source_width - smallest) // 2
         self.top_offset = (source_height - smallest) // 2
-        self.pool: Pool = None
 
     def get_fps(self: Self) -> float:
         """
@@ -91,19 +90,19 @@ class VideoFileSource(VideoSource):
         """
         return self.source_fps
 
-    def get_frame(self: Self) -> Optional[ndarray]:
+    def get_frame(self: Self) -> npt.NDArray[np.float32] | None:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
         """
         ret, frame = self.cap.read()
-        if not ret or frame is None:
+        if not ret:
             self.stopped = True
             return None
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # Crop the image to a square aspect ratio
-        return frame[
+        return frame[  # type: ignore
             self.top_offset : self.top_offset + self.size[1],
             self.left_offset : self.left_offset + self.size[0],
         ].copy()
@@ -153,16 +152,16 @@ class CameraSource(VideoSource):
         """
         return 60
 
-    def get_frame(self: Self) -> Optional[ndarray]:
+    def get_frame(self: Self) -> npt.NDArray[np.float32] | None:
         """
         Get the next frame from the video
         :return: The frame and the timestamp
         """
         if self.camera.query_image():
-            frame = pygame.Surface(self.size)
+            frame = Surface(self.size)
             image = self.camera.get_image()
             frame.blit(image, (0, 0), ((self.left_offset, self.top_offset), self.size))
-            return surfarray.array3d(frame)
+            return surfarray.array3d(frame)  # type: ignore
 
         return None
 

@@ -2,9 +2,9 @@ from typing import Optional, Self
 
 import pygame
 import pygame.camera
-from mediapipe.tasks.python import BaseOptions
-from mediapipe.tasks.python.vision import RunningMode
-from pygame_gui import UIManager
+from mediapipe.tasks.python import BaseOptions  # type: ignore
+from mediapipe.tasks.python.vision import RunningMode  # type: ignore
+from pygame_gui import UIManager  # type: ignore
 
 from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
@@ -24,9 +24,9 @@ class App:
         self: Self,
         source: Source = Source.CAMERA,
         file_path: Optional[str] = None,
-        running_mode: RunningMode = RunningMode.LIVE_STREAM,
+        running_mode: RunningMode = RunningMode.LIVE_STREAM,  # type: ignore
         model: LandmarkerModel = LandmarkerModel.FULL,
-        delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
+        delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,  # type: ignore
         log_file: Optional[str] = None,
         landmark_type: LandmarkType = LandmarkType.WORLD_LANDMARKS,
     ) -> None:
@@ -53,10 +53,10 @@ class App:
         self.drum_trackers = DrumTrackers()
 
         self.media_pipe_pose = MediaPipePose(
-            running_mode=running_mode,
+            running_mode=running_mode,  # type: ignore
             model=model,
             log_file=log_file,
-            delegate=delegate,
+            delegate=delegate,  # type: ignore
             landmark_type=landmark_type,
             drum_trackers=self.drum_trackers,
         )
@@ -66,11 +66,11 @@ class App:
             media_pipe_pose=self.media_pipe_pose,
         )
 
-        self.video_source = None
         match source:
             case Source.CAMERA:
                 self.video_source = CameraSource(cameras[0])
             case Source.FILE:
+                assert file_path is not None, "File path must be provided"
                 self.video_source = VideoFileSource(file_path)
 
         self.fps = self.video_source.get_fps()
@@ -109,9 +109,9 @@ class App:
 def main() -> None:
     app = App(
         source=Source.FILE,
-        running_mode=RunningMode.VIDEO,
+        running_mode=RunningMode.VIDEO,  # type: ignore
         file_path="../../recordings/multicam_asil_01_front.mkv",
-        log_file="test.csv",
+        # log_file="test.csv",
     )
     app.start()
 

@@ -1,6 +1,7 @@
-from typing import Any, Self, Optional
+from typing import Self, Optional
 
 import numpy as np
+import numpy.typing as npt
 from mediapipe import Image, ImageFormat
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe.python import solutions
@@ -11,17 +12,16 @@ from mediapipe.tasks.python.vision import (
     PoseLandmarkerResult,
     RunningMode,
 )
-from numpy import ndarray, dtype
 
-from drumpy.trajectory_file import TrajectoryFile
 from drumpy.mediapipe_pose.landmark_type import LandmarkType
 from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
 from drumpy.tracking.drum_trackers import DrumTrackers
+from drumpy.trajectory_file import TrajectoryFile
 
 
 def visualize_landmarks(
-    rgb_image: ndarray, detection_result: PoseLandmarkerResult
-) -> ndarray[Any, dtype[Any]]:
+    rgb_image: npt.NDArray[np.float64], detection_result: PoseLandmarkerResult
+) -> npt.NDArray[np.float64]:
     """
     Visualize the landmarks on the image given the landmarks and the image
     """
@@ -94,7 +94,7 @@ class MediaPipePose:
             0  # The timestamp of the latest frame that was processed
         )
         self.latency: int = 0  # The latency of the pose estimation, in milliseconds
-        self.visualisation: ndarray | None = None
+        self.visualisation: npt.NDArray[np.float32] | None = None
 
         self.landmark_type = landmark_type
 
@@ -119,7 +119,10 @@ class MediaPipePose:
         self.latency = timestamp_ms - self.latest_timestamp
         self.latest_timestamp = timestamp_ms
         self.drum_trackers.drum.check_calibrations()
-        if result.pose_landmarks is not None and len(result.pose_landmarks) > 0:
+        if (
+            result.pose_world_landmarks is not None
+            and len(result.pose_world_landmarks) > 0
+        ):
             self.drum_trackers.update(result.pose_world_landmarks[0])
         self.visualisation = visualize_landmarks(
             image.numpy_view(), self.detection_result
@@ -160,7 +163,9 @@ class MediaPipePose:
                 landmark.presence,
             )
 
-    def process_image(self: Self, image_array: ndarray, timestamp_ms: int) -> None:
+    def process_image(
+        self: Self, image_array: npt.NDArray[np.float32], timestamp_ms: int
+    ) -> None:
         """
         Process the image
         :param timestamp_ms: The timestamp of the frame
@@ -174,3 +179,5 @@ class MediaPipePose:
             case RunningMode.VIDEO:
                 result = self.landmarker.detect_for_video(image, timestamp_ms)
                 self.result_callback(result, image, timestamp_ms)
+            case _:
+                pass

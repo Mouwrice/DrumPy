@@ -1,9 +1,9 @@
 from typing import Self
 
-from mediapipe.tasks.python.vision import RunningMode
+from mediapipe.tasks.python.vision import RunningMode  # type: ignore
 from pygame import Rect
-from pygame_gui import UIManager
-from pygame_gui.elements import UILabel
+from pygame_gui import UIManager  # type: ignore
+from pygame_gui.elements import UILabel  # type: ignore
 
 from drumpy.mediapipe_pose.mediapipe_pose import MediaPipePose
 
@@ -21,11 +21,14 @@ class FPSDisplay(UILabel):
         media_pipe_pose: MediaPipePose,
     ) -> None:
         mode = ""
-        match media_pipe_pose.options.running_mode:
-            case RunningMode.LIVE_STREAM:
+        match media_pipe_pose.options.running_mode:  # type: ignore
+            case RunningMode.LIVE_STREAM:  # type: ignore
                 mode = "Async Mode"
-            case RunningMode.VIDEO:
+            case RunningMode.VIDEO:  # type: ignore
                 mode = "Blocking Mode"
+            case _:  # type: ignore
+                pass
+
         self.model = media_pipe_pose.model
         super().__init__(
             Rect((0, 0), (900, 50)),
@@ -34,8 +37,8 @@ class FPSDisplay(UILabel):
             anchors={"top": "top", "left": "left"},
         )
 
-        self.ui_time_deltas = []
-        self.mediapipe_time_deltas = []
+        self.ui_time_deltas: list[float] = []
+        self.mediapipe_time_deltas: list[int] = []
 
         self.media_pipe_pose = media_pipe_pose
         self.ui_manager = ui_manager
@@ -68,11 +71,14 @@ class FPSDisplay(UILabel):
         )
 
         mode = ""
-        match self.media_pipe_pose.options.running_mode:
-            case RunningMode.LIVE_STREAM:
+        match self.media_pipe_pose.options.running_mode:  # type: ignore
+            case RunningMode.LIVE_STREAM:  # type: ignore
                 mode = "Async Mode"
-            case RunningMode.VIDEO:
+            case RunningMode.VIDEO:  # type: ignore
                 mode = "Blocking Mode"
+            case _:  # type: ignore
+                pass
+
         self.set_text(
             f"UI FPS: {ui_fps:.2f}  Camera FPS: {camera_fps:.2f}   {mode}  Model: {self.model}"
         )

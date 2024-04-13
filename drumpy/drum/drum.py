@@ -2,9 +2,9 @@ from enum import auto, Enum
 from time import sleep
 from typing import Self, Optional
 
-
 from drumpy.drum.sound import Sound, SoundState
-from drumpy.util import print_float_array, Position
+from drumpy.util import position_str, Position
+from drumpy.mediapipe_pose.mediapipe_markers import MarkerEnum
 
 
 class DrumPresets:
@@ -49,12 +49,12 @@ class Drum:
         sounds: list[Sound],
         sleep_option: SleepOption = SleepOption.SLEEP,
     ) -> None:
-        self.sounds = sounds
+        self.sounds: list[Sound] = sounds
 
         # Queue to keep track of sounds that need to be calibrated
-        self.auto_calibrations = []
+        self.auto_calibrations: list[Sound] = []
 
-        self.sleep_option = sleep_option
+        self.sleep_option: SleepOption = sleep_option
 
     def __str__(self: Self) -> str:
         return "\n".join([str(sound) for sound in self.sounds])
@@ -62,13 +62,13 @@ class Drum:
     def find_and_play_sound(
         self: Self,
         position: Position,
-        marker_label: str,
-        sounds: Optional[list[Sound]],
+        marker: MarkerEnum,
+        sounds: Optional[list[Sound]] = None,
     ) -> None:
         """
         Find the closest sound to the given position and play it
         If the drum is calibrating sounds, the to be calibrated sound will be played
-        :param marker_label: The label of the marker that is hitting the sound
+        :param marker: The marker that hit the sound
         :param sounds: List of sounds to consider, if None, all sounds will be considered
         :param position: A 3D position as a numpy array
         :return:
@@ -83,7 +83,7 @@ class Drum:
                 if sound.state == SoundState.CALIBRATING:
                     sound.hit(position)
                     print(
-                        f"\t{marker_label}: {sound.name} with distance {distance:.3f} at {print_float_array(position)}"
+                        f"\t{marker}: {sound.name} with distance {distance:.3f} at {position_str(position)}"
                     )
                     return
 
@@ -94,23 +94,20 @@ class Drum:
         if closest_sound is not None:
             closest_sound.hit(position)
             print(
-                f"{marker_label}: {closest_sound.name} with distance {closest_distance:.3f} "
-                f"at {print_float_array(position)}"
+                f"{marker}: {closest_sound.name} with distance {closest_distance:.3f} "
+                f"at {position_str(position)}"
             )
         else:
-            print(
-                f"{marker_label}: No sound found for position {print_float_array(position)} "
-                f"with distance {closest_distance:.3f}"
-            )
+            print(f"{marker}: No sound found for position {position_str(position)}")
 
-    def auto_calibrate(self: Self, sounds: Optional[list[int]] = None) -> None:
+    def auto_calibrate(self: Self, sounds: list[Sound] | None = None) -> None:
         """
         Automatically calibrate all sounds
         :param sounds: List of sounds to calibrate, if None, all sounds will be calibrated in order
         :return:
         """
         if sounds is None:
-            sounds = list(range(len(self.sounds)))
+            sounds = self.sounds
 
         self.auto_calibrations = sounds
 
@@ -122,7 +119,7 @@ class Drum:
         if len(self.auto_calibrations) == 0:
             return
 
-        sound = self.sounds[self.auto_calibrations[0]]
+        sound = self.auto_calibrations[0]
 
         match sound.state.value:
             case SoundState.UNINITIALIZED.value:
@@ -133,3 +130,6 @@ class Drum:
             case SoundState.READY.value:
                 self.auto_calibrations.pop(0)
                 return
+
+            case _:
+                pass

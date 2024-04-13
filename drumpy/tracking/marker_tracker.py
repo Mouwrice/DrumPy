@@ -1,9 +1,10 @@
 from statistics import mean
 from typing import Self
 
-from drumpy.drum.sound import Sound
 from drumpy.drum.drum import Drum
+from drumpy.drum.sound import Sound
 from drumpy.util import Position
+from drumpy.mediapipe_pose.mediapipe_markers import MarkerEnum
 
 MAX_DISTANCE = 100
 
@@ -15,35 +16,40 @@ class MarkerTracker:
 
     def __init__(
         self: Self,
-        label: str,
+        marker: MarkerEnum,
         drum: Drum,
         sounds: list[Sound],
         memory: int = 15,
         downward_trend: float = -2,
         upward_trend: float = 1,
     ) -> None:
-        self.label = label
+        """
+        Initialize the marker tracker
+        :param marker: The marker to track
+        :param drum: The drum to play the sounds on
+        :param sounds: The sounds that can be played by this marker
+        :param memory: How many positions to keep track of
+        :param downward_trend: The threshold for a downward trend on the z-axis
+        :param upward_trend: The threshold for an upward trend on the z-axis
+        """
+        self.marker: MarkerEnum = marker
 
         # the sounds that can be played by this marker
         self.sounds: list[Sound] = sounds
 
-        # keep track of the last 10 velocities on the z-axis
-        self.velocities = []
-
-        # keep track of the last 10 positions
+        self.velocities: list[float] = []
         self.positions: list[Position] = []
 
         # time until next hit can be registered
         self.time_until_next_hit = 0
 
-        # how many positions to keep track of
         self.memory = memory
+
         # how many positions to look ahead to determine if a hit is registered
         # should be smaller than memory
         self.look_ahead = 5
         assert self.look_ahead < self.memory
 
-        # thresholds for registering a hit
         self.downward_trend = downward_trend
         self.upward_trend = upward_trend
 
@@ -64,11 +70,9 @@ class MarkerTracker:
             self.velocities.pop(0)
 
         if self.is_hit():
-            position = self.positions[-self.look_ahead]
-
             self.time_until_next_hit = self.memory
             self.drum.find_and_play_sound(
-                self.positions[-self.look_ahead], self.label, self.sounds
+                self.positions[-self.look_ahead], self.marker, self.sounds
             )
 
     def get_velocity(self: Self) -> float:
@@ -95,9 +99,4 @@ class MarkerTracker:
             avg_z_vel < self.downward_trend
             and avg_z_look_ahead > self.upward_trend
             and self.time_until_next_hit == 0
-        )
-
-    def __str__(self: Self) -> str:
-        return "{}: \n{}  {}".format(
-            self.label, self.positions[-1], self.velocities[-1]
         )
