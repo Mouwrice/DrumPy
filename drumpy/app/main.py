@@ -108,9 +108,10 @@ class App:
 
 def main() -> None:
     app = App(
-        source=Source.FILE,
-        running_mode=RunningMode.VIDEO,  # type: ignore
-        file_path="../../recordings/multicam_asil_01_front.mkv",
+        source=Source.CAMERA,
+        running_mode=RunningMode.LIVE_STREAM,  # type: ignore
+        model=LandmarkerModel.LITE,
+        # file_path="../../recordings/multicam_asil_01_front.mkv",
         # log_file="test.csv",
     )
     app.start()
