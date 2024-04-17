@@ -82,6 +82,7 @@ class VideoFileSource(VideoSource):
         self.size = (smallest, smallest)
         self.left_offset = (source_width - smallest) // 2
         self.top_offset = (source_height - smallest) // 2
+        self.stopped = False
 
     def get_fps(self: Self) -> float:
         """

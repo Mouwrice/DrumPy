@@ -41,13 +41,9 @@ class DrumStick(MarkerTrackerWrapper):
         self.position = np.array([0, 0, 0])
 
     def update(self: Self, markers: list[Landmark]) -> None:
-        wrist_landmark = markers[self.wrist.value]
-        pinky_landmark = markers[self.pinky.value]
-        index_landmark = markers[self.index.value]
-
-        wrist_pos = landmark_to_position(wrist_landmark)
-        pinky_pos = landmark_to_position(pinky_landmark)
-        index_pos = landmark_to_position(index_landmark)
+        wrist_pos = landmark_to_position(markers[self.wrist])
+        pinky_pos = landmark_to_position(markers[self.pinky])
+        index_pos = landmark_to_position(markers[self.index])
 
         direction = wrist_pos + (index_pos - pinky_pos) + (pinky_pos - wrist_pos)
 
@@ -90,7 +86,7 @@ class Foot(MarkerTrackerWrapper):
         self.tracker = tracker
 
     def update(self: Self, markers: list[Landmark]) -> None:
-        self.position = landmark_to_position(markers[self.toe_tip.value])
+        self.position = landmark_to_position(markers[self.toe_tip])
 
         self.tracker.update(self.position)
 
