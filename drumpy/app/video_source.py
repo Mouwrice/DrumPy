@@ -148,7 +148,7 @@ class CameraSource(VideoSource):
     def __init__(self: Self, camera_index: int) -> None:
         super().__init__()
         camera.init()
-        cameras = pygame.camera.list_cameras()
+        cameras = camera.list_cameras()
         print(f"Available cameras: {cameras}")
         assert camera_index < len(cameras), f"Invalid camera index: {camera_index}"
 

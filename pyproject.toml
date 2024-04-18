@@ -37,4 +37,4 @@ max-line-length = 120
 [tool.pyright]
 include = ["drumpy"]
 typeCheckingMode = "strict"
-exclude = ["**/*mediapipe_pose.py"]
+exclude = ["**/*mediapipe_pose.py", "**/*cli.py"]
