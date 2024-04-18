@@ -16,6 +16,7 @@ opencv-python = "4.9.0.80"
 termcolor = "2.4.0"
 pygame-gui = "0.6.10"
 pygame-ce = "^2.4.1"
+click = "^8.1.7"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "3.7.0"

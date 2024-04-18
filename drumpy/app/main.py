@@ -26,9 +26,10 @@ class App:
         file_path: Optional[str] = None,
         running_mode: RunningMode = RunningMode.LIVE_STREAM,  # type: ignore
         model: LandmarkerModel = LandmarkerModel.FULL,
-        delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,  # type: ignore
+        delegate: BaseOptions.Delegate = BaseOptions.Delegate.CPU,  # type: ignore
         log_file: Optional[str] = None,
         landmark_type: LandmarkType = LandmarkType.WORLD_LANDMARKS,
+        camera_index: int = 0,
     ) -> None:
         """
         Initialize the application
@@ -39,11 +40,6 @@ class App:
         self.model = model
 
         pygame.init()
-        pygame.camera.init()
-
-        print(pygame.camera.get_backends())
-        cameras = pygame.camera.list_cameras()
-        print(cameras)
 
         pygame.display.set_caption("DrumPy")
         initial_window_size = (900, 900)
@@ -68,7 +64,7 @@ class App:
 
         match source:
             case Source.CAMERA:
-                self.video_source = CameraSource(cameras[0])
+                self.video_source = CameraSource(camera_index=camera_index)
             case Source.FILE:
                 assert file_path is not None, "File path must be provided"
                 self.video_source = VideoFileSource(file_path)
