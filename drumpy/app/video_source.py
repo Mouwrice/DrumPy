@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import IntEnum
 from pathlib import Path
 from typing import Self
 
@@ -10,13 +10,23 @@ import numpy.typing as npt
 from pygame import camera, surfarray, Surface
 
 
-class Source(Enum):
+class Source(IntEnum):
     """
     Enumeration for the different sources of video
     """
 
     CAMERA = 0
     FILE = 1
+
+    @staticmethod
+    def from_str(source: str) -> "Source":
+        match source.lower():
+            case "camera":
+                return Source.CAMERA
+            case "file":
+                return Source.FILE
+            case _:
+                raise ValueError(f"Invalid source: {source}")
 
 
 class VideoSource(ABC):
@@ -82,6 +92,7 @@ class VideoFileSource(VideoSource):
         self.size = (smallest, smallest)
         self.left_offset = (source_width - smallest) // 2
         self.top_offset = (source_height - smallest) // 2
+        self.stopped = False
 
     def get_fps(self: Self) -> float:
         """
@@ -134,10 +145,15 @@ class CameraSource(VideoSource):
     Class to handle a video source from a camera
     """
 
-    def __init__(self: Self, camera_id: int | str) -> None:
+    def __init__(self: Self, camera_index: int) -> None:
         super().__init__()
-        self.camera_id = camera_id
-        self.camera = camera.Camera(camera_id)
+        camera.init()
+        cameras = camera.list_cameras()
+        print(f"Available cameras: {cameras}")
+        assert camera_index < len(cameras), f"Invalid camera index: {camera_index}"
+
+        self.camera_id = camera_index
+        self.camera = camera.Camera(cameras[camera_index])
         self.camera.start()
         original_size = self.camera.get_size()
         # Crop the image to a square aspect ratio

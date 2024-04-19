@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Self
 
 
-class MarkerEnum(Enum):
+class MarkerEnum(IntEnum):
     """
     From the documentation:
     0 - nose
@@ -79,6 +79,78 @@ class MarkerEnum(Enum):
     RIGHT_DRUM_STICK = 34
     LEFT_FOOT = 35
     RIGHT_FOOT = 36
+
+    @staticmethod
+    def from_qtm_label(label: str) -> "MarkerEnum":  # noqa: PLR0911
+        match label:
+            case "Nose":
+                return MarkerEnum.NOSE
+            case "Eye_Inner_L":
+                return MarkerEnum.LEFT_EYE_INNER
+            case "Eye_L":
+                return MarkerEnum.LEFT_EYE
+            case "Eye_Outer_L":
+                return MarkerEnum.LEFT_EYE_OUTER
+            case "Eye_Inner_R":
+                return MarkerEnum.RIGHT_EYE_INNER
+            case "Eye_R":
+                return MarkerEnum.RIGHT_EYE
+            case "Eye_Outer_R":
+                return MarkerEnum.RIGHT_EYE_OUTER
+            case "Ear_L":
+                return MarkerEnum.LEFT_EAR
+            case "Ear_R":
+                return MarkerEnum.RIGHT_EAR
+            case "Mouth_L":
+                return MarkerEnum.MOUTH_LEFT
+            case "Mouth_R":
+                return MarkerEnum.MOUTH_RIGHT
+            case "Shoulder_L":
+                return MarkerEnum.LEFT_SHOULDER
+            case "Shoulder_R":
+                return MarkerEnum.RIGHT_SHOULDER
+            case "Elbow_L":
+                return MarkerEnum.LEFT_ELBOW
+            case "Elbow_R":
+                return MarkerEnum.RIGHT_ELBOW
+            case "Wrist_L":
+                return MarkerEnum.LEFT_WRIST
+            case "Wrist_R":
+                return MarkerEnum.RIGHT_WRIST
+            case "Pinky_L":
+                return MarkerEnum.LEFT_PINKY
+            case "Pinky_R":
+                return MarkerEnum.RIGHT_PINKY
+            case "Index_L":
+                return MarkerEnum.LEFT_INDEX
+            case "Index_R":
+                return MarkerEnum.RIGHT_INDEX
+            case "Thumb_L":
+                return MarkerEnum.LEFT_THUMB
+            case "Thumb_R":
+                return MarkerEnum.RIGHT_THUMB
+            case "Hip_L":
+                return MarkerEnum.LEFT_HIP
+            case "Hip_R":
+                return MarkerEnum.RIGHT_HIP
+            case "Knee_L":
+                return MarkerEnum.LEFT_KNEE
+            case "Knee_R":
+                return MarkerEnum.RIGHT_KNEE
+            case "Ankle_L":
+                return MarkerEnum.LEFT_ANKLE
+            case "Ankle_R":
+                return MarkerEnum.RIGHT_ANKLE
+            case "Heel_L":
+                return MarkerEnum.LEFT_HEEL
+            case "Heel_R":
+                return MarkerEnum.RIGHT_HEEL
+            case "Foot_Index_L":
+                return MarkerEnum.LEFT_FOOT_INDEX
+            case "Foot_Index_R":
+                return MarkerEnum.RIGHT_FOOT_INDEX
+            case _:
+                raise ValueError(f"Unknown label: {label}")
 
     def __str__(self: Self) -> str:
         return self.name.replace("_", " ").title()
