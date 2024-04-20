@@ -79,7 +79,7 @@ class MarkerTracker:
         if len(self.positions) < 2:  # noqa: PLR2004
             return 0
 
-        return self.positions[-1][2] - self.positions[-2][2]
+        return float(self.positions[-1][2]) - float(self.positions[-2][2])
 
     def is_hit(self: Self) -> bool:
         """

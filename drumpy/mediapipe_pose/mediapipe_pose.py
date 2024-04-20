@@ -2,6 +2,10 @@ from typing import Self, Optional
 
 import numpy as np
 import numpy.typing as npt
+from drumpy.mediapipe_pose.landmark_type import LandmarkType
+from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
+from drumpy.tracking.drum_trackers import DrumTrackers
+from drumpy.trajectory_file import TrajectoryFile
 from mediapipe import Image, ImageFormat
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe.python import solutions
@@ -12,11 +16,7 @@ from mediapipe.tasks.python.vision import (
     PoseLandmarkerResult,
     RunningMode,
 )
-
-from drumpy.mediapipe_pose.landmark_type import LandmarkType
-from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
-from drumpy.tracking.drum_trackers import DrumTrackers
-from drumpy.trajectory_file import TrajectoryFile
+from drumpy.mediapipe_pose.process_result import ResultProcessor
 
 
 def visualize_landmarks(
@@ -61,7 +61,7 @@ class MediaPipePose:
         self: Self,
         running_mode: RunningMode,
         landmark_type: LandmarkType,
-        drum_trackers: DrumTrackers,
+        drum_trackers: Optional[DrumTrackers] = None,
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.GPU,
         log_file: Optional[str] = None,
@@ -105,6 +105,8 @@ class MediaPipePose:
 
         self.drum_trackers = drum_trackers
 
+        self.result_processor = ResultProcessor()
+
     def result_callback(
         self: Self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
     ) -> None:
@@ -115,18 +117,23 @@ class MediaPipePose:
         :param timestamp_ms: The timestamp of the frame
         :return:
         """
+        result = self.result_processor.process_result(result, timestamp_ms)
         self.detection_result = result
         self.latency = timestamp_ms - self.latest_timestamp
         self.latest_timestamp = timestamp_ms
-        self.drum_trackers.drum.check_calibrations()
+        if self.drum_trackers is not None:
+            self.drum_trackers.drum.check_calibrations()
         if (
             result.pose_world_landmarks is not None
             and len(result.pose_world_landmarks) > 0
+            and self.drum_trackers is not None
         ):
             self.drum_trackers.update(result.pose_world_landmarks[0])
+
         self.visualisation = visualize_landmarks(
             image.numpy_view(), self.detection_result
         )
+
         self.frame_count += 1
         if self.csv_writer is not None:
             self.write_landmarks(result, timestamp_ms)

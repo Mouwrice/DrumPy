@@ -30,6 +30,7 @@ class App:
         log_file: Optional[str] = None,
         landmark_type: LandmarkType = LandmarkType.WORLD_LANDMARKS,
         camera_index: int = 0,
+        disable_drum: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """
         Initialize the application
@@ -46,7 +47,9 @@ class App:
         self.window_surface = pygame.display.set_mode(initial_window_size)
         self.manager = UIManager(initial_window_size)
 
-        self.drum_trackers = DrumTrackers()
+        self.drum_trackers: Optional[DrumTrackers] = None
+        if not disable_drum:
+            self.drum_trackers = DrumTrackers()
 
         self.media_pipe_pose = MediaPipePose(
             running_mode=running_mode,  # type: ignore
@@ -79,11 +82,9 @@ class App:
         )
 
     def start(self: Self) -> None:
-        frame = 0
         clock = pygame.time.Clock()
         running = True
         while running and not self.video_source.stopped:
-            frame += 1
             time_delta_ms = clock.tick(self.fps)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -110,6 +111,7 @@ def main() -> None:
         delegate=BaseOptions.Delegate.CPU,  # type: ignore
         file_path="../data/Recordings/multicam_asil_01_front.mkv",
         # log_file="test.csv",
+        disable_drum=True,
     )
     app.start()
 
