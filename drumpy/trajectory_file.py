@@ -9,7 +9,7 @@ class TrajectoryFile:
     Class to read and write the captured data to a CSV file.
     """
 
-    def __init__(self: Self, path: str) -> None:
+    def __init__(self, path: str) -> None:
         fieldnames = [
             "frame",
             "time",

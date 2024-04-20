@@ -34,7 +34,7 @@ class VideoSource(ABC):
     Abstract base class for a video source
     """
 
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         self.stopped = False
 
     @abstractmethod
@@ -145,7 +145,7 @@ class CameraSource(VideoSource):
     Class to handle a video source from a camera
     """
 
-    def __init__(self: Self, camera_index: int) -> None:
+    def __init__(self, camera_index: int) -> None:
         super().__init__()
         camera.init()
         cameras = camera.list_cameras()

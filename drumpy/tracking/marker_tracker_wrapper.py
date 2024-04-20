@@ -26,7 +26,7 @@ class MarkerTrackerWrapper(ABC):
 
 class DrumStick(MarkerTrackerWrapper):
     def __init__(
-        self: Self,
+        self,
         wrist: MarkerEnum,
         pinky: MarkerEnum,
         index: MarkerEnum,
@@ -80,7 +80,7 @@ class DrumStick(MarkerTrackerWrapper):
 
 
 class Foot(MarkerTrackerWrapper):
-    def __init__(self: Self, toe_tip: MarkerEnum, tracker: MarkerTracker) -> None:
+    def __init__(self, toe_tip: MarkerEnum, tracker: MarkerTracker) -> None:
         self.toe_tip = toe_tip
         self.position: Position = np.array([0, 0, 0])
         self.tracker = tracker

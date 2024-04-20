@@ -29,7 +29,7 @@ class Sound:
     """
 
     def __init__(
-        self: Self,
+        self,
         name: str,
         path: str,
         margin: float,
@@ -117,7 +117,7 @@ class Sound:
 
 
 class SnareDrum(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "Snare Drum",
             "./DrumSamples/Snare/CKV1_Snare Loud.wav",
@@ -126,7 +126,7 @@ class SnareDrum(Sound):
 
 
 class HiHat(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "High Hat",
             "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
@@ -135,7 +135,7 @@ class HiHat(Sound):
 
 
 class KickDrum(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "Kick Drum",
             "./DrumSamples/Kick/CKV1_Kick Loud.wav",
@@ -144,7 +144,7 @@ class KickDrum(Sound):
 
 
 class HiHatFoot(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "High Hat Foot",
             "./DrumSamples/HiHat/CKV1_HH Foot.wav",
@@ -153,7 +153,7 @@ class HiHatFoot(Sound):
 
 
 class Tom1(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "Tom 1",
             "./DrumSamples/Perc/Tom1.wav",
@@ -162,7 +162,7 @@ class Tom1(Sound):
 
 
 class Tom2(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "Tom 2",
             "./DrumSamples/Perc/Tom2.wav",
@@ -171,7 +171,7 @@ class Tom2(Sound):
 
 
 class Cymbal(Sound):
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         super().__init__(
             "Cymbal",
             "./DrumSamples/cymbals/Hop_Crs.wav",

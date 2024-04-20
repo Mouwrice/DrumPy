@@ -13,7 +13,7 @@ class DrumTrackers:
     Objects of this class are used to update the positions of the trackers
     """
 
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         snare_drum = SnareDrum()
         hi_hat = HiHat()
         kick_drum = KickDrum()

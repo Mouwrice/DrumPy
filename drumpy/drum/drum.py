@@ -45,7 +45,7 @@ class Drum:
     """
 
     def __init__(
-        self: Self,
+        self,
         sounds: list[Sound],
         sleep_option: SleepOption = SleepOption.SLEEP,
     ) -> None:

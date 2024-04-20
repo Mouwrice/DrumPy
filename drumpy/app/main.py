@@ -21,7 +21,7 @@ class App:
     """
 
     def __init__(
-        self: Self,
+        self,
         source: Source = Source.CAMERA,
         file_path: Optional[str] = None,
         running_mode: RunningMode = RunningMode.LIVE_STREAM,  # type: ignore

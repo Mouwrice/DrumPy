@@ -15,7 +15,7 @@ class MarkerTracker:
     """
 
     def __init__(
-        self: Self,
+        self,
         marker: MarkerEnum,
         drum: Drum,
         sounds: list[Sound],

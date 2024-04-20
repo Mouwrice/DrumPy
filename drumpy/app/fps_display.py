@@ -16,7 +16,7 @@ class FPSDisplay(UILabel):
     """
 
     def __init__(
-        self: Self,
+        self,
         ui_manager: UIManager,
         media_pipe_pose: MediaPipePose,
     ) -> None:
