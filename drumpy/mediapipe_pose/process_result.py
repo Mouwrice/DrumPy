@@ -10,9 +10,16 @@ class ResultProcessor:
     Major deviations from the previous positions are considered outliers and will be corrected.
     """
 
-    def __init__(self, memory: int = 5, threshold: float = 0.08) -> None:
+    def __init__(
+        self, memory: int = 2, max_deviation: float = 0.08, min_deviation: float = 0.01
+    ) -> None:
         self.memory: int = memory
-        self.threshold: float = threshold
+        self.max_deviation: float = max_deviation
+        # The minimum distance to the previous position for a landmark to be considered a movement and not jitter
+        self.min_deviation: float = min_deviation
+        self.smoothing: float = (
+            0.2  # The smoothing factor for the landmarks, lower is smoother
+        )
         self.results: list[PoseLandmarkerResult] = []
         self.timestamps_ms: list[float] = []  # timestamps of the results, in ms
         self.time_deltas_ms: list[float] = []  # time deltas between the results, in ms
@@ -81,23 +88,40 @@ class ResultProcessor:
         predicted.z = (
             self.results[-1].pose_landmarks[0][index].z + avg_diff.z * time_delta
         )
-        # print(f"Predicted: {predicted.x}, {predicted.y}, {predicted.z}")
-        # print(f"Current: {landmark.x}, {landmark.y}, {landmark.z}\n")
+
+        previous = self.results[-1].pose_landmarks[0][index]
+        diff_landmark_previous = self.calculate_diff(landmark, previous)
 
         # Calculate the difference between the predicted and current position
-        diff = self.calculate_diff(landmark, predicted)
+        diff_landmark_predicted = self.calculate_diff(landmark, predicted)
 
-        # If the difference is too large, the current position is considered an outlier
-        # The current position is corrected by the predicted position
-        if abs(diff.x) > self.threshold:
-            print(f"Corrected x: {landmark.x} -> {predicted.x}")
-            landmark.x = predicted.x
-        if abs(diff.y) > self.threshold:
-            print(f"Corrected y: {landmark.y} -> {predicted.y}")
-            landmark.y = predicted.y
-        if abs(diff.z) > self.threshold:
-            # print(f"Corrected z: {landmark.z} -> {predicted.z}")
-            landmark.z = predicted.z
+        # If the difference with the previous position is below the minimum deviation, smooth it out
+        # This is to prevent jittering of the landmarks
+        # Else apply the difference to the predicted position
+
+        if abs(diff_landmark_previous.x) < self.min_deviation:
+            landmark.x = previous.x + diff_landmark_previous.x * self.smoothing
+        else:
+            diff_landmark_predicted.x = max(
+                -self.max_deviation, min(self.max_deviation, diff_landmark_predicted.x)
+            )
+            landmark.x = predicted.x + diff_landmark_predicted.x
+
+        if abs(diff_landmark_previous.y) < self.min_deviation:
+            landmark.y = previous.y + diff_landmark_previous.y * self.smoothing
+        else:
+            diff_landmark_predicted.y = max(
+                -self.max_deviation, min(self.max_deviation, diff_landmark_predicted.y)
+            )
+            landmark.y = predicted.y + diff_landmark_predicted.y
+
+        if abs(diff_landmark_previous.z) < self.min_deviation:
+            landmark.z = previous.z + diff_landmark_previous.z * self.smoothing
+        else:
+            diff_landmark_predicted.z = max(
+                -self.max_deviation, min(self.max_deviation, diff_landmark_predicted.z)
+            )
+            landmark.z = predicted.z + diff_landmark_predicted.z
 
         return landmark
 

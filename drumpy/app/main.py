@@ -106,7 +106,7 @@ class App:
 def main() -> None:
     app = App(
         source=Source.FILE,
-        # running_mode=RunningMode.LIVE_STREAM,  # type: ignore
+        running_mode=RunningMode.VIDEO,  # type: ignore
         model=LandmarkerModel.LITE,
         delegate=BaseOptions.Delegate.CPU,  # type: ignore
         file_path="../data/Recordings/multicam_asil_01_front.mkv",
