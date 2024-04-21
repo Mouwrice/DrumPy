@@ -1,3 +1,5 @@
+import math
+
 from mediapipe.tasks.python.components.containers.landmark import (
     NormalizedLandmark,
     Landmark,
@@ -19,25 +21,20 @@ class ResultProcessor:
         self.landmark_type: LandmarkType = landmark_type
 
         self.memory: int = 2
-        self.max_normalized_deviation: float = (
-            0.02  # The maximum distance from the predicted position for a landmark
-        )
-        self.min_normalized_deviation: float = (
-            0.01  # The minimum distance to the previous position for a landmark
-        )
-        # to be considered a movement and not jitter
-
-        self.max_world_deviation: float = 0.08
-        self.min_world_deviation: float = 0.01
-
-        self.smoothing: float = (
-            0.1  # The smoothing factor for the landmarks, lower is smoother
-        )
 
         self.results: list[PoseLandmarkerResult] = []
         self.timestamps_ms: list[float] = []  # timestamps of the results, in ms
         self.time_deltas_ms: list[float] = []  # time deltas between the results, in ms
         self.time_duration_ms: float = 0.0  # duration of the time deltas, in ms
+
+    def mollifier(self, x: float) -> float:
+        """
+        The mollifier function
+        """
+        if x <= 0:
+            return 0
+
+        return math.exp((-(math.log(x / 0.05) ** 2)) * 0.1)
 
     def process_result(
         self, result: PoseLandmarkerResult, timestamp_ms: float
@@ -96,9 +93,8 @@ class ResultProcessor:
 
     def process_axis(
         self,
-        diff_landmark_previous: float,
         diff_landmark_predicted: float,
-        previous: float,
+        landmark: float,
         predicted: float,
     ) -> float:
         """
@@ -106,24 +102,8 @@ class ResultProcessor:
         This is to prevent small jittering of the landmarks
         Else apply clamp the difference to be within the maximum deviation
         """
-
-        min_deviation = (
-            self.min_world_deviation
-            if self.landmark_type == LandmarkType.WORLD_LANDMARKS
-            else self.min_normalized_deviation
-        )
-        if abs(diff_landmark_previous) < min_deviation:
-            return previous + diff_landmark_previous * self.smoothing
-
-        max_deviation = (
-            self.max_world_deviation
-            if self.landmark_type == LandmarkType.WORLD_LANDMARKS
-            else self.max_normalized_deviation
-        )
-        diff_landmark_predicted = max(
-            -max_deviation, min(max_deviation, diff_landmark_predicted)
-        )
-        return predicted + diff_landmark_predicted
+        ratio = self.mollifier(abs(diff_landmark_predicted))
+        return predicted * (1 - ratio) + landmark * ratio
 
     def process_landmark(
         self, landmark: NormalizedLandmark | Landmark, index: int, timestamp_ms: float
@@ -157,20 +137,17 @@ class ResultProcessor:
         pos = self.predict_position(avg_diff, index, timestamp_ms)
         predicted = Landmark(x=pos[0], y=pos[1], z=pos[2])
 
-        previous = self.results[-1].pose_landmarks[0][index]
-        diff_landmark_previous = self.calculate_diff(landmark, previous)
-
         # Calculate the difference between the predicted and current position
         diff_landmark_predicted = self.calculate_diff(landmark, predicted)
 
         landmark.x = self.process_axis(
-            diff_landmark_previous.x, diff_landmark_predicted.x, previous.x, predicted.x
+            diff_landmark_predicted.x, landmark.x, predicted.x
         )
         landmark.y = self.process_axis(
-            diff_landmark_previous.y, diff_landmark_predicted.y, previous.y, predicted.y
+            diff_landmark_predicted.y, landmark.y, predicted.y
         )
         landmark.z = self.process_axis(
-            diff_landmark_previous.z, diff_landmark_predicted.z, previous.z, predicted.z
+            diff_landmark_predicted.z, landmark.z, predicted.z
         )
 
         return landmark
@@ -187,3 +164,9 @@ class ResultProcessor:
         diff.y = current.y - previous.y
         diff.z = current.z - previous.z
         return diff
+
+
+if __name__ == "__main__":
+    processor = ResultProcessor(LandmarkType.LANDMARKS)
+    for i in range(20):
+        print(processor.mollifier(i / 2))
