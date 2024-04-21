@@ -105,7 +105,7 @@ class MediaPipePose:
 
         self.drum_trackers = drum_trackers
 
-        self.result_processor = ResultProcessor()
+        self.result_processor = ResultProcessor(landmark_type=self.landmark_type)
 
     def result_callback(
         self: Self, result: PoseLandmarkerResult, image: Image, timestamp_ms: int
