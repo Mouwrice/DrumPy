@@ -21,6 +21,14 @@ class ResultProcessor:
         self.landmark_type: LandmarkType = landmark_type
 
         self.memory: int = 2
+        self.peak: float = (
+            0.02  # Deviations at this value are considered completely plausible
+        )
+        # The mollifier function will be 1 at this value
+        self.tightness: float = (
+            0.5  # How tight the mollifier function is around the peak
+        )
+        # Higher values will make the mollifier function tighter
 
         self.results: list[PoseLandmarkerResult] = []
         self.timestamps_ms: list[float] = []  # timestamps of the results, in ms
@@ -34,7 +42,7 @@ class ResultProcessor:
         if x <= 0:
             return 0
 
-        return math.exp((-(math.log(x / 0.05) ** 2)) * 0.1)
+        return math.exp((-(math.log(x / self.peak) ** 4)) * self.tightness)
 
     def process_result(
         self, result: PoseLandmarkerResult, timestamp_ms: float
@@ -42,6 +50,8 @@ class ResultProcessor:
         """
         Process the result of the pose estimation
         """
+        if len(self.results) == 0 or len(result.pose_landmarks) == 0:
+            return result
         for i, landmark in enumerate(result.pose_landmarks[0]):
             result.pose_landmarks[0][i] = self.process_landmark(
                 landmark, i, timestamp_ms
@@ -91,19 +101,24 @@ class ResultProcessor:
 
         return x, y, z
 
-    def process_axis(
+    def apply_mollifier(
         self,
-        diff_landmark_predicted: float,
-        landmark: float,
-        predicted: float,
-    ) -> float:
+        diff_landmark_predicted: NormalizedLandmark | Landmark,
+        landmark: NormalizedLandmark | Landmark,
+        predicted: NormalizedLandmark | Landmark,
+    ) -> NormalizedLandmark | Landmark:
         """
         If the difference with the previous position is below the minimum deviation, smooth it out
         This is to prevent small jittering of the landmarks
         Else apply clamp the difference to be within the maximum deviation
         """
-        ratio = self.mollifier(abs(diff_landmark_predicted))
-        return predicted * (1 - ratio) + landmark * ratio
+        ratio_x = self.mollifier(abs(diff_landmark_predicted.x))
+        ratio_y = self.mollifier(abs(diff_landmark_predicted.y))
+        ratio_z = self.mollifier(abs(diff_landmark_predicted.z))
+        landmark.x = predicted.x * (1 - ratio_x) + landmark.x * ratio_x
+        landmark.y = predicted.y * (1 - ratio_y) + landmark.y * ratio_y
+        landmark.z = predicted.z * (1 - ratio_z) + landmark.z * ratio_z
+        return landmark
 
     def process_landmark(
         self, landmark: NormalizedLandmark | Landmark, index: int, timestamp_ms: float
@@ -140,17 +155,7 @@ class ResultProcessor:
         # Calculate the difference between the predicted and current position
         diff_landmark_predicted = self.calculate_diff(landmark, predicted)
 
-        landmark.x = self.process_axis(
-            diff_landmark_predicted.x, landmark.x, predicted.x
-        )
-        landmark.y = self.process_axis(
-            diff_landmark_predicted.y, landmark.y, predicted.y
-        )
-        landmark.z = self.process_axis(
-            diff_landmark_predicted.z, landmark.z, predicted.z
-        )
-
-        return landmark
+        return self.apply_mollifier(diff_landmark_predicted, landmark, predicted)
 
     @staticmethod
     def calculate_diff(

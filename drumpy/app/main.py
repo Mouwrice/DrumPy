@@ -105,14 +105,14 @@ class App:
 
 def main() -> None:
     app = App(
-        source=Source.FILE,
-        running_mode=RunningMode.VIDEO,  # type: ignore
-        model=LandmarkerModel.LITE,
+        source=Source.CAMERA,
+        running_mode=RunningMode.LIVE_STREAM,  # type: ignore
+        model=LandmarkerModel.FULL,
         delegate=BaseOptions.Delegate.CPU,  # type: ignore
-        landmark_type=LandmarkType.LANDMARKS,
+        landmark_type=LandmarkType.WORLD_LANDMARKS,
         file_path="../data/Recordings/multicam_asil_01_front.mkv",
         # log_file="test.csv",
-        disable_drum=True,
+        disable_drum=False,
     )
     app.start()
 

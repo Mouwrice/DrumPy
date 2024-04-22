@@ -7,7 +7,7 @@ from termcolor import cprint
 
 from drumpy.util import position_str, Position, distance_no_depth
 
-MARGIN = 0.1  # 10 cm, the margin that the sound can be hit with
+MARGIN = 0.15  # 20 cm, the margin that the sound can be hit with
 MIN_HIT_COUNT = 10
 
 

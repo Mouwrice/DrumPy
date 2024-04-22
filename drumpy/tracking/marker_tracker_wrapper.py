@@ -103,3 +103,25 @@ class Foot(MarkerTrackerWrapper):
         return Foot(
             toe_tip, MarkerTracker(MarkerEnum.RIGHT_FOOT, drum=drum, sounds=sounds)
         )
+
+
+class Hand(MarkerTrackerWrapper):
+    def __init__(self, wrist: MarkerEnum, tracker: MarkerTracker) -> None:
+        self.wrist = wrist
+        self.position: Position = np.array([0, 0, 0])
+        self.tracker = tracker
+
+    def update(self: Self, markers: list[Landmark]) -> None:
+        self.position = landmark_to_position(markers[self.wrist])
+
+        self.tracker.update(self.position)
+
+    @staticmethod
+    def left_hand(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
+        wrist = MarkerEnum.LEFT_WRIST
+        return Hand(wrist, MarkerTracker(wrist, drum=drum, sounds=sounds))
+
+    @staticmethod
+    def right_hand(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
+        wrist = MarkerEnum.RIGHT_WRIST
+        return Hand(wrist, MarkerTracker(wrist, drum=drum, sounds=sounds))

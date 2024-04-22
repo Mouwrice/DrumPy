@@ -20,8 +20,8 @@ class MarkerTracker:
         drum: Drum,
         sounds: list[Sound],
         memory: int = 15,
-        downward_trend: float = -2,
-        upward_trend: float = 1,
+        downward_trend: float = -0.01,
+        upward_trend: float = 0.01,
     ) -> None:
         """
         Initialize the marker tracker
@@ -29,8 +29,8 @@ class MarkerTracker:
         :param drum: The drum to play the sounds on
         :param sounds: The sounds that can be played by this marker
         :param memory: How many positions to keep track of
-        :param downward_trend: The threshold for a downward trend on the z-axis
-        :param upward_trend: The threshold for an upward trend on the z-axis
+        :param downward_trend: The threshold for a downward trend on the z-axis, in meters
+        :param upward_trend: The threshold for an upward trend on the z-axis, in meters
         """
         self.marker: MarkerEnum = marker
 
