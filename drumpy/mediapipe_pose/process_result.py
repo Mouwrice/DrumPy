@@ -42,7 +42,7 @@ class ResultProcessor:
         if x <= 0:
             return 0
 
-        return math.exp((-(math.log(x / self.peak) ** 4)) * self.tightness)
+        return math.exp((-(math.log(x / self.peak) ** 2)) * self.tightness)
 
     def process_result(
         self, result: PoseLandmarkerResult, timestamp_ms: float
@@ -50,8 +50,10 @@ class ResultProcessor:
         """
         Process the result of the pose estimation
         """
-        if len(self.results) == 0 or len(result.pose_landmarks) == 0:
+        if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
+            print("No pose landmarks found")
             return result
+
         for i, landmark in enumerate(result.pose_landmarks[0]):
             result.pose_landmarks[0][i] = self.process_landmark(
                 landmark, i, timestamp_ms
@@ -169,9 +171,3 @@ class ResultProcessor:
         diff.y = current.y - previous.y
         diff.z = current.z - previous.z
         return diff
-
-
-if __name__ == "__main__":
-    processor = ResultProcessor(LandmarkType.LANDMARKS)
-    for i in range(20):
-        print(processor.mollifier(i / 2))
