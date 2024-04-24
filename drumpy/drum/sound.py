@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Self, Optional
 
 import numpy as np
@@ -11,7 +11,7 @@ MARGIN = 0.15  # 20 cm, the margin that the sound can be hit with
 MIN_HIT_COUNT = 10
 
 
-class SoundState(Enum):
+class SoundState(IntEnum):
     UNINITIALIZED = 0
     READY = 1
     CALIBRATING = 2

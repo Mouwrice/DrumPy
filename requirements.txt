@@ -1,0 +1,7 @@
+numpy==1.26.4
+mediapipe==0.10.11
+opencv-python==4.9.0.80
+termcolor==2.4.0
+pygame-gui==0.6.10
+pygame-ce==2.4.1
+click==8.1.7

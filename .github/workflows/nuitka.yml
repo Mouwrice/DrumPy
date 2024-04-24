@@ -1,8 +1,9 @@
 name: Build & Publish Binaries
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 
 jobs:
@@ -20,27 +21,25 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          python-version: '3.11'
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v3
-      - name: Setup a local virtual environment (if no poetry.toml file)
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
-      - uses: actions/cache@v4
-        name: Define a cache for the virtual environment based on the dependencies lock file
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          path: ./.venv
-          key: venv-${{ hashFiles('poetry.lock') }}
-      - name: Install the project dependencies
-        run: poetry install
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
 
       - name: Build Executable
-        uses: Nuitka/Nuitka-Action@main
+        uses: Nuitka/Nuitka-Action@v1.1
         with:
           nuitka-version: main
-          script-name: ./drumpy/app/main.py
+          script-name: ./drumpy/cli.py
           onefile: true
 
       - name: Upload Artifacts
