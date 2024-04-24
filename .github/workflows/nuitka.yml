@@ -23,6 +23,18 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
       - name: Build Executable
         uses: Nuitka/Nuitka-Action@v1.1
         with:
