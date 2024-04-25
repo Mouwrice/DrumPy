@@ -51,4 +51,4 @@ sudo docker run --device "/dev/video0" -e "DISPLAY=:0" --mount type=bind,src=/tm
 Your mileage may vary.
 
 
-## For more insight into the project setup and development, read the [development guide](./docs/development.md).
+### For more insight into the project setup and development, read the [development guide](DEVELOPING.md).
