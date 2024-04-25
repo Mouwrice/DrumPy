@@ -33,5 +33,22 @@ This file is generated using the `poetry export` command.
 ```shell
 poetry export -f requirements.txt --output requirements.txt --without-hashes 
 ```
-When the dependencies are updated, this command should be run to update the `requirements.txt` file.
-This command is provided by the [Poetry Export Plugin](https://github.com/python-poetry/poetry-plugin-export).
+This command is executed in the `nuitka.yml` workflow file, so it is not necessary to run it manually.
+It is provided by the [Poetry Export Plugin](https://github.com/python-poetry/poetry-plugin-export).
+
+
+#### Building locally
+
+For testing and debugging purposes, it is possible to build the application locally using Nuitka.
+You can find the required nuitka command in the [build_exe.nu](build_exe.nu) file. Or you can run the following command:
+```shell
+poetry run python -m nuitka
+--include-plugin-directory=.venv/Lib/site-packages/pygame_gui/data/
+--include-data-files=.venv/Lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
+--include-data-files=.venv/Lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
+--include-data-files=./*.task=./
+--include-data-dir=./DrumSamples=./DrumSamples
+--enable-console
+--enable-plugin=no-qt
+--standalone ./drumpy/cli.py
+```

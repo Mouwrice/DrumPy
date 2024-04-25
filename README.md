@@ -52,3 +52,40 @@ Your mileage may vary.
 
 
 ### For more insight into the project setup and development, read the [development guide](DEVELOPING.md).
+
+
+## Usage
+
+The application uses the body pose estimation model from mediapipe to detect the position of the hands and the face.
+What you need to do is stand in front of the camera and start moving your hands as if you are playing the drums.
+The application will detect your hands and play the corresponding drum sound.
+At first, there is a calibration phase where the application will ask you to hit the drums in a specific order.
+This is to calibrate the position of the drums in the camera view.
+After the calibration phase, you can start playing the drums freely.
+This calibration phase is only done once when the application is started and progress is shown in the console.
+Keep this console visible to see the progress and the drum sounds that are being calibrated.
+
+The application also has a small CLI interface that can be used to tweaks some parameters or choose a different camera.
+Open a terminal in the same directory as the application to access the CLI.
+
+```shell
+drumpy.exe --help
+```
+Which will show the following help message:
+
+```
+Usage: cli.exe [OPTIONS]
+
+Options:
+  --source [camera|file]          Source of video, camera or file
+  --file TEXT                     Path to video file, should be provided if
+                                  source is file
+  --running-mode [live_stream|blocking]
+                                  Running mode for pose estimation, either
+                                  dropping frames with the live stream or
+                                  blocking
+  --model [lite|full|heavy]       Model to use for pose estimation
+  --delegate [cpu|gpu]            Delegate to use for pose estimation
+  --camera-index INTEGER          Index of the camera to use
+  --help                          Show this message and exit.
+```
