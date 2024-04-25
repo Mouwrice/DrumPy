@@ -44,6 +44,7 @@ jobs:
           nuitka-version: main
           script-name: ./drumpy/cli.py
           standalone: true
+          onefile: false
           include-plugin-directory: "C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\pygame_gui\\data"
           include-data-dir: ./DrumSamples=./DrumSamples
           include-data-files: |
