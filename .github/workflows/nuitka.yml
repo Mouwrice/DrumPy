@@ -47,7 +47,7 @@ jobs:
           include-data-dir: ./DrumSamples=./DrumSamples
           include-data-files: |
             ./*.task=./
-            C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/*=pygame_gui/data/
+            C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
             C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
           enable-console: true
           enable-plugins: no-qt
