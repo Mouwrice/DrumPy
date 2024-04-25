@@ -9,6 +9,4 @@
 --enable-console
 --enable-plugin=no-qt
 --standalone ./drumpy/cli.py
--o=DrumPy.exe
---output-dir=./DrumPy
 )

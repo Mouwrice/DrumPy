@@ -53,6 +53,7 @@ jobs:
           enable-plugins: no-qt
           company-name: Mouwrice
           product-name: DrumPy
+          product-version: 0.1.0
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
