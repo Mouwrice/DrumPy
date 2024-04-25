@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Install Poetry
         uses: snok/install-poetry@v1
+
+      - name: Export dependencies
         run: poetry export -f requirements.txt --output requirements.txt --without-hashes
 
       - name: Setup Python
