@@ -53,7 +53,13 @@ jobs:
           product-name: DrumPy
           product-version: 0.1.0
 
+      - name: Zip
+        uses: vimtor/action-zip@v1.2
+        with:
+          files: build/cli.dist
+          dest: DrumPy.zip
+
       - name: Upload to latest release
-        run: |
-          cp ./build/cli.dist DrumPy
-          gh release upload ${{github.event.release.tag_name}} DrumPy
+        run: gh release upload ${{github.event.release.tag_name}} DrumPy.zip
+        env:
+          GH_TOKEN: ${{ github.token}}
