@@ -8,45 +8,30 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    defaults:
-      run:
-        shell: bash
-
-    runs-on: ${{ matrix.os }}
-
+    runs-on: windows-latest
     steps:
       - name: Check-out repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Load cached Poetry installation
-        id: cached-poetry
-        uses: actions/cache@v3
-        with:
-          path: ~/.local  # the path depends on the OS
-          key: poetry-0  # increment to reset cache
       - name: Install Poetry
-        if: steps.cached-poetry.outputs.cache-hit != 'true'
         uses: snok/install-poetry@v1
 
-      - name: Load cached venv
-        id: cached-pip-wheels
-        uses: actions/cache@v3
+      - name: Export dependencies
+        run: C:\Users\runneradmin\.local\bin\poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          path: ~/.cache
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-      - name: Install library
-        run: poetry install --no-interaction
-      - run: source $VENV
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            **/requirements*.txt
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - run: python -m site
 
       - name: Build Executable
         uses: Nuitka/Nuitka-Action@v1.1
@@ -55,12 +40,12 @@ jobs:
           script-name: ./drumpy/cli.py
           standalone: true
           onefile: false
-          include-plugin-directory: .venv/lib/python3.11/site-packages/pygame_gui/data/
+          include-plugin-directory: "C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\pygame_gui\\data"
           include-data-dir: ./DrumSamples=./DrumSamples
           include-data-files: |
             ./*.task=./
-            .venv/lib/python3.11/site-packages/pygame_gui/data/*.*=pygame_gui/data/
-            .venv/lib/python3.11/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
+            C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
+            C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
           enable-console: true
           enable-plugins: no-qt
           company-name: Mouwrice
@@ -70,5 +55,5 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Drumpy-${{ runner.os }}
-          path: build/cli.dist
+          name: DrumPy
+          path: build/
