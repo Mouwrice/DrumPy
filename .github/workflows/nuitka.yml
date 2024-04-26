@@ -41,9 +41,8 @@ jobs:
           standalone: true
           onefile: false
           include-plugin-directory: "C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\pygame_gui\\data"
-          include-data-dir: ./DrumSamples=./DrumSamples
+          include-data-dir: ./resources=./resources
           include-data-files: |
-            ./*.task=./
             C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
             C:/hostedtoolcache/windows/Python/3.11.9/x64/Lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
           enable-console: true
@@ -56,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DrumPy
-          path: build/
+          path: build/cli.dist

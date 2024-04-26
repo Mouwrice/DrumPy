@@ -120,7 +120,7 @@ class SnareDrum(Sound):
     def __init__(self) -> None:
         super().__init__(
             "Snare Drum",
-            "./DrumSamples/Snare/CKV1_Snare Loud.wav",
+            "./resources/sounds/CKV1_Snare Loud.wav",
             margin=MARGIN,
         )
 
@@ -129,7 +129,7 @@ class HiHat(Sound):
     def __init__(self) -> None:
         super().__init__(
             "High Hat",
-            "./DrumSamples/HiHat/CKV1_HH Closed Loud.wav",
+            "./resources/sounds/CKV1_HH Closed Loud.wav",
             margin=MARGIN,
         )
 
@@ -138,7 +138,7 @@ class KickDrum(Sound):
     def __init__(self) -> None:
         super().__init__(
             "Kick Drum",
-            "./DrumSamples/Kick/CKV1_Kick Loud.wav",
+            "./resources/sounds/CKV1_Kick Loud.wav",
             margin=MARGIN,
         )
 
@@ -147,7 +147,7 @@ class HiHatFoot(Sound):
     def __init__(self) -> None:
         super().__init__(
             "High Hat Foot",
-            "./DrumSamples/HiHat/CKV1_HH Foot.wav",
+            "./resources/sounds/CKV1_HH Foot.wav",
             margin=MARGIN,
         )
 
@@ -156,7 +156,7 @@ class Tom1(Sound):
     def __init__(self) -> None:
         super().__init__(
             "Tom 1",
-            "./DrumSamples/Perc/Tom1.wav",
+            "./DrumSamples/Tom1.wav",
             margin=MARGIN,
         )
 
@@ -165,7 +165,7 @@ class Tom2(Sound):
     def __init__(self) -> None:
         super().__init__(
             "Tom 2",
-            "./DrumSamples/Perc/Tom2.wav",
+            "./resources/sounds/Tom2.wav",
             margin=MARGIN,
         )
 
@@ -174,6 +174,6 @@ class Cymbal(Sound):
     def __init__(self) -> None:
         super().__init__(
             "Cymbal",
-            "./DrumSamples/cymbals/Hop_Crs.wav",
+            "./resources/sounds/Hop_Crs.wav",
             margin=MARGIN,
         )
