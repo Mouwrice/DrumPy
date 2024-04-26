@@ -55,12 +55,12 @@ jobs:
           script-name: ./drumpy/cli.py
           standalone: true
           onefile: false
-          include-plugin-directory: .venv/lib/site-packages/pygame_gui/data/
+          include-plugin-directory: .venv/lib/python3.11/site-packages/pygame_gui/data/
           include-data-dir: ./DrumSamples=./DrumSamples
           include-data-files: |
             ./*.task=./
-            .venv/lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
-            .venv/lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
+            .venv/lib/python3.11/site-packages/pygame_gui/data/*.*=pygame_gui/data/
+            .venv/lib/python3.11/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
           enable-console: true
           enable-plugins: no-qt
           company-name: Mouwrice
