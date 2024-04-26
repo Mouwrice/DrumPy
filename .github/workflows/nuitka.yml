@@ -1,10 +1,9 @@
-name: Build & Publish Binaries
+name: Build & Publish Executable
 
 on:
-  push:
-    branches:
-      - main
-
+  release:
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -51,8 +50,9 @@ jobs:
           product-name: DrumPy
           product-version: 0.1.0
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: DrumPy
-          path: build/cli.dist
+          file: build/cli.dist
+          asset_name: DrumPy ${{tag}}
+          overwrite: true
