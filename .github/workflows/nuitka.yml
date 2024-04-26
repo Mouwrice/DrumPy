@@ -53,9 +53,7 @@ jobs:
           product-name: DrumPy
           product-version: 0.1.0
 
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: build/cli.dist
-          asset_name: DrumPy
-          overwrite: true
+      - name: Upload to latest release
+        run: |
+          cp ./build/cli.dist DrumPy
+          gh release upload ${{github.event.release.tag_name}} DrumPy
