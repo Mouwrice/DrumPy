@@ -61,3 +61,5 @@ jobs:
 
       - name: Upload to latest release
         run: gh release upload ${{github.event.release.tag_name}} result.zip
+        env:
+          GH_TOKEN: ${{ github.token}}
