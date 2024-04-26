@@ -26,11 +26,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Load cached Poetry installation
+        id: cached-poetry
+        uses: actions/cache@v3
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+          path: ~/.local  # the path depends on the OS
+          key: poetry-0  # increment to reset cache
+      - name: Install Poetry
+        if: steps.cached-poetry.outputs.cache-hit != 'true'
+        uses: snok/install-poetry@v1
 
       - name: Load cached venv
         id: cached-pip-wheels
@@ -51,12 +55,12 @@ jobs:
           script-name: ./drumpy/cli.py
           standalone: true
           onefile: false
-          include-plugin-directory: .venv/Lib/site-packages/pygame_gui/data/
+          include-plugin-directory: .venv/lib/site-packages/pygame_gui/data/
           include-data-dir: ./DrumSamples=./DrumSamples
           include-data-files: |
             ./*.task=./
-            .venv/Lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
-            .venv/Lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
+            .venv/lib/site-packages/pygame_gui/data/*.*=pygame_gui/data/
+            .venv/lib/site-packages/pygame_gui/data/translations/*=pygame_gui/data/translations/
           enable-console: true
           enable-plugins: no-qt
           company-name: Mouwrice
