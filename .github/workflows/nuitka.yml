@@ -8,12 +8,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [windows-latest]
-
-    runs-on: ${{ matrix.os }}
-
+    runs-on: windows-latest
     steps:
       - name: Check-out repository
         uses: actions/checkout@v4
