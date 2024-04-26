@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/Mouwrice/DrumPy/compare/v0.1.0...v0.1.1) (2024-04-26)
+
+
+### Bug Fixes
+
+* delete unneeded resources ([1a4a465](https://github.com/Mouwrice/DrumPy/commit/1a4a46546bc93393b683d937e08881c957b21d21))
+
 ## [0.1.0](https://github.com/Mouwrice/DrumPy/compare/v0.0.1...v0.1.0) (2024-04-24)
 
 
