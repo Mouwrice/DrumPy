@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.1](https://github.com/Mouwrice/DrumPy/compare/v0.1.0...v0.1.1) (2024-04-26)
+
+
+### Bug Fixes
+
+* ci permissions ([8ff0731](https://github.com/Mouwrice/DrumPy/commit/8ff0731b32cff55c94b7961e4ba372c461feefd6))
+* delete unneeded resources ([1a4a465](https://github.com/Mouwrice/DrumPy/commit/1a4a46546bc93393b683d937e08881c957b21d21))
+* upload to release ([84ec35c](https://github.com/Mouwrice/DrumPy/commit/84ec35c06c733c83a3ab4be709bec3eeeb564eab))
+
 ## [0.1.0](https://github.com/Mouwrice/DrumPy/compare/v0.0.1...v0.1.0) (2024-04-24)
 
 
