@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/Mouwrice/DrumPy/compare/v0.2.0...v0.2.1) (2024-04-27)
+
+
+### Bug Fixes
+
+* docs ([bfb86a0](https://github.com/Mouwrice/DrumPy/commit/bfb86a0342caeed2d36f748707dfb48e3844ecb2))
+
 ## [0.2.0](https://github.com/Mouwrice/DrumPy/compare/v0.1.1...v0.2.0) (2024-04-26)
 
 
