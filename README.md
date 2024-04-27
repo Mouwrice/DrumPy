@@ -1,6 +1,6 @@
 # DrumPy
 
-Air drumming using body pose estimation.
+Air drumming using MediaPipe Pose Landmarker. 
 
 ## Installation
 
