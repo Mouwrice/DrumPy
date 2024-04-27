@@ -69,7 +69,7 @@ The application also has a small CLI interface that can be used to tweaks some p
 Open a terminal in the same directory as the application to access the CLI.
 
 ```shell
-drumpy.exe --help
+cli.exe --help
 ```
 Which will show the following help message:
 
