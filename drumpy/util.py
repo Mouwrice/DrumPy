@@ -19,16 +19,16 @@ def landmark_to_position(landmark: Landmark) -> Position:
     """
     Convert a mediapipe landmark to a numpy array
     Also switches some axes around:
-    x -> y, the horizontal axis
-    y -> z, the vertical axis
-    z -> x, the depth axis
+    x = z
+    y = y
+    z = -x
     """
     assert landmark.x is not None
     assert landmark.y is not None
     assert landmark.z is not None
-    x = float(landmark.y)
-    y = float(landmark.z)
-    z = float(landmark.x)
+    x = landmark.z
+    y = landmark.y
+    z = -landmark.x
     return np.array([x, y, z])
 
 

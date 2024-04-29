@@ -155,6 +155,7 @@ class CameraSource(VideoSource):
         self.camera_id = camera_index
         self.camera = camera.Camera(cameras[camera_index])
         self.camera.start()
+        self.camera.set_controls(hflip=True)
         original_size = self.camera.get_size()
         # Crop the image to a square aspect ratio
         min_size = min(original_size)

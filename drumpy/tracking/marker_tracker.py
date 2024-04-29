@@ -19,9 +19,9 @@ class MarkerTracker:
         marker: MarkerEnum,
         drum: Drum,
         sounds: list[Sound],
-        memory: int = 15,
-        downward_trend: float = -0.01,
-        upward_trend: float = 0.01,
+        memory: int = 10,
+        downward_trend: float = -0.005,
+        upward_trend: float = 0.001,
     ) -> None:
         """
         Initialize the marker tracker
@@ -47,7 +47,7 @@ class MarkerTracker:
 
         # how many positions to look ahead to determine if a hit is registered
         # should be smaller than memory
-        self.look_ahead = 5
+        self.look_ahead = 3
         assert self.look_ahead < self.memory
 
         self.downward_trend = downward_trend

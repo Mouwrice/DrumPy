@@ -3,7 +3,7 @@ from typing import Self
 from mediapipe.tasks.python.components.containers.landmark import Landmark  # pyright: ignore
 
 from drumpy.drum.drum import Drum
-from drumpy.drum.sound import SnareDrum, HiHat, KickDrum
+from drumpy.drum.sound import SnareDrum, HiHat, KickDrum, HiHatFoot
 from drumpy.tracking.marker_tracker_wrapper import MarkerTrackerWrapper, Foot, Hand
 
 
@@ -17,6 +17,7 @@ class DrumTrackers:
         snare_drum = SnareDrum()
         hi_hat = HiHat()
         kick_drum = KickDrum()
+        hi_hat_foot = HiHatFoot()
 
         self.drum = Drum([snare_drum, hi_hat, kick_drum])
         self.drum.auto_calibrate()
@@ -24,7 +25,7 @@ class DrumTrackers:
         self.trackers: list[MarkerTrackerWrapper] = [
             Hand.left_hand(self.drum, [snare_drum, hi_hat]),
             Hand.right_hand(self.drum, [snare_drum, hi_hat]),
-            Foot.left_foot(self.drum, [kick_drum]),
+            Foot.left_foot(self.drum, [hi_hat_foot]),
             Foot.right_foot(self.drum, [kick_drum]),
         ]
 

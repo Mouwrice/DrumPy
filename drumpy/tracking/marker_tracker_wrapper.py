@@ -80,10 +80,16 @@ class DrumStick(MarkerTrackerWrapper):
 
 
 class Foot(MarkerTrackerWrapper):
-    def __init__(self, toe_tip: MarkerEnum, tracker: MarkerTracker) -> None:
+    def __init__(self, toe_tip: MarkerEnum, drum: Drum, sounds: list[Sound]) -> None:
         self.toe_tip = toe_tip
         self.position: Position = np.array([0, 0, 0])
-        self.tracker = tracker
+        self.tracker = MarkerTracker(
+            MarkerEnum.LEFT_FOOT_INDEX,
+            drum=drum,
+            sounds=sounds,
+            downward_trend=-0.004,
+            upward_trend=-0.001,
+        )
 
     def update(self: Self, markers: list[Landmark]) -> None:
         self.position = landmark_to_position(markers[self.toe_tip])
@@ -92,24 +98,18 @@ class Foot(MarkerTrackerWrapper):
 
     @staticmethod
     def left_foot(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
-        toe_tip = MarkerEnum.LEFT_FOOT_INDEX
-        return Foot(
-            toe_tip, MarkerTracker(MarkerEnum.LEFT_FOOT, drum=drum, sounds=sounds)
-        )
+        return Foot(MarkerEnum.LEFT_FOOT_INDEX, drum, sounds)
 
     @staticmethod
     def right_foot(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
-        toe_tip = MarkerEnum.RIGHT_FOOT_INDEX
-        return Foot(
-            toe_tip, MarkerTracker(MarkerEnum.RIGHT_FOOT, drum=drum, sounds=sounds)
-        )
+        return Foot(MarkerEnum.RIGHT_FOOT_INDEX, drum, sounds)
 
 
 class Hand(MarkerTrackerWrapper):
-    def __init__(self, wrist: MarkerEnum, tracker: MarkerTracker) -> None:
+    def __init__(self, wrist: MarkerEnum, drum: Drum, sounds: list[Sound]) -> None:
         self.wrist = wrist
         self.position: Position = np.array([0, 0, 0])
-        self.tracker = tracker
+        self.tracker = MarkerTracker(wrist, drum=drum, sounds=sounds)
 
     def update(self: Self, markers: list[Landmark]) -> None:
         self.position = landmark_to_position(markers[self.wrist])
@@ -118,10 +118,8 @@ class Hand(MarkerTrackerWrapper):
 
     @staticmethod
     def left_hand(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
-        wrist = MarkerEnum.LEFT_WRIST
-        return Hand(wrist, MarkerTracker(wrist, drum=drum, sounds=sounds))
+        return Hand(MarkerEnum.LEFT_WRIST, drum, sounds)
 
     @staticmethod
     def right_hand(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
-        wrist = MarkerEnum.RIGHT_WRIST
-        return Hand(wrist, MarkerTracker(wrist, drum=drum, sounds=sounds))
+        return Hand(MarkerEnum.RIGHT_WRIST, drum, sounds)
