@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/Mouwrice/DrumPy/compare/v0.2.1...v0.3.0) (2024-05-03)
+
+
+### Features
+
+* improve tracking and drum ([6d6a07d](https://github.com/Mouwrice/DrumPy/commit/6d6a07dfc787931d6abc8bcb07f3caab62ebdb86))
+
+
+### Bug Fixes
+
+* .task files path ([77361f6](https://github.com/Mouwrice/DrumPy/commit/77361f6cd3afecaa1fcd0c61669747209382388d))
+* fix camera input axis transformation and improve hit detection ([7665f5f](https://github.com/Mouwrice/DrumPy/commit/7665f5fa7e42c509ae4a301773e7f0f25466bee0))
+* fix corrupt audio file ([b656121](https://github.com/Mouwrice/DrumPy/commit/b65612101a691d1227f2b89266e545c202023633))
+
 ## [0.2.1](https://github.com/Mouwrice/DrumPy/compare/v0.2.0...v0.2.1) (2024-04-27)
 
 
