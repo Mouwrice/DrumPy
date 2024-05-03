@@ -34,6 +34,7 @@ class Sound:
         path: str,
         margin: float,
         position: Optional[Position] = None,
+        velocity_multiplier: float = 20,
     ) -> None:
         """
         Initialize the sound
@@ -55,6 +56,8 @@ class Sound:
         # the number of hits that have been registered
         self.hit_count = 0
         self.hits: list[Position] = []
+
+        self.velocity_multiplier = velocity_multiplier
 
         # the margin that the sound can be hit with, aka the distance to the sound, or the size of the sound area
         self.margin: float = margin
@@ -106,11 +109,15 @@ class Sound:
                     return distance
                 return None
 
-    def hit(self: Self, position: Position) -> None:
+    def hit(self: Self, position: Position, velocity: float) -> None:
         """
         Update the position of the sound slowly to the given position and play it
-        :param position:
+        :param position: The position of the hit
+        :param velocity: The velocity of the hit, used to determine the volume of the sound
         """
+        # print(f"\n{self.name} hit at {position_str(position)} with velocity {velocity}")
+        volume = min(1.0, max(0.0, abs(velocity) * self.velocity_multiplier))
+        self.sound.set_volume(volume)
         self.sound.play()
         self.hit_count += 1
         self.position = 0.99 * self.position + 0.01 * position
@@ -122,6 +129,7 @@ class SnareDrum(Sound):
             "Snare Drum",
             "./resources/sounds/CKV1_Snare Loud.wav",
             margin=MARGIN,
+            velocity_multiplier=20,
         )
 
 
@@ -131,6 +139,7 @@ class HiHat(Sound):
             "High Hat",
             "./resources/sounds/CKV1_HH Closed Loud.wav",
             margin=MARGIN,
+            velocity_multiplier=20,
         )
 
 
@@ -140,6 +149,7 @@ class KickDrum(Sound):
             "Kick Drum",
             "./resources/sounds/CKV1_Kick Loud.wav",
             margin=MARGIN,
+            velocity_multiplier=40,
         )
 
 
@@ -149,6 +159,7 @@ class HiHatFoot(Sound):
             "High Hat Foot",
             "./resources/sounds/CKV1_HH Foot.wav",
             margin=MARGIN,
+            velocity_multiplier=40,
         )
 
 
@@ -158,6 +169,7 @@ class Tom1(Sound):
             "Tom 1",
             "./DrumSamples/Tom1.wav",
             margin=MARGIN,
+            velocity_multiplier=20,
         )
 
 
@@ -167,6 +179,7 @@ class Tom2(Sound):
             "Tom 2",
             "./resources/sounds/Tom2.wav",
             margin=MARGIN,
+            velocity_multiplier=20,
         )
 
 
@@ -176,4 +189,5 @@ class Cymbal(Sound):
             "Cymbal",
             "./resources/sounds/Hop_Crs.wav",
             margin=MARGIN,
+            velocity_multiplier=20,
         )

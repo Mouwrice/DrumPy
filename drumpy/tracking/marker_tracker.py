@@ -53,6 +53,9 @@ class MarkerTracker:
         self.downward_trend = downward_trend
         self.upward_trend = upward_trend
 
+        # The current z-axis velocity
+        self.velocity = 0
+
         self.drum = drum
 
     def update(self: Self, position: Position) -> None:
@@ -70,9 +73,12 @@ class MarkerTracker:
             self.velocities.pop(0)
 
         if self.is_hit():
-            self.time_until_next_hit = self.memory
+            self.time_until_next_hit = self.memory / 2
             self.drum.find_and_play_sound(
-                self.positions[-self.look_ahead], self.marker, self.sounds
+                self.positions[-self.look_ahead],
+                self.marker,
+                self.velocity,
+                self.sounds,
             )
 
     def get_velocity(self: Self) -> float:
@@ -93,6 +99,7 @@ class MarkerTracker:
             return False
 
         avg_z_vel = mean(self.velocities[: -self.look_ahead])
+        self.velocity = avg_z_vel
         avg_z_look_ahead = mean(self.velocities[-self.look_ahead :])
 
         return (

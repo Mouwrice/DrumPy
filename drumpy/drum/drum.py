@@ -63,6 +63,7 @@ class Drum:
         self: Self,
         position: Position,
         marker: MarkerEnum,
+        velocity: float,
         sounds: Optional[list[Sound]] = None,
     ) -> None:
         """
@@ -71,6 +72,7 @@ class Drum:
         :param marker: The marker that hit the sound
         :param sounds: List of sounds to consider, if None, all sounds will be considered
         :param position: A 3D position as a numpy array
+        :param velocity: The velocity of the marker, used to determine the hit strength and sound volume
         :return:
         """
 
@@ -81,7 +83,7 @@ class Drum:
             if (distance := sound.is_hit(position)) is not None:
                 # Check if the sound is calibrating
                 if sound.state == SoundState.CALIBRATING:
-                    sound.hit(position)
+                    sound.hit(position, velocity)
                     print(
                         f"\t{marker}: {sound.name} with distance {distance:.3f} at {position_str(position)}"
                     )
@@ -92,7 +94,7 @@ class Drum:
                     closest_distance = distance
 
         if closest_sound is not None:
-            closest_sound.hit(position)
+            closest_sound.hit(position, velocity)
             print(
                 f"{marker}: {closest_sound.name} with distance {closest_distance:.3f} "
                 f"at {position_str(position)}"

@@ -87,8 +87,8 @@ class Foot(MarkerTrackerWrapper):
             MarkerEnum.LEFT_FOOT_INDEX,
             drum=drum,
             sounds=sounds,
-            downward_trend=-0.004,
-            upward_trend=-0.001,
+            downward_trend=-0.003,
+            upward_trend=0.0,
         )
 
     def update(self: Self, markers: list[Landmark]) -> None:

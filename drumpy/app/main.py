@@ -41,6 +41,7 @@ class App:
         self.model = model
 
         pygame.init()
+        # pygame.mixer.init(channels=8)
 
         pygame.display.set_caption("DrumPy")
         initial_window_size = (900, 900)

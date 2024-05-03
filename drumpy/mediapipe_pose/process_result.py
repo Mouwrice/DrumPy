@@ -51,7 +51,6 @@ class ResultProcessor:
         Process the result of the pose estimation
         """
         if result.pose_landmarks is None or len(result.pose_landmarks) == 0:
-            print("No pose landmarks found")
             return result
 
         for i, landmark in enumerate(result.pose_landmarks[0]):
