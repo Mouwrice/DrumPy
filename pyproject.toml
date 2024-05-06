@@ -9,7 +9,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-python = "~3.11"
+python = "~3.12.0"
 numpy = "1.26.4"
 mediapipe = "0.10.11"
 opencv-python = "4.9.0.80"
