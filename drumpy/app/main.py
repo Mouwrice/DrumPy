@@ -111,7 +111,7 @@ def main() -> None:
         model=LandmarkerModel.LITE,
         delegate=BaseOptions.Delegate.CPU,  # type: ignore
         landmark_type=LandmarkType.LANDMARKS,
-        file_path="../data/Recordings/multicam_asil_01_front.mkv",
+        file_path="../../../data/recordings/multicam_asil_01_front.mkv",
         # log_file="test.csv",
         disable_drum=False,
     )
