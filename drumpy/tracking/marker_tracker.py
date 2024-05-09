@@ -20,8 +20,8 @@ class MarkerTracker:
         drum: Drum,
         sounds: list[Sound],
         memory: int = 10,
-        downward_trend: float = -0.005,
-        upward_trend: float = 0.001,
+        downward_trend: float = -0.1,
+        upward_trend: float = 0.01,
     ) -> None:
         """
         Initialize the marker tracker
@@ -29,8 +29,8 @@ class MarkerTracker:
         :param drum: The drum to play the sounds on
         :param sounds: The sounds that can be played by this marker
         :param memory: How many positions to keep track of
-        :param downward_trend: The threshold for a downward trend on the z-axis, in meters
-        :param upward_trend: The threshold for an upward trend on the z-axis, in meters
+        :param downward_trend: The threshold for a downward trend on the z-axis, in meter / second
+        :param upward_trend: The threshold for an upward trend on the z-axis, in meter / second
         """
         self.marker: MarkerEnum = marker
 
@@ -39,6 +39,7 @@ class MarkerTracker:
 
         self.velocities: list[float] = []
         self.positions: list[Position] = []
+        self.timestamps_ms: list[float] = []
 
         # time until next hit can be registered
         self.time_until_next_hit = 0
@@ -58,7 +59,7 @@ class MarkerTracker:
 
         self.drum = drum
 
-    def update(self: Self, position: Position) -> None:
+    def update(self: Self, position: Position, timestamp_ms: float) -> None:
         if self.time_until_next_hit > 0:
             self.time_until_next_hit -= 1
 
@@ -66,6 +67,11 @@ class MarkerTracker:
         self.positions.append(position)
         if len(self.positions) > self.memory:
             self.positions.pop(0)
+
+        # add the new timestamp to the list of timestamps
+        self.timestamps_ms.append(timestamp_ms)
+        if len(self.timestamps_ms) > self.memory:
+            self.timestamps_ms.pop(0)
 
         velocity = self.get_velocity()
         self.velocities.append(velocity)
@@ -82,10 +88,18 @@ class MarkerTracker:
             )
 
     def get_velocity(self: Self) -> float:
+        """
+        Calculate the current velocity of the marker on the z-axis
+        By calculating the difference between the last two positions
+        Divided by the time difference between the last two timestamps
+        :return: The velocity of the marker on the z-axis per second
+        """
         if len(self.positions) < 2:  # noqa: PLR2004
             return 0
 
-        return float(self.positions[-1][2]) - float(self.positions[-2][2])
+        time_delta = self.timestamps_ms[-1] - self.timestamps_ms[-2]  # in milliseconds
+        position_delta = float(self.positions[-1][2] - self.positions[-2][2])
+        return position_delta / time_delta * 1000
 
     def is_hit(self: Self) -> bool:
         """

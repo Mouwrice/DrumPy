@@ -5,9 +5,9 @@ import numpy as np
 import pygame
 from termcolor import cprint
 
-from drumpy.util import position_str, Position, distance_no_depth
+from drumpy.util import Position, distance_no_depth
 
-MARGIN = 0.15  # 20 cm, the margin that the sound can be hit with
+MARGIN = 0.1
 MIN_HIT_COUNT = 10
 
 
@@ -34,7 +34,7 @@ class Sound:
         path: str,
         margin: float,
         position: Optional[Position] = None,
-        velocity_multiplier: float = 20,
+        velocity_multiplier: float = 5,
     ) -> None:
         """
         Initialize the sound
@@ -93,13 +93,14 @@ class Sound:
                 if self.hit_count >= MIN_HIT_COUNT and distance <= self.margin:
                     self.state = SoundState.READY
                     cprint(
-                        f"\n{self.name} calibration done", color="green", attrs=["bold"]
+                        f"\n{self.name} calibration done\n",
+                        color="green",
+                        attrs=["bold"],
                     )
                 else:
                     cprint(f"\nCalibrating {self.name}", color="blue")
 
-                print(f"\tPosition: {position_str(self.position)}")
-                print(f"\tHit count: {self.hit_count}")
+                print(f"\tHit count: {self.hit_count}\n")
 
                 return distance
 
@@ -115,8 +116,8 @@ class Sound:
         :param position: The position of the hit
         :param velocity: The velocity of the hit, used to determine the volume of the sound
         """
-        # print(f"\n{self.name} hit at {position_str(position)} with velocity {velocity}")
         volume = min(1.0, max(0.0, abs(velocity) * self.velocity_multiplier))
+        print(f"Volume: {volume:.3f}")
         self.sound.set_volume(volume)
         self.sound.play()
         self.hit_count += 1
@@ -129,7 +130,7 @@ class SnareDrum(Sound):
             "Snare Drum",
             "./resources/sounds/CKV1_Snare Loud.wav",
             margin=MARGIN,
-            velocity_multiplier=20,
+            velocity_multiplier=3,
         )
 
 
@@ -139,7 +140,7 @@ class HiHat(Sound):
             "High Hat",
             "./resources/sounds/CKV1_HH Closed Loud.wav",
             margin=MARGIN,
-            velocity_multiplier=20,
+            velocity_multiplier=3,
         )
 
 
@@ -149,7 +150,7 @@ class KickDrum(Sound):
             "Kick Drum",
             "./resources/sounds/CKV1_Kick Loud.wav",
             margin=MARGIN,
-            velocity_multiplier=40,
+            velocity_multiplier=5,
         )
 
 
@@ -159,7 +160,7 @@ class HiHatFoot(Sound):
             "High Hat Foot",
             "./resources/sounds/CKV1_HH Foot.wav",
             margin=MARGIN,
-            velocity_multiplier=40,
+            velocity_multiplier=5,
         )
 
 
@@ -169,7 +170,7 @@ class Tom1(Sound):
             "Tom 1",
             "./DrumSamples/Tom1.wav",
             margin=MARGIN,
-            velocity_multiplier=20,
+            velocity_multiplier=3,
         )
 
 
@@ -179,7 +180,7 @@ class Tom2(Sound):
             "Tom 2",
             "./resources/sounds/Tom2.wav",
             margin=MARGIN,
-            velocity_multiplier=20,
+            velocity_multiplier=3,
         )
 
 
@@ -189,5 +190,5 @@ class Cymbal(Sound):
             "Cymbal",
             "./resources/sounds/Hop_Crs.wav",
             margin=MARGIN,
-            velocity_multiplier=20,
+            velocity_multiplier=3,
         )

@@ -2,7 +2,7 @@ from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
-from mediapipe.tasks.python.components.containers.landmark import Landmark  # type: ignore
+from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark  # type: ignore
 
 # Type for a 3D position, x, y, z
 Position: TypeAlias = npt.NDArray[np.float64]
@@ -15,7 +15,7 @@ def position_str(position: Position) -> str:
     return f"[{', '.join([f'{x:.3f}' for x in position])}]"
 
 
-def landmark_to_position(landmark: Landmark) -> Position:
+def landmark_to_position(landmark: NormalizedLandmark) -> Position:
     """
     Convert a mediapipe landmark to a numpy array
     Also switches some axes around:

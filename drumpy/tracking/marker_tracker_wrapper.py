@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Self
 
 import numpy as np
-from mediapipe.tasks.python.components.containers.landmark import Landmark  # pyright: ignore
+from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark  # pyright: ignore
 
 from drumpy.drum.drum import Drum
 from drumpy.drum.sound import Sound
@@ -18,7 +18,9 @@ class MarkerTrackerWrapper(ABC):
     """
 
     @abstractmethod
-    def update(self: Self, markers: list[Landmark]) -> None:
+    def update(
+        self: Self, markers: list[NormalizedLandmark], timestamp_ms: float
+    ) -> None:
         """
         Update the tracker with the new markers
         """
@@ -40,7 +42,9 @@ class DrumStick(MarkerTrackerWrapper):
 
         self.position = np.array([0, 0, 0])
 
-    def update(self: Self, markers: list[Landmark]) -> None:
+    def update(
+        self: Self, markers: list[NormalizedLandmark], timestamp_ms: float
+    ) -> None:
         wrist_pos = landmark_to_position(markers[self.wrist])
         pinky_pos = landmark_to_position(markers[self.pinky])
         index_pos = landmark_to_position(markers[self.index])
@@ -50,7 +54,7 @@ class DrumStick(MarkerTrackerWrapper):
         # increase the length of the direction vector by 50
         self.position = wrist_pos + 50 * direction / np.linalg.norm(direction)
 
-        self.tracker.update(self.position)
+        self.tracker.update(self.position, timestamp_ms)
 
     @staticmethod
     def left_hand(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
@@ -87,14 +91,16 @@ class Foot(MarkerTrackerWrapper):
             MarkerEnum.LEFT_FOOT_INDEX,
             drum=drum,
             sounds=sounds,
-            downward_trend=-0.003,
-            upward_trend=0.0,
+            downward_trend=-0.1,
+            upward_trend=0.01,
         )
 
-    def update(self: Self, markers: list[Landmark]) -> None:
+    def update(
+        self: Self, markers: list[NormalizedLandmark], timestamp_ms: float
+    ) -> None:
         self.position = landmark_to_position(markers[self.toe_tip])
 
-        self.tracker.update(self.position)
+        self.tracker.update(self.position, timestamp_ms)
 
     @staticmethod
     def left_foot(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:
@@ -111,10 +117,12 @@ class Hand(MarkerTrackerWrapper):
         self.position: Position = np.array([0, 0, 0])
         self.tracker = MarkerTracker(wrist, drum=drum, sounds=sounds)
 
-    def update(self: Self, markers: list[Landmark]) -> None:
+    def update(
+        self: Self, markers: list[NormalizedLandmark], timestamp_ms: float
+    ) -> None:
         self.position = landmark_to_position(markers[self.wrist])
 
-        self.tracker.update(self.position)
+        self.tracker.update(self.position, timestamp_ms)
 
     @staticmethod
     def left_hand(drum: Drum, sounds: list[Sound]) -> MarkerTrackerWrapper:

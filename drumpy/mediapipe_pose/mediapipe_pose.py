@@ -128,7 +128,7 @@ class MediaPipePose:
             and len(result.pose_world_landmarks) > 0
             and self.drum_trackers is not None
         ):
-            self.drum_trackers.update(result.pose_world_landmarks[0])
+            self.drum_trackers.update(result.pose_landmarks[0], timestamp_ms)
 
         self.visualisation = visualize_landmarks(
             image.numpy_view(), self.detection_result

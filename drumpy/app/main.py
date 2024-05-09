@@ -28,7 +28,7 @@ class App:
         model: LandmarkerModel = LandmarkerModel.FULL,
         delegate: BaseOptions.Delegate = BaseOptions.Delegate.CPU,  # type: ignore
         log_file: Optional[str] = None,
-        landmark_type: LandmarkType = LandmarkType.WORLD_LANDMARKS,
+        landmark_type: LandmarkType = LandmarkType.LANDMARKS,
         camera_index: int = 0,
         disable_drum: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
@@ -106,14 +106,14 @@ class App:
 
 def main() -> None:
     app = App(
-        source=Source.CAMERA,
-        running_mode=RunningMode.VIDEO,  # type: ignore
-        model=LandmarkerModel.LITE,
-        delegate=BaseOptions.Delegate.CPU,  # type: ignore
-        landmark_type=LandmarkType.LANDMARKS,
-        file_path="../../../data/recordings/multicam_asil_01_front.mkv",
+        # source=Source.CAMERA,
+        # running_mode=RunningMode.LIVE_STREAM,  # type: ignore
+        # model=LandmarkerModel.FULL,
+        delegate=BaseOptions.Delegate.GPU,  # type: ignore
+        # landmark_type=LandmarkType.LANDMARKS,
+        # file_path="../../../data/recordings/multicam_asil_01_front.mkv",
         # log_file="test.csv",
-        disable_drum=False,
+        # disable_drum=False,
     )
     app.start()
 

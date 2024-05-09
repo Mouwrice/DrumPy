@@ -85,7 +85,10 @@ class Drum:
                 if sound.state == SoundState.CALIBRATING:
                     sound.hit(position, velocity)
                     print(
-                        f"\t{marker}: {sound.name} with distance {distance:.3f} at {position_str(position)}"
+                        f"{marker}: {sound.name} \n"
+                        f"Distance: {distance:.3f}\n"
+                        f"Velocity: {velocity:.3f}\n"
+                        f"Position: {position_str(position)}\n"
                     )
                     return
 
@@ -96,11 +99,18 @@ class Drum:
         if closest_sound is not None:
             closest_sound.hit(position, velocity)
             print(
-                f"{marker}: {closest_sound.name} with distance {closest_distance:.3f} "
-                f"at {position_str(position)}"
+                f"{marker}: {closest_sound.name}\n"
+                f"Distance: {closest_distance:.3f}\n"
+                f"Velocity: {velocity:.3f} (m/s)\n"
+                f"Position: {position_str(position)}\n"
             )
         else:
-            print(f"{marker}: No sound found for position {position_str(position)}")
+            print(
+                f"{marker}: No sound found.\n"
+                f"Distance: {closest_distance:.3f}\n"
+                f"Velocity: {velocity:.3f}\n"
+                f"Position: {position_str(position)}\n"
+            )
 
     def auto_calibrate(self: Self, sounds: list[Sound] | None = None) -> None:
         """

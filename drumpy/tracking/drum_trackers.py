@@ -1,6 +1,6 @@
 from typing import Self
 
-from mediapipe.tasks.python.components.containers.landmark import Landmark  # pyright: ignore
+from mediapipe.tasks.python.components.containers.landmark import NormalizedLandmark  # pyright: ignore
 
 from drumpy.drum.drum import Drum
 from drumpy.drum.sound import SnareDrum, HiHat, KickDrum, HiHatFoot, Cymbal
@@ -30,6 +30,8 @@ class DrumTrackers:
             Foot.right_foot(self.drum, [kick_drum]),
         ]
 
-    def update(self: Self, markers: list[Landmark]) -> None:
+    def update(
+        self: Self, markers: list[NormalizedLandmark], timestamp_ms: float
+    ) -> None:
         for tracker in self.trackers:
-            tracker.update(markers)
+            tracker.update(markers, timestamp_ms)
