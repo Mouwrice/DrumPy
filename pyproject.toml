@@ -11,7 +11,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = "~3.11"
 numpy = "1.26.4"
-mediapipe = "0.10.11"
+mediapipe = "0.10.14"
 opencv-python = "4.9.0.80"
 termcolor = "2.4.0"
 pygame-gui = "0.6.10"
