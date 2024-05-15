@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/Mouwrice/DrumPy/compare/v0.3.0...v0.4.0) (2024-05-14)
+
+
+### Features
+
+* the drumming model now uses the NormalizedLandmark instead of the World Landmarks for increased stability ([998a861](https://github.com/Mouwrice/DrumPy/commit/998a861808100bc8683e280fab9edbb636d0f48d))
+
+
+### Bug Fixes
+
+* **deps:** update dependency mediapipe to v0.10.14 ([#52](https://github.com/Mouwrice/DrumPy/issues/52)) ([4dd72e6](https://github.com/Mouwrice/DrumPy/commit/4dd72e6cbf475935d831ccc16af2eab742c15e4b))
+
 ## [0.3.0](https://github.com/Mouwrice/DrumPy/compare/v0.2.1...v0.3.0) (2024-05-03)
 
 
