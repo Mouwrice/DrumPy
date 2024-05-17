@@ -1,6 +1,6 @@
 # Docker file taken and inspired from
 # https://medium.com/@albertazzir/blazing-fast-python-docker-builds-with-poetry-a78a66f5aed0
-FROM python:3.11-bookworm as builder
+FROM python:3.12-bookworm as builder
 
 RUN pip install poetry
 
@@ -17,7 +17,7 @@ RUN touch README.md
 RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
 
 # The runtime image, used to just run the code provided its virtual environment
-FROM python:3.11-slim-bookworm as runtime
+FROM python:3.12-slim-bookworm as runtime
 
 # Needed to get cv2
 # https://stackoverflow.com/questions/55313610/importerror-libgl-so-1-cannot-open-shared-object-file-no-such-file-or-directo
