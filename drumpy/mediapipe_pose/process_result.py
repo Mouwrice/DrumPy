@@ -22,11 +22,11 @@ class ResultProcessor:
 
         self.memory: int = 2
         self.peak: float = (
-            0.02  # Deviations at this value are considered completely plausible
+            0.015  # Deviations at this value are considered completely plausible
         )
         # The mollifier function will be 1 at this value
         self.tightness: float = (
-            0.5  # How tight the mollifier function is around the peak
+            0.7  # How tight the mollifier function is around the peak
         )
         # Higher values will make the mollifier function tighter
 

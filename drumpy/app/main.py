@@ -108,10 +108,10 @@ def main() -> None:
     app = App(
         source=Source.FILE,
         running_mode=RunningMode.VIDEO,  # type: ignore
-        model=LandmarkerModel.HEAVY,
+        model=LandmarkerModel.LITE,
         delegate=BaseOptions.Delegate.GPU,  # type: ignore
-        # landmark_type=LandmarkType.LANDMARKS,
-        file_path="../data/recordings/maurice_drum_60fps_trim_01.mp4",
+        landmark_type=LandmarkType.LANDMARKS,
+        file_path="../data/recordings/maurice_drum_fast.mov",
         # log_file="test.csv",
         disable_drum=True,
     )
