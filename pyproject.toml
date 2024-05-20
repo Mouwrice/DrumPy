@@ -21,7 +21,7 @@ click = "^8.1.7"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "3.7.1"
 deptry = "0.16.1"
-nuitka = "2.2.1"
+nuitka = "2.2.3"
 ruff-lsp = "^0.0.53"
 ruff = "^0.4.0"
 pyright = "^1.1.358"
