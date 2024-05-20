@@ -702,12 +702,12 @@ setuptools = "*"
 
 [[package]]
 name = "nuitka"
-version = "2.2.1"
+version = "2.2.3"
 description = "Python compiler with full language support and CPython compatibility"
 optional = false
 python-versions = "*"
 files = [
-    {file = "Nuitka-2.2.1.tar.gz", hash = "sha256:7bf67e80f94c93017fbaacfe1e277b92422d234a3c849a1555e43848f5fb27a1"},
+    {file = "Nuitka-2.2.3.tar.gz", hash = "sha256:aa78f838c2b5d165e2c071e9a9e705b2ac77506d24e91121321fa4b9740bba88"},
 ]
 
 [package.dependencies]
@@ -1448,4 +1448,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "c025c5499e1440e5f125846b2f05556782f4243bd66d4130ba7fa5d4aa4a1799"
+content-hash = "b10d4f9dc97f470db80250753c183d8b6137606428355782441d5c1e66876477"
