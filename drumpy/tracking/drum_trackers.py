@@ -17,7 +17,7 @@ class DrumTrackers:
         snare_drum = SnareDrum()
         hi_hat = HiHat()
         kick_drum = KickDrum()
-        hi_hat_foot = HiHatFoot()
+        _hi_hat_foot = HiHatFoot()
         cymbal = Cymbal()
 
         self.drum = Drum([snare_drum, hi_hat, kick_drum, cymbal])
@@ -26,7 +26,7 @@ class DrumTrackers:
         self.trackers: list[MarkerTrackerWrapper] = [
             Hand.left_hand(self.drum, [snare_drum, hi_hat, cymbal]),
             Hand.right_hand(self.drum, [snare_drum, hi_hat, cymbal]),
-            Foot.left_foot(self.drum, [hi_hat_foot]),
+            Foot.left_foot(self.drum, [kick_drum]),
             Foot.right_foot(self.drum, [kick_drum]),
         ]
 

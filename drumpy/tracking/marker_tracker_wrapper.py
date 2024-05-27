@@ -91,8 +91,8 @@ class Foot(MarkerTrackerWrapper):
             MarkerEnum.LEFT_FOOT_INDEX,
             drum=drum,
             sounds=sounds,
-            downward_trend=-0.1,
-            upward_trend=0.01,
+            downward_trend=-0.04,
+            upward_trend=0.003,
         )
 
     def update(
