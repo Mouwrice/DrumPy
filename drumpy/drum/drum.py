@@ -101,7 +101,7 @@ class Drum:
             print(
                 f"{marker}: {closest_sound.name}\n"
                 f"Distance: {closest_distance:.3f}\n"
-                f"Velocity: {velocity:.3f} (m/s)\n"
+                f"Velocity: {velocity:.3f}\n"
                 f"Position: {position_str(position)}\n"
             )
         else:
