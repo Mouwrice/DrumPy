@@ -2,6 +2,8 @@
 
 Air drumming using MediaPipe Pose Landmarker. 
 
+https://github.com/Mouwrice/DrumPy/assets/56763273/36107c48-a916-4dba-ab1e-c4f9960ca7ed
+
 ## Installation
 
 ### Download the DrumPy binary from the latest release
@@ -64,6 +66,9 @@ This is to calibrate the position of the drums in the camera view.
 After the calibration phase, you can start playing the drums freely.
 This calibration phase is only done once when the application is started and progress is shown in the console.
 Keep this console visible to see the progress and the drum sounds that are being calibrated.
+
+The currently enabled drum elements are: Snare Drum, High Hat Closed, Kick Drum and Cymbal.
+They are calibrated in that order.
 
 The application also has a small CLI interface that can be used to tweaks some parameters or choose a different camera.
 Open a terminal in the same directory as the application to access the CLI.
