@@ -2,7 +2,10 @@
 
 Air drumming using MediaPipe Pose Landmarker. 
 
-https://github.com/Mouwrice/DrumPy/assets/56763273/36107c48-a916-4dba-ab1e-c4f9960ca7ed
+
+
+https://github.com/Mouwrice/DrumPy/assets/56763273/8e15504c-e404-40da-8d5b-a491cbc1f449
+
 
 ## Installation
 
@@ -10,7 +13,7 @@ https://github.com/Mouwrice/DrumPy/assets/56763273/36107c48-a916-4dba-ab1e-c4f99
 
 Find the latest release on the releases page and download the binary for your platform.
 For windows, download the `DrumPy` folder with the `.exe` file inside.
-After downloading, extract the folder and run the `.exe` file.
+After downloading, extract the folder and run the `cli.exe` file.
 
 ### Using python 3.11 and poetry
 
@@ -34,7 +37,7 @@ Registry. https://github.com/Mouwrice/DrumPy/pkgs/container/drumpy
 
 > [!NOTE]
 > Although the docker image is available, it requires some additional steps to be able to run it properly.
-> As It requires a webcam and display to be made available to the container. This seems to be especially difficult
+> As it requires a webcam and display to be made available to the container. This seems to be especially difficult
 > on Windows.
 
 ```shell
