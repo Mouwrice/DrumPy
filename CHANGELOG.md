@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/Mouwrice/DrumPy/compare/v0.4.0...v0.5.0) (2024-05-27)
+
+
+### Features
+
+* process results ([5835dc5](https://github.com/Mouwrice/DrumPy/commit/5835dc5202f37873f098424d0e12f4302ae4e7d1))
+
+
+### Bug Fixes
+
+* fix audio files ([9e66b8f](https://github.com/Mouwrice/DrumPy/commit/9e66b8ff13a395fbdbf7b9d468a71af12f7fb643))
+
 ## [0.4.0](https://github.com/Mouwrice/DrumPy/compare/v0.3.0...v0.4.0) (2024-05-14)
 
 
