@@ -2,13 +2,18 @@
 
 Air drumming using MediaPipe Pose Landmarker. 
 
+
+
+https://github.com/Mouwrice/DrumPy/assets/56763273/8e15504c-e404-40da-8d5b-a491cbc1f449
+
+
 ## Installation
 
 ### Download the DrumPy binary from the latest release
 
 Find the latest release on the releases page and download the binary for your platform.
 For windows, download the `DrumPy` folder with the `.exe` file inside.
-After downloading, extract the folder and run the `.exe` file.
+After downloading, extract the folder and run the `cli.exe` file.
 
 ### Using python 3.11 and poetry
 
@@ -32,7 +37,7 @@ Registry. https://github.com/Mouwrice/DrumPy/pkgs/container/drumpy
 
 > [!NOTE]
 > Although the docker image is available, it requires some additional steps to be able to run it properly.
-> As It requires a webcam and display to be made available to the container. This seems to be especially difficult
+> As it requires a webcam and display to be made available to the container. This seems to be especially difficult
 > on Windows.
 
 ```shell
@@ -64,6 +69,9 @@ This is to calibrate the position of the drums in the camera view.
 After the calibration phase, you can start playing the drums freely.
 This calibration phase is only done once when the application is started and progress is shown in the console.
 Keep this console visible to see the progress and the drum sounds that are being calibrated.
+
+The currently enabled drum elements are: Snare Drum, High Hat Closed, Kick Drum and Cymbal.
+They are calibrated in that order.
 
 The application also has a small CLI interface that can be used to tweaks some parameters or choose a different camera.
 Open a terminal in the same directory as the application to access the CLI.
