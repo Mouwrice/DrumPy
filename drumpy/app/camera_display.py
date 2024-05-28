@@ -4,7 +4,7 @@ import pygame.time
 from pygame import Surface
 
 from drumpy.app.video_source import VideoSource, Source
-from drumpy.mediapipe_pose.mediapipe_pose import MediaPipePose
+from drumpy.pose.mediapipe_pose import MediaPipePose
 
 
 class VideoDisplay:

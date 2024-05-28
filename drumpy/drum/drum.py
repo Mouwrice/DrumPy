@@ -4,7 +4,7 @@ from typing import Self, Optional
 
 from drumpy.drum.sound import Sound, SoundState
 from drumpy.util import position_str, Position
-from drumpy.mediapipe_pose.mediapipe_markers import MarkerEnum
+from drumpy.pose.mediapipe_markers import MarkerEnum
 
 
 class DrumPresets:

@@ -4,7 +4,7 @@ from typing import Self
 from drumpy.drum.drum import Drum
 from drumpy.drum.sound import Sound
 from drumpy.util import Position
-from drumpy.mediapipe_pose.mediapipe_markers import MarkerEnum
+from drumpy.pose.mediapipe_markers import MarkerEnum
 
 MAX_DISTANCE = 100
 

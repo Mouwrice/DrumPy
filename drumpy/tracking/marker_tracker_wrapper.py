@@ -6,7 +6,7 @@ from mediapipe.tasks.python.components.containers.landmark import NormalizedLand
 
 from drumpy.drum.drum import Drum
 from drumpy.drum.sound import Sound
-from drumpy.mediapipe_pose.mediapipe_markers import MarkerEnum
+from drumpy.pose.mediapipe_markers import MarkerEnum
 from drumpy.tracking.marker_tracker import MarkerTracker
 from drumpy.util import landmark_to_position, Position
 

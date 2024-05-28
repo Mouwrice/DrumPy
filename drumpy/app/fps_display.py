@@ -5,7 +5,7 @@ from pygame import Rect
 from pygame_gui import UIManager  # type: ignore
 from pygame_gui.elements import UILabel  # type: ignore
 
-from drumpy.mediapipe_pose.mediapipe_pose import MediaPipePose
+from drumpy.pose.mediapipe_pose import MediaPipePose
 
 MEMORY = 30
 

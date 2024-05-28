@@ -9,9 +9,9 @@ from pygame_gui import UIManager  # type: ignore
 from drumpy.app.camera_display import VideoDisplay
 from drumpy.app.fps_display import FPSDisplay
 from drumpy.app.video_source import CameraSource, VideoFileSource, Source
-from drumpy.mediapipe_pose.landmark_type import LandmarkType
-from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
-from drumpy.mediapipe_pose.mediapipe_pose import MediaPipePose
+from drumpy.pose.landmark_type import LandmarkType
+from drumpy.pose.landmarker_model import LandmarkerModel
+from drumpy.pose.mediapipe_pose import MediaPipePose
 from drumpy.tracking.drum_trackers import DrumTrackers
 
 

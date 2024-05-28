@@ -4,7 +4,7 @@ from mediapipe.tasks.python.vision import RunningMode
 
 from drumpy.app.main import App
 from drumpy.app.video_source import Source
-from drumpy.mediapipe_pose.landmarker_model import LandmarkerModel
+from drumpy.pose.landmarker_model import LandmarkerModel
 
 
 def parse_running_mode(mode: str) -> RunningMode:
