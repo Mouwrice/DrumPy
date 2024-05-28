@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/Mouwrice/DrumPy/compare/v1.0.0...v1.0.1) (2024-05-28)
+
+
+### Bug Fixes
+
+* rename mediapipe_pose module to pose ([689d20c](https://github.com/Mouwrice/DrumPy/commit/689d20c45905dd3b23c04b102353e3f2b3c6c360))
+* rename mediapipe_pose module to pose ([adbbdc7](https://github.com/Mouwrice/DrumPy/commit/adbbdc784e09194b827c800a570faed4b5a6fffc))
+
 ## [1.0.0](https://github.com/Mouwrice/DrumPy/compare/v0.5.0...v1.0.0) (2024-05-28)
 
 
