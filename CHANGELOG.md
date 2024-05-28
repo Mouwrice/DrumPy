@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/Mouwrice/DrumPy/compare/v0.5.0...v1.0.0) (2024-05-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* final release
+
+### Features
+
+* final release ([e800f68](https://github.com/Mouwrice/DrumPy/commit/e800f681ec92240aba3c3fe83bd845a37a1eaf79))
+
 ## [0.5.0](https://github.com/Mouwrice/DrumPy/compare/v0.4.0...v0.5.0) (2024-05-27)
 
 
