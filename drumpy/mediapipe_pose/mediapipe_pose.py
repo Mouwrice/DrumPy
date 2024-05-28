@@ -117,7 +117,7 @@ class MediaPipePose:
         :param timestamp_ms: The timestamp of the frame
         :return:
         """
-        result = self.result_processor.process_result(result, timestamp_ms)
+        # result = self.result_processor.process_result(result, timestamp_ms)
         self.detection_result = result
         self.latency = timestamp_ms - self.latest_timestamp
         self.latest_timestamp = timestamp_ms
