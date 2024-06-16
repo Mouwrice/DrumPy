@@ -1053,12 +1053,12 @@ files = [
 
 [[package]]
 name = "pygame-gui"
-version = "0.6.10"
+version = "0.6.12"
 description = "A GUI module for pygame Community Edition"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pygame_gui-0.6.10-py3-none-any.whl", hash = "sha256:9ced1a7b5bd5a661dd4a6b89425b1319d7fbcc2912129d4eb2ab0a54d9809c7b"},
+    {file = "pygame_gui-0.6.12-py3-none-any.whl", hash = "sha256:dcd9ade8a32c56f64b8f06b29c06454c8b37d78f1c9bb87171397f0701f8c66f"},
 ]
 
 [package.dependencies]
@@ -1448,4 +1448,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "b10d4f9dc97f470db80250753c183d8b6137606428355782441d5c1e66876477"
+content-hash = "07e0a45213c120f66197d9dc9671823d32a634425e67f4acfbb59096b8ce5986"
