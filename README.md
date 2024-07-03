@@ -1,8 +1,10 @@
 # DrumPy
 
+> [!NOTE]  
+> This project was part of my [masters dissertation](https://github.com/Mouwrice/thesis-typst) at Ghent University in Computer Science Engineering.
+> It will not receive any further updates or maintenance.
+
 Air drumming using MediaPipe Pose Landmarker. 
-
-
 
 https://github.com/Mouwrice/DrumPy/assets/56763273/8e15504c-e404-40da-8d5b-a491cbc1f449
 
